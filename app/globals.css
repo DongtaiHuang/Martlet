@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* Progress tree (components/progress/GrowthTree.tsx). CSS px inside SVG = user units. */
+@keyframes martlet-tree-sway {
+  from { transform: rotate(-1.4deg); }
+  to { transform: rotate(1.4deg); }
+}
+
+@keyframes martlet-leaf-fall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(var(--drift, 0px), var(--fall, 100px)) rotate(320deg); opacity: 0; }
+}
+
+@keyframes martlet-bird-bob {
+  from { transform: translateY(-2px); }
+  to { transform: translateY(2px); }
+}
+
+.martlet-tree .martlet-tree-sway {
+  transform-box: view-box;
+  transform-origin: 120px 230px; /* sway from the base of the trunk */
+  animation: martlet-tree-sway 4.5s ease-in-out infinite alternate;
+}
+
+.martlet-tree .martlet-falling-leaf {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: martlet-leaf-fall 7s ease-in infinite;
+}
+
+.martlet-tree .martlet-bird path {
+  animation: martlet-bird-bob 2.2s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .martlet-tree .martlet-tree-sway,
+  .martlet-tree .martlet-bird path { animation: none; }
+  .martlet-tree .martlet-falling-leaf { animation: none; display: none; }
+}
