@@ -1,20 +1,14 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GeolocateControl, Map, Marker, NavigationControl, Popup, getVersion, setWorkerUrl } from "maplibre-gl";
+import { GeolocateControl, Map, Marker, NavigationControl, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import { categories, categoryValues } from "@/components/feed/categories";
+import { CAMPUS_CENTER, MARKER_COLORS } from "./map-config";
 import { mapStyleUrl } from "./map-style";
 
-const MARKER_COLORS: Record<MeetupCategory, string> = {
-  coffee: "#b45309", study: "#4338ca", food: "#c2410c",
-  sports: "#047857", gaming: "#6d28d9", other: "#57534e",
-};
-// Served from public/ by scripts/copy-maplibre-worker.mjs; the default relative URL 404s under Next.js.
-setWorkerUrl(`/maplibre-gl-worker.mjs?v=${getVersion()}`);
-
-const CAMPUS_CENTER: [number, number] = [-73.577, 45.5045];
+const FOCUS_ZOOM = 17;
 
 function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {
   // Build with DOM APIs + textContent: never interpolate user-provided HTML.
@@ -43,9 +37,13 @@ function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {
   return root;
 }
 
-export function CampusMap({ meetups }: { meetups: MeetupSummary[] }) {
+/**
+ * `focusId` (from /explore?meetup=<id>) centres the map on that meetup and opens its popup once.
+ */
+export function CampusMap({ meetups, focusId }: { meetups: MeetupSummary[]; focusId?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  const markersRef = useRef(new globalThis.Map<string, Marker>());
   const router = useRouter();
   const [active, setActive] = useState<MeetupCategory | "all">("all");
 
@@ -54,6 +52,8 @@ export function CampusMap({ meetups }: { meetups: MeetupSummary[] }) {
     [meetups, active],
   );
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
+  // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
+  const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -73,22 +73,39 @@ export function CampusMap({ meetups }: { meetups: MeetupSummary[] }) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+    const byId = markersRef.current;
     const markers = visible.map((meetup) => {
       const marker = new Marker({ color: MARKER_COLORS[meetup.category] })
         .setLngLat([meetup.longitude, meetup.latitude])
         .setPopup(new Popup({ offset: 24 }).setDOMContent(popupContent(meetup, (href) => router.push(href))))
         .addTo(map);
       marker.getElement().setAttribute("aria-label", `${meetup.title} at ${meetup.location_name}`);
+      byId.set(meetup.id, marker);
       return marker;
     });
-    return () => markers.forEach((m) => m.remove());
+    return () => { markers.forEach((m) => m.remove()); byId.clear(); };
   }, [visible, router]);
+
+  // Runs after the marker effect above, and only when focusId changes, so changing
+  // the category filter doesn't keep re-opening the popup.
+  useEffect(() => {
+    const map = mapRef.current;
+    const marker = focusId ? markersRef.current.get(focusId) : undefined;
+    if (!map || !marker) return;
+    map.jumpTo({ center: marker.getLngLat(), zoom: FOCUS_ZOOM });
+    if (!marker.getPopup()?.isOpen()) marker.togglePopup();
+  }, [focusId]);
 
   const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-red-700";
   const chipState = (on: boolean) => (on ? "border-red-700 bg-red-700 text-white" : "border-stone-300 bg-white text-stone-800 hover:border-red-700");
 
   return (
     <div>
+      {focusMissing && (
+        <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          That meetup isn’t on the map anymore. It may have been cancelled or already started.
+        </p>
+      )}
       <div role="group" aria-label="Filter map by category" className="mb-4 flex flex-wrap gap-2">
         <button type="button" aria-pressed={active === "all"} onClick={() => setActive("all")} className={`${chip} ${chipState(active === "all")}`}>
           All ({meetups.length})
