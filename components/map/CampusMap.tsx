@@ -53,8 +53,8 @@ export function CampusMap({ meetups }: { meetups: MeetupSummary[] }) {
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
 
   useEffect(() => {
-    if (!ref.current || !mapStyleUrl) return;
-    const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 15 });
+    if (!ref.current) return;
+    const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
     map.addControl(new NavigationControl(), "top-right");
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
@@ -73,10 +73,6 @@ export function CampusMap({ meetups }: { meetups: MeetupSummary[] }) {
     });
     return () => markers.forEach((m) => m.remove());
   }, [visible, router]);
-
-  if (!mapStyleUrl) {
-    return <p className="rounded-2xl border border-neutral-200 bg-white p-5">The campus map is unavailable until a map style is configured.</p>;
-  }
 
   const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-red-700";
   const chipState = (on: boolean) => (on ? "border-red-700 bg-red-700 text-white" : "border-stone-300 bg-white text-stone-800 hover:border-red-700");

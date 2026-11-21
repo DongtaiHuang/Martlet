@@ -1,11 +1,10 @@
 // MapLibre style selection. See docs/DEPLOYMENT.md.
-export const DEMO_STYLE_URL = "https://demotiles.maplibre.org/style.json";
+// Default: OpenFreeMap (free, no key, production use allowed with attribution,
+// which the style's attribution control shows). MapLibre's demo tiles are
+// country outlines only — useless at campus zoom — so they are never used.
+export const DEFAULT_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
 const configured = process.env.NEXT_PUBLIC_MAP_STYLE_URL?.trim();
-const isProduction = process.env.NODE_ENV === "production";
 
-/** Demo tiles are allowed in development only; production without a real style gets no map. */
-export const mapStyleUrl: string | undefined =
-  configured && !(isProduction && configured.includes("demotiles.maplibre.org"))
-    ? configured
-    : isProduction ? undefined : DEMO_STYLE_URL;
+export const mapStyleUrl: string =
+  configured && !configured.includes("demotiles.maplibre.org") ? configured : DEFAULT_STYLE_URL;
