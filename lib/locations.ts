@@ -12,7 +12,7 @@ export const CAMPUS_LOCATIONS: CampusLocation[] = [
   { id: "redpath-library", name: "Redpath Library", latitude: 45.50383233, longitude: -73.57742633 },
   { id: "redpath-museum", name: "Redpath Museum", latitude: 45.50446675, longitude: -73.57738453 },
   { id: "arts-building", name: "Arts Building", latitude: 45.505, longitude: -73.5775 },
-  // Additional verified McGill downtown campus buildings.
+  // Additional McGill downtown campus buildings; pins are approximate building-area locations.
   { id: "leacock-building", name: "Leacock Building", latitude: 45.50432553, longitude: -73.57786051 },
   { id: "burnside-hall", name: "Burnside Hall", latitude: 45.50463395, longitude: -73.57491447 },
   { id: "trottier-building", name: "Trottier Building", latitude: 45.50738884, longitude: -73.57882603 },
