@@ -6,6 +6,14 @@ if (process.env.VERCEL_ENV === "production" && process.env.NEXT_PUBLIC_MAP_STYLE
   throw new Error("NEXT_PUBLIC_MAP_STYLE_URL must not use MapLibre demo tiles in production.");
 }
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Landmark photos (ADR 0009) are resized in the browser to well under 1 MB; this is
+      // headroom for multipart overhead, kept below Vercel's 4.5 MB request limit.
+      bodySizeLimit: "4mb",
+    },
+  },
+};
 
 export default nextConfig;
