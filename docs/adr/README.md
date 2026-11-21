@@ -7,10 +7,11 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0001 | [Record architecture decisions](0001-record-architecture-decisions.md) | Accepted |
 | 0002 | [Next.js + Supabase foundation](0002-nextjs-supabase-foundation.md) | Accepted |
 | 0003 | [Row-level security as the authorization boundary](0003-rls-authorization-boundary.md) | Accepted |
-| 0004 | [Approved campus locations only, no live geolocation](0004-approved-campus-locations.md) | Accepted |
+| 0004 | [Approved campus locations only, no live geolocation](0004-approved-campus-locations.md) | Accepted (amended by 0008) |
 | 0005 | [Peck/Flap participation and reaction model](0005-peck-flap-model.md) | Accepted |
 | 0006 | [MapLibre with a configurable style](0006-maplibre-configurable-style.md) | Accepted |
 | 0007 | [Frozen MVP scope and mock-first service contracts](0007-frozen-mvp-and-service-contracts.md) | Accepted |
+| 0008 | [Client-side "show my location" on the map](0008-client-side-locate-me.md) | Proposed |
 
 ## Adding a new ADR
 
