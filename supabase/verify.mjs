@@ -53,7 +53,8 @@ const meetup = (overrides = {}) => ({
 });
 
 let r = await anon.from("meetups").select("id").limit(1);
-check("anonymous reads no meetups", !r.error && r.data.length === 0, r);
+// Either RLS returns no rows, or (005_table_grants) anon has no SELECT privilege at all.
+check("anonymous reads no meetups", r.error ? r.error.code === "42501" : r.data.length === 0, r);
 r = await anon.from("meetups").insert(meetup());
 check("anonymous cannot create", Boolean(r.error), r);
 

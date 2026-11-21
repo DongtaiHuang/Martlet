@@ -23,6 +23,8 @@ In **SQL Editor**, paste and run each file once:
 1. `supabase/migrations/001_mvp.sql` (schema, profile trigger, base RLS). Only on a fresh project, since it is not re-runnable.
 2. `supabase/migrations/002_security_hardening.sql` (RLS/privilege hardening, approved campus locations). Safe to re-run.
 3. `supabase/migrations/003_more_campus_locations.sql` (additional downtown campus meetup locations). Safe to re-run.
+4. `supabase/migrations/004_backfill_profiles.sql` (profiles for accounts created before `001` ran). Safe to re-run.
+5. `supabase/migrations/005_table_grants.sql` (explicit table privileges; newer Supabase projects don't auto-grant them, causing `permission denied`). Safe to re-run.
 
 `002` adds a foreign key from `meetups(location_name, latitude, longitude)` to `campus_locations`. If the project already holds meetups at non-approved coordinates, it will fail; cancel/delete those rows first (Table editor) and re-run.
 
