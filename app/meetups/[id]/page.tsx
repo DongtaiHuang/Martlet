@@ -5,6 +5,8 @@ import { categories } from "@/components/feed/categories";
 import { CancelMeetupForm } from "@/components/forms/CancelMeetupForm";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { FlapButton } from "@/components/social/FlapButton";
+import { PeckButton } from "@/components/social/PeckButton";
 import { getMeetup } from "@/lib/meetups";
 import { MeetupReactions } from "./MeetupReactions";
 import { MeetupStartTime } from "./MeetupStartTime";
@@ -18,12 +20,13 @@ async function loadMeetup(id: string) {
   const cancelled = meetup.status === "cancelled";
   const expired = Date.parse(meetup.starts_at) <= Date.now();
   const upcoming = !cancelled && !expired;
-  return { meetup, cancelled, expired, canCancel: upcoming && viewer === meetup.host_id, canReact: upcoming && viewer !== null };
+  const isHost = viewer === meetup.host_id;
+  return { meetup, cancelled, expired, isHost, canCancel: upcoming && isHost, canReact: upcoming && viewer !== null };
 }
 
 export default async function MeetupDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { meetup, cancelled, expired, canCancel, canReact } = await loadMeetup(id);
+  const { meetup, cancelled, expired, isHost, canCancel, canReact } = await loadMeetup(id);
   const { icon: CategoryIcon, label, color } = categories[meetup.category];
 
   return (
@@ -51,8 +54,17 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
               <p className="mt-1 leading-7 whitespace-pre-wrap text-stone-700 [overflow-wrap:anywhere]">{meetup.description}</p>
             </section>
           )}
-          {/* Developer 4 can supply Peck/Flap controls through actions for upcoming, open meetups. */}
-          <MeetupReactions meetup={meetup} canReact={canReact} />
+          {/* Developer 4's Peck/Flap controls. The host is already counted as going and RLS rejects host pecks. */}
+          <MeetupReactions
+            meetup={meetup}
+            canReact={canReact}
+            actions={
+              <div className="flex flex-wrap gap-2">
+                <PeckButton meetupId={meetup.id} active={meetup.has_pecked} count={meetup.attendee_count} disabled={isHost} />
+                <FlapButton meetupId={meetup.id} active={meetup.has_flapped} count={meetup.flap_count} />
+              </div>
+            }
+          />
           {canCancel && <div className="mt-6"><CancelMeetupForm meetupId={meetup.id} /></div>}
         </article>
       </main>
