@@ -2,6 +2,9 @@ import { MartletNav } from "@/components/layout/MartletNav";
 import { CampusMap } from "@/components/map/CampusMap";
 import { listMeetups } from "@/lib/meetups";
 
+// Generate the sample start times relative to each request.
+export const dynamic = "force-dynamic";
+
 export default async function ExplorePage() {
   const meetups = await listMeetups();
   return <div className="min-h-screen bg-neutral-50 text-neutral-900"><MartletNav />
