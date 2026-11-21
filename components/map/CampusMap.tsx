@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Map, Marker, NavigationControl, Popup } from "maplibre-gl";
+import { Map, Marker, NavigationControl, Popup, getVersion, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import { categories, categoryValues } from "@/components/feed/categories";
@@ -11,6 +11,9 @@ const MARKER_COLORS: Record<MeetupCategory, string> = {
   coffee: "#b45309", study: "#4338ca", food: "#c2410c",
   sports: "#047857", gaming: "#6d28d9", other: "#57534e",
 };
+// Served from public/ by scripts/copy-maplibre-worker.mjs; the default relative URL 404s under Next.js.
+setWorkerUrl(`/maplibre-gl-worker.mjs?v=${getVersion()}`);
+
 const CAMPUS_CENTER: [number, number] = [-73.577, 45.5045];
 
 function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {

@@ -10,5 +10,5 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
   },
-  globalIgnores([".cache/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([".cache/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "public/maplibre-gl-worker.mjs"]),
 ]);
