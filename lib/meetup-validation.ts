@@ -1,0 +1,93 @@
+import { z } from "zod";
+import { CAMPUS_LOCATIONS, type CampusLocation } from "@/lib/locations";
+import type { CreateMeetupInput, MeetupCategory } from "@/types/meetup";
+
+// Pure validation shared by the server (lib/meetups.ts) and, optionally, client forms.
+// The database re-enforces the same rules (see supabase/migrations), so client-side
+// use is only for friendlier error messages.
+
+export const MEETUP_CATEGORIES = [
+  "coffee", "study", "food", "sports", "gaming", "other",
+] as const satisfies readonly MeetupCategory[];
+
+export const TITLE_MIN = 3;
+export const TITLE_MAX = 80;
+export const DESCRIPTION_MAX = 500;
+
+// Coordinates from the client are compared to the approved entry with a small tolerance,
+// then replaced by the canonical values so the database never stores client-chosen points.
+const COORDINATE_TOLERANCE = 1e-6;
+
+export type MeetupFieldErrors = Partial<Record<keyof CreateMeetupInput | "form", string>>;
+
+export type MeetupValidationResult =
+  | { ok: true; value: CreateMeetupInput; location: CampusLocation }
+  | { ok: false; errors: MeetupFieldErrors };
+
+export function findApprovedLocation(
+  name: string,
+  latitude: number,
+  longitude: number,
+): CampusLocation | undefined {
+  return CAMPUS_LOCATIONS.find((place) =>
+    place.name === name &&
+    Math.abs(place.latitude - latitude) <= COORDINATE_TOLERANCE &&
+    Math.abs(place.longitude - longitude) <= COORDINATE_TOLERANCE);
+}
+
+const createMeetupSchema = z.object({
+  title: z.string().trim()
+    .min(TITLE_MIN, `Title must be at least ${TITLE_MIN} characters.`)
+    .max(TITLE_MAX, `Title must be at most ${TITLE_MAX} characters.`),
+  description: z.string().trim()
+    .max(DESCRIPTION_MAX, `Description must be at most ${DESCRIPTION_MAX} characters.`)
+    .default(""),
+  category: z.enum(MEETUP_CATEGORIES, "Choose a valid category."),
+  location_name: z.string("Choose a campus location.").trim().min(1, "Choose a campus location."),
+  latitude: z.number("Choose a campus location."),
+  longitude: z.number("Choose a campus location."),
+  starts_at: z.string("Choose a start time.").min(1, "Choose a start time."),
+});
+
+export function validateCreateMeetupInput(
+  input: unknown,
+  now: Date = new Date(),
+): MeetupValidationResult {
+  const parsed = createMeetupSchema.safeParse(input);
+  const errors: MeetupFieldErrors = {};
+
+  if (!parsed.success) {
+    for (const issue of parsed.error.issues) {
+      const field = (issue.path[0] ?? "form") as keyof MeetupFieldErrors;
+      errors[field] ??= issue.message;
+    }
+    return { ok: false, errors };
+  }
+
+  const data = parsed.data;
+  const location = findApprovedLocation(data.location_name, data.latitude, data.longitude);
+  if (!location) errors.location_name = "Choose one of the approved campus locations.";
+
+  const startsAt = new Date(data.starts_at);
+  if (Number.isNaN(startsAt.getTime())) {
+    errors.starts_at = "Start time is not a valid date.";
+  } else if (startsAt.getTime() <= now.getTime()) {
+    errors.starts_at = "Start time must be in the future.";
+  }
+
+  if (!location || Object.keys(errors).length > 0) return { ok: false, errors };
+
+  return {
+    ok: true,
+    location,
+    value: {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      location_name: location.name,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      starts_at: startsAt.toISOString(),
+    },
+  };
+}

@@ -20,4 +20,4 @@ Supabase exposes the database directly to the browser through its API using a pu
 - Impersonation and cross-user edits are blocked even if frontend code is wrong.
 - Business rules like "cannot join a cancelled or past meetup" and "host cannot peck own meetup" live in SQL and must be kept in sync with UI validation.
 - RLS must be verified before deployment (two test accounts, direct API attempts).
-- Follow-up: the "Update own meetups" policy lets a host change any column, not only `status`. If only cancellation should be allowed, restrict it (column privileges or a `cancel_meetup` RPC).
+- ~~Follow-up: the "Update own meetups" policy lets a host change any column, not only `status`.~~ Resolved by `002_security_hardening.sql`: column-level grants allow hosts to update only `status`, and only to `'cancelled'`; clients can no longer set `id`/`status`/`created_at` on insert.

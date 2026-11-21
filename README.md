@@ -35,10 +35,11 @@ Run checks with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
 | `/meetups/[id]` | Meetup detail placeholder. Try `/meetups/demo-coffee`. |
 | `/explore` | Campus map with sample meetup markers. A production build without a map style shows a fallback message. |
 | `/profile` | Student profile placeholder. |
+| `/login`, `/signup` | Email/password auth. With Supabase configured, all other pages redirect here when signed out. |
 
 ## Implementation status
 
-The feed and map read the shared mock meetup service. Supabase browser and server clients and the Next.js session refresh proxy are ready for integration. Sign-in screens, real meetup reads and writes, profile editing, Peck, Flap, and Realtime are team follow-up work. Apply [the initial SQL migration](supabase/migrations/001_mvp.sql) to a development Supabase project before wiring up database operations.
+Without Supabase credentials the app runs in **mock mode** (sample feed/map, no auth, writes disabled). With credentials it runs in **live mode**: email auth, protected pages, and real `listMeetups`/`getMeetup`/`createMeetup`/`cancelMeetup` backed by Supabase with RLS. Mock and live data are never mixed. Follow [Supabase setup](docs/SUPABASE_SETUP.md) to create the project, apply both migrations, and verify with two test accounts. Peck/Flap services, profile editing, and Realtime are team follow-up work.
 
 ## Team ownership and Git workflow
 

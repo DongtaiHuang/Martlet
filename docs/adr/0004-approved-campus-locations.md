@@ -17,4 +17,4 @@ Meetups are visible to other students and plotted on a map. Allowing free-form c
 
 - Strong privacy default and a simpler UI (a select instead of a map picker).
 - Adding a location requires a code change to `lib/locations.ts`.
-- Follow-up: the database currently only range-checks latitude/longitude. Server-side revalidation must be implemented in `createMeetup()` (or moved into the database, e.g. a `campus_locations` table with a foreign key) to fully enforce this decision.
+- ~~Follow-up: the database currently only range-checks latitude/longitude.~~ Resolved: `createMeetup()` revalidates against `CAMPUS_LOCATIONS` and stores canonical coordinates, and `002_security_hardening.sql` adds a `campus_locations` table with a composite foreign key so direct API writes are enforced too. The list now lives in two places (`lib/locations.ts` and the SQL seed) and must be kept in sync.
