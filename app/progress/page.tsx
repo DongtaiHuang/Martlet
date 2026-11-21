@@ -65,7 +65,7 @@ export default async function ProgressPage({
         )}
 
         <section aria-labelledby="tree-heading" className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 text-center shadow-sm sm:p-8">
-          <div className="mx-auto max-w-xs sm:max-w-sm">
+          <div className="overflow-hidden rounded-xl border border-stone-200">
             <GrowthTree stage={stage} unlocked={unlocked} total={total} />
           </div>
           <h2 id="tree-heading" className="mt-3 text-2xl font-extrabold tracking-tight">{TREE_STAGES[stage]}</h2>
