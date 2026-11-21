@@ -3,6 +3,9 @@ import { MartletNav } from "@/components/layout/MartletNav";
 import { MeetupCard } from "@/components/feed/MeetupCard";
 import { listMeetups } from "@/lib/meetups";
 
+// Generate the sample start times relative to each request.
+export const dynamic = "force-dynamic";
+
 export default async function MeetupsPage() {
   const meetups = await listMeetups();
   return (
