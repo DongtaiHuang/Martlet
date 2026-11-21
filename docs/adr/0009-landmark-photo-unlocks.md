@@ -6,7 +6,7 @@
 
 ## Context
 
-Martlet's MVP only has meetups. The original idea also had a map of campus places you unlock by going there and sharing a photo, which ADR 0007 deferred. It fits the goal of getting students out to real places and meeting people. Landmarks also give people a reason to open the app when there's no meetup happening.
+Martlet's MVP only has meetups. The original idea also had a map of places you unlock by going there and sharing a photo, which ADR 0007 deferred. It fits the goal of getting students out to real places and meeting people. Landmarks also give people a reason to open the app when there's no meetup happening.
 
 Constraints:
 - **Privacy (ADR 0004):** no private addresses, no live tracking, no stored user positions. Photos can show faces.
@@ -17,18 +17,30 @@ Constraints:
 ## Decision
 
 ### Landmarks
-- A curated list of **public** campus places, each with a challenge prompt, e.g. "Take a photo high-fiving the Roddick Gates". Landmarks are a separate concept from meetup `campus_locations`; they get their own map markers.
+- A curated list of **public places on and around campus in Montreal**, each with a challenge prompt, e.g. "Take a photo high-fiving the Roddick Gates". Landmarks are a separate concept from meetup `campus_locations` (meetups stay on campus); they get their own map markers.
 - Each landmark shows a **preview card**: name, challenge, and a blurred cover while locked.
+- **Initial landmarks:**
+
+  | Landmark | Area | Notes |
+  |---|---|---|
+  | Saint Joseph's Oratory | Mount Royal, off campus | Large site, so it needs a wider `radius_m` |
+  | Old Port (Vieux-Port) | Old Montreal, off campus | Large area: set a wide radius or pick one anchor point (e.g. the Clock Tower) |
+  | Redpath Museum | Campus | |
+  | Leacock Building | Campus | |
+  | Rutherford Physics Building observatory | Campus | Rooftop dome; challenge must be doable from publicly accessible ground |
+  | La Banquise | Plateau, off campus | A restaurant: challenge must be doable from the street, without a purchase |
+
+  Coordinates and radii are set in the seed migration and must be checked on the map. Challenges must never require entering restricted or private areas.
 
 ### Unlocking
 - A user unlocks a landmark by uploading **one photo** of themselves doing the challenge there, with an optional caption. There's one unlock per user per landmark.
-- Once you've unlocked a landmark, you can see **everyone's photos** for it. This is enforced by RLS, not just the UI.
+- Once you've unlocked a landmark, you can see **all users' photos** for it (no friends filter; there's no social graph yet). Before unlocking you see only the preview. This is enforced by RLS, not just the UI.
 - **Unlocks are permanent:** users can **modify** their unlock (replace the photo, edit the caption) but **cannot delete** it. Removal is a moderator action (see Privacy).
 
 ### Verification belongs to the visit, not the photo
 - At the landmark, the user taps **"I'm here"**. The browser reads its position **once** (opt-in, like ADR 0008) and sends it to a server action. The server computes the distance to the landmark and accepts it if it's within the landmark's `radius_m` plus the reported accuracy, up to a cap.
 - The server records a **check-in** (user, landmark, time, verified). **The coordinates are discarded after the comparison and never stored, logged, or shared.**
-- The photo can be uploaded or replaced **later, from anywhere**. An unlock shows a **"verified visit"** badge when a verified check-in exists for that user and landmark. Replacing the photo doesn't affect it.
+- The location check happens **only at check-in, while the user is at the landmark**. After that, the photo can be uploaded or replaced **later, from anywhere, with no time limit**. Location no longer matters once the visit is verified. An unlock shows a **"verified visit"** badge when a verified check-in exists for that user and landmark. Replacing the photo doesn't affect it.
 - Unverified unlocks are **allowed** (honour system, e.g. GPS failed indoors) but show no badge.
 - Photo EXIF GPS is **not** used for verification in this version.
 
@@ -56,7 +68,7 @@ storage bucket     landmark-photos (private), path {user_id}/{landmark_id}.jpg
 ### Privacy and moderation
 - The upload form states that the photo is **visible to everyone who has unlocked this landmark**, and that **unlocks are permanent; the photo and caption can be changed but not removed**.
 - A **report** action, plus moderator removal through the Supabase dashboard, covers takedown requests (including people who appear in someone else's photo). Users can always replace their own photo.
-- Landmarks are public places only. There's no tracking, and the position is read only when the user taps "I'm here".
+- Landmarks are public places only, and challenges never require entering restricted areas or buying anything. There's no tracking, and the position is read only when the user taps "I'm here".
 
 ### Build order
 1. **Core:** landmarks table and seed, map markers, preview card, landmark page, photo upload with honour-system unlock, RLS-gated gallery, no-delete rules.
@@ -74,9 +86,9 @@ New `lib/landmarks.ts`, following the `lib/meetups.ts` pattern (server-only, moc
 - Verification is **best-effort**: positions can be spoofed and indoor GPS is poor. The badge means "probably visited", not proof. Generous radii are needed.
 - The server receives a position at check-in. This is the new data flow ADR 0008 required an ADR for. It must stay one-shot and unstored.
 - Landmarks are seeded by migration like `campus_locations`; adding one is a code and migration change.
+- Three landmarks are off campus (Oratory, Old Port, La Banquise), so the map must zoom out beyond campus to show them, and unlocking them takes a real trip.
 - Adds work for several owners: database/Storage/RLS and `lib/landmarks.ts` (Developer 3), map markers and preview card (Developer 4), landmark page, upload form and gallery (Developers 1 and 2). The core meetup flow should be stable and deployed first.
 
 ### Open questions
-- Should the first photo have to be uploaded within a time window after a verified check-in (e.g. 48 h), or with no limit?
-- Is the gallery visible to all unlockers (current proposal) or only to people you follow? There's no social graph yet.
-- What is the initial landmark list and challenges, and who curates them?
+- The challenge text for each landmark, and who curates future landmarks.
+- Whether the Old Port uses one anchor point or a wide radius.
