@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CalendarDays, LogIn, UserRound, UsersRound } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
 import { listMeetups } from "@/lib/meetups";
 import { getCurrentUser, type CurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
@@ -96,6 +97,7 @@ export default async function ProfilePage() {
               )}
             </div>
           </div>
+          {state.kind === "ready" && <DisplayNameForm current={state.user.display_name} />}
           {state.kind === "signed-out" ? (
             <Link href="/login?next=/profile" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"><LogIn aria-hidden="true" size={16} /> Sign in</Link>
           ) : (

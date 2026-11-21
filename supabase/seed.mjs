@@ -16,22 +16,18 @@ const env = (name) => {
 const url = env("NEXT_PUBLIC_SUPABASE_URL");
 const key = env("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
 
-async function signIn(prefix, fallbackName) {
+// Never renames accounts: test accounts may be real people's (see issue #20).
+async function signIn(prefix) {
   const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data, error } = await supabase.auth.signInWithPassword({
     email: env(`MARTLET_TEST_${prefix}_EMAIL`), password: env(`MARTLET_TEST_${prefix}_PASSWORD`),
   });
   if (error) { console.error(`Sign-in ${prefix} failed: ${error.message}`); process.exit(1); }
-  const id = data.user.id;
-  const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", id).single();
-  if (!profile || profile.display_name === "Martlet Student") {
-    await supabase.from("profiles").update({ display_name: fallbackName }).eq("id", id);
-  }
-  return { supabase, id };
+  return { supabase, id: data.user.id };
 }
 
-const A = await signIn("A", "Alex (test)");
-const B = await signIn("B", "Jamie (test)");
+const A = await signIn("A");
+const B = await signIn("B");
 if (A.id === B.id) { console.error("Test accounts A and B must be different users."); process.exit(1); }
 
 const { data: places, error: placesError } = await A.supabase.from("campus_locations").select("id, name, latitude, longitude");
