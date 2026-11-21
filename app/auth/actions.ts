@@ -92,7 +92,8 @@ export async function signUp(_prev: AuthFormState, formData: FormData): Promise<
 export async function signOut(): Promise<void> {
   if (getSupabaseConfig()) {
     const supabase = await createClient();
-    await supabase.auth.signOut();
+    // Clear this browser session even when remote token revocation fails.
+    await supabase.auth.signOut({ scope: "local" });
   }
   revalidatePath("/", "layout");
   redirect("/login");
