@@ -1,8 +1,7 @@
 -- Add more McGill downtown meetup places after 002_security_hardening.sql.
 -- Coordinates represent building vicinity, not a precise room or live user location.
--- McGill Libraries building histories (digital.library.mcgill.ca/campus/items/)
--- supply the coordinates except McLennan Library and McConnell Engineering,
--- whose map pins use OpenStreetMap-derived Mapcarta coordinates.
+-- Campus building-area coordinates should be checked visually on the map
+-- before using these as precise meetup instructions.
 -- This insert is idempotent, keeping the approved-location FK synchronized
 -- with lib/locations.ts without rewriting historical migrations.
 
