@@ -1,10 +1,16 @@
 import Link from "next/link";
-import { MartletNav } from "@/components/layout/MartletNav";
+import { MartletNavLinks } from "@/components/layout/MartletNavLinks";
 
 export function MeetupRouteStatus({ title, description, loading, retry }: { title: string; description?: string; loading?: boolean; retry?: () => void }) {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-950">
-      <MartletNav />
+      {/* Client-side error boundaries cannot import the server-only authentication navbar. */}
+      <header className="border-b border-stone-200 bg-white text-stone-900">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pt-3 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-3">
+          <Link href="/meetups" className="inline-flex min-h-11 items-center text-lg font-extrabold tracking-tight text-red-800">McGill Martlet</Link>
+          <MartletNavLinks />
+        </div>
+      </header>
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-8 sm:py-12">
         <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <div role={loading ? "status" : undefined}>

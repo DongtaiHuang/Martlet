@@ -22,10 +22,13 @@ In **SQL Editor**, paste and run each file once:
 
 1. `supabase/migrations/001_mvp.sql` (schema, profile trigger, base RLS). Only on a fresh project, since it is not re-runnable.
 2. `supabase/migrations/002_security_hardening.sql` (RLS/privilege hardening, approved campus locations). Safe to re-run.
+3. `supabase/migrations/003_more_campus_locations.sql` (additional downtown campus meetup locations). Safe to re-run.
 
 `002` adds a foreign key from `meetups(location_name, latitude, longitude)` to `campus_locations`. If the project already holds meetups at non-approved coordinates, it will fail; cancel/delete those rows first (Table editor) and re-run.
 
-**When adding a campus location**, update both `lib/locations.ts` and the `insert into public.campus_locations` block in `002` (or a new migration), then run the SQL.
+**When adding a campus location**, update `lib/locations.ts` and create a new idempotent migration to insert the matching canonical name and coordinates in `public.campus_locations`; then run it in Supabase. Do not rewrite migrations that teammates may have already applied.
+
+**Sign-in not available?** In local mock mode (without both `NEXT_PUBLIC_SUPABASE_*` variables), the nav still exposes `/login` and `/signup` for discovery, but account creation and meetup publishing are disabled until the Supabase configuration and migrations are applied. Restart `npm run dev` after changing `.env.local`.
 
 ## 3. Configure Auth
 
