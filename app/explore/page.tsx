@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { CampusMap } from "@/components/map/CampusMap";
+import { listLandmarks } from "@/lib/landmarks";
 import { listMeetups } from "@/lib/meetups";
 
 // Generate the sample start times relative to each request.
@@ -10,7 +12,7 @@ export default async function ExplorePage({
 }: {
   searchParams: Promise<{ meetup?: string | string[] }>;
 }) {
-  const [meetups, { meetup }] = await Promise.all([listMeetups(), searchParams]);
+  const [meetups, landmarks, { meetup }] = await Promise.all([listMeetups(), listLandmarks(), searchParams]);
   // ?meetup=<id> (linked from a meetup's location) opens the map on that meetup.
   const focusId = typeof meetup === "string" ? meetup : undefined;
 
@@ -18,7 +20,12 @@ export default async function ExplorePage({
     <main className="mx-auto max-w-5xl px-5 py-9">
       <h1 className="text-3xl font-bold">Explore campus</h1>
       <p className="mt-2 mb-5 text-neutral-600">Find spontaneous meetups on a map. Filter by category.</p>
-      <CampusMap meetups={meetups} focusId={focusId} />
-      <p className="mt-3 text-xs text-neutral-500">Tap a marker for details. Locations are approved campus landmarks only.</p>
+      <CampusMap meetups={meetups} focusId={focusId} landmarks={landmarks} />
+      <p className="mt-3 text-xs text-neutral-500">Tap a marker for details. Meetup locations are approved campus landmarks only.</p>
+      {landmarks.length > 0 && (
+        <p className="mt-1 text-xs text-neutral-500">
+          ★ pins are <Link href="/landmarks" className="font-semibold text-red-800 underline">landmarks</Link> to unlock with a photo. Some are off campus; zoom out to find them.
+        </p>
+      )}
     </main></div>;
 }

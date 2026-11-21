@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { GeolocateControl, Map, Marker, NavigationControl, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
+import type { LandmarkSummary } from "@/types/landmark";
 import { categories, categoryValues } from "@/components/feed/categories";
+import { LANDMARK_COLORS } from "./landmark-style";
 import { CAMPUS_CENTER, MARKER_COLORS } from "./map-config";
 import { mapStyleUrl } from "./map-style";
 
@@ -37,10 +39,55 @@ function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {
   return root;
 }
 
+const NO_LANDMARKS: LandmarkSummary[] = [];
+
+function landmarkPopupContent(landmark: LandmarkSummary, onOpen: (href: string) => void) {
+  const root = document.createElement("div");
+  root.style.cssText = "display:grid;gap:4px;max-width:220px;font:14px system-ui,sans-serif";
+  const add = (tag: string, text: string, css = "") => {
+    const el = document.createElement(tag);
+    el.textContent = text; // never interpolate HTML
+    el.style.cssText = css;
+    root.append(el);
+    return el;
+  };
+  add("span", `★ Landmark · ${landmark.unlocked ? "Unlocked" : "Locked"}`, "font-size:12px;font-weight:600;color:#57534e");
+  add("strong", landmark.name);
+  add("span", landmark.challenge_prompt, "font-size:13px");
+  add("span", `${landmark.unlock_count} unlocked`, "font-size:12px;color:#57534e");
+  const href = `/landmarks/${encodeURIComponent(landmark.id)}`;
+  const link = add("a", landmark.unlocked ? "View photos →" : "View challenge →", "font-weight:700;color:#991b1b;text-decoration:underline") as HTMLAnchorElement;
+  link.href = href;
+  link.addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    onOpen(href);
+  });
+  return root;
+}
+
+function landmarkMarkerElement(landmark: LandmarkSummary) {
+  const el = document.createElement("div");
+  el.textContent = "★";
+  el.style.cssText = [
+    "width:30px", "height:30px", "border-radius:9999px", "display:grid", "place-items:center",
+    `background:${landmark.unlocked ? LANDMARK_COLORS.unlocked : LANDMARK_COLORS.locked}`,
+    "color:#fff", "font-size:17px", "line-height:1", "border:2px solid #fff",
+    "box-shadow:0 1px 4px rgba(0,0,0,.35)", "cursor:pointer",
+  ].join(";");
+  el.setAttribute("aria-label", `Landmark: ${landmark.name} (${landmark.unlocked ? "unlocked" : "locked"})`);
+  return el;
+}
+
 /**
  * `focusId` (from /explore?meetup=<id>) centres the map on that meetup and opens its popup once.
+ * `landmarks` (ADR 0009) are always shown as star pins, independent of the category filter.
  */
-export function CampusMap({ meetups, focusId }: { meetups: MeetupSummary[]; focusId?: string }) {
+export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
+  meetups: MeetupSummary[];
+  focusId?: string;
+  landmarks?: LandmarkSummary[];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const markersRef = useRef(new globalThis.Map<string, Marker>());
@@ -85,6 +132,17 @@ export function CampusMap({ meetups, focusId }: { meetups: MeetupSummary[]; focu
     });
     return () => { markers.forEach((m) => m.remove()); byId.clear(); };
   }, [visible, router]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const markers = landmarks.map((landmark) =>
+      new Marker({ element: landmarkMarkerElement(landmark) })
+        .setLngLat([landmark.longitude, landmark.latitude])
+        .setPopup(new Popup({ offset: 18 }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
+        .addTo(map));
+    return () => markers.forEach((m) => m.remove());
+  }, [landmarks, router]);
 
   // Runs after the marker effect above, and only when focusId changes, so changing
   // the category filter doesn't keep re-opening the popup.

@@ -7,15 +7,19 @@ import { MARKER_COLORS } from "./map-config";
 import { mapStyleUrl } from "./map-style";
 
 interface MeetupLocationMapProps {
-  category: MeetupCategory;
+  /** Marker colour from the meetup category; ignored when `color` is given. */
+  category?: MeetupCategory;
+  color?: string;
   locationName: string;
   latitude: number;
   longitude: number;
+  zoom?: number;
 }
 
-/** Small single-pin map for the meetup detail page. */
-export function MeetupLocationMap({ category, locationName, latitude, longitude }: MeetupLocationMapProps) {
+/** Small single-pin map for meetup and landmark detail pages. */
+export function MeetupLocationMap({ category, color, locationName, latitude, longitude, zoom = 16.5 }: MeetupLocationMapProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const markerColor = color ?? MARKER_COLORS[category ?? "other"];
 
   useEffect(() => {
     if (!ref.current) return;
@@ -24,7 +28,7 @@ export function MeetupLocationMap({ category, locationName, latitude, longitude 
       container: ref.current,
       style: mapStyleUrl,
       center,
-      zoom: 16.5,
+      zoom,
       // Don't hijack page scrolling or rotate the map by accident on a small embed.
       scrollZoom: false,
       dragRotate: false,
@@ -35,11 +39,11 @@ export function MeetupLocationMap({ category, locationName, latitude, longitude 
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
     map.touchZoomRotate.disableRotation();
 
-    const marker = new Marker({ color: MARKER_COLORS[category] }).setLngLat(center).addTo(map);
+    const marker = new Marker({ color: markerColor }).setLngLat(center).addTo(map);
     marker.getElement().setAttribute("aria-label", locationName);
 
     return () => map.remove();
-  }, [category, locationName, latitude, longitude]);
+  }, [markerColor, locationName, latitude, longitude, zoom]);
 
   return (
     <div

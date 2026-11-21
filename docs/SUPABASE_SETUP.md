@@ -25,6 +25,7 @@ In **SQL Editor**, paste and run each file once:
 3. `supabase/migrations/003_more_campus_locations.sql` (additional downtown campus meetup locations). Safe to re-run.
 4. `supabase/migrations/004_backfill_profiles.sql` (profiles for accounts created before `001` ran). Safe to re-run.
 5. `supabase/migrations/005_table_grants.sql` (explicit table privileges; newer Supabase projects don't auto-grant them, causing `permission denied`). Safe to re-run.
+6. `supabase/migrations/006_landmarks.sql` (ADR 0009: landmarks, photo unlocks, and the private `landmark-photos` Storage bucket with its policies). Safe to re-run. Landmark coordinates are approximate; check them on the map and keep `lib/mock-landmarks.ts` in sync.
 
 `002` adds a foreign key from `meetups(location_name, latitude, longitude)` to `campus_locations`. If the project already holds meetups at non-approved coordinates, it will fail; cancel/delete those rows first (Table editor) and re-run.
 
@@ -58,6 +59,7 @@ In **SQL Editor**, paste and run each file once:
 
    ```sh
    node --env-file=.env.local supabase/verify.mjs
+   node --env-file=.env.local supabase/verify-landmarks.mjs   # landmark unlocks + photo Storage rules
    ```
 
    It signs in as both users plus an anonymous client and tries impersonation, cross-user cancel, editing,
