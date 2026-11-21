@@ -1,6 +1,6 @@
 # 0004. Approved campus locations only, no live geolocation
 
-- **Status:** Accepted
+- **Status:** Accepted, amended by [0008](0008-client-side-locate-me.md) (browser-only "show my location" on the map)
 - **Date:** 2026-11-21
 
 ## Context

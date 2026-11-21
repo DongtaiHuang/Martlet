@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Map, Marker, NavigationControl, Popup, getVersion, setWorkerUrl } from "maplibre-gl";
+import { GeolocateControl, Map, Marker, NavigationControl, Popup, getVersion, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import { categories, categoryValues } from "@/components/feed/categories";
@@ -59,6 +59,13 @@ export function CampusMap({ meetups }: { meetups: MeetupSummary[] }) {
     if (!ref.current) return;
     const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
     map.addControl(new NavigationControl(), "top-right");
+    // ADR 0008: opt-in, one-shot "show my location". The position stays in the
+    // browser (MapLibre draws a dot); it is never sent to our server or stored.
+    map.addControl(new GeolocateControl({
+      trackUserLocation: false,
+      positionOptions: { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 },
+      fitBoundsOptions: { maxZoom: 16 },
+    }), "top-right");
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
