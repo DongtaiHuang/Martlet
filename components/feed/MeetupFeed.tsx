@@ -7,7 +7,7 @@ import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import { categories, categoryValues } from "./categories";
 import { MeetupCard } from "./MeetupCard";
 
-export function MeetupFeed({ meetups }: { meetups: MeetupSummary[] }) {
+export function MeetupFeed({ meetups, viewerId = null }: { meetups: MeetupSummary[]; viewerId?: string | null }) {
   const [category, setCategory] = useState<MeetupCategory | "all">("all");
   const visible = category === "all" ? meetups : meetups.filter((meetup) => meetup.category === category);
   const filters = [
@@ -28,7 +28,7 @@ export function MeetupFeed({ meetups }: { meetups: MeetupSummary[] }) {
       <p role="status" className="mb-4 text-sm font-medium text-stone-600">{visible.length} {visible.length === 1 ? "meetup" : "meetups"}{category === "all" ? "" : ` · ${categories[category].label}`}</p>
       {visible.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {visible.map((meetup) => <MeetupCard key={meetup.id} meetup={meetup} />)}
+          {visible.map((meetup) => <MeetupCard key={meetup.id} meetup={meetup} viewerId={viewerId} />)}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-5 py-10 text-center">

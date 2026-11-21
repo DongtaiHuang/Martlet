@@ -44,12 +44,11 @@ Use the authenticated Supabase user ID internally; **never accept a `userId` arg
 ```typescript
 type MeetupCardProps = {
   meetup: MeetupSummary;
-  onPeck?: (id: string) => Promise<void>;
-  onFlap?: (id: string) => Promise<void>;
+  viewerId?: string | null; // signed-in user (live mode); null = read-only counts
 }
 ```
 
-Cards are presentational; Developer 4 supplies interaction callbacks. Developer 2's detail page can reuse the same reaction components.
+Cards render Developer 4's `PeckButton`/`FlapButton` (which call `lib/social.ts`) when `viewerId` is set; Peck is disabled for the host. Developer 2's detail page can reuse the same reaction components.
 
 ## Validation
 - title 3–80 characters, description max 500

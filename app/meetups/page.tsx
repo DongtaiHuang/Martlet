@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Compass, FlaskConical, Plus } from "lucide-react";
+import { Compass, FlaskConical, LogIn, Plus } from "lucide-react";
 import { FeedUnavailable } from "@/components/feed/FeedUnavailable";
 import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import campusBanner from "@/components/feed/campus-banner.webp";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { listMeetups } from "@/lib/meetups";
+import { getCurrentUser } from "@/lib/supabase/auth";
+import { getDataMode } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
@@ -24,17 +26,36 @@ async function loadUpcomingMeetups() {
 }
 
 async function UpcomingMeetups() {
+  const live = getDataMode() === "live";
+  const viewer = live ? await getCurrentUser().catch(() => null) : null;
+
+  // Live mode: meetups are only readable when signed in (RLS), so don't show an empty feed.
+  if (live && !viewer) {
+    return (
+      <div className="mt-5 rounded-2xl border border-stone-200 bg-white px-5 py-8 text-center">
+        <LogIn aria-hidden="true" className="mx-auto mb-3 text-red-800" />
+        <h3 className="text-lg font-bold text-stone-900">Sign in to see meetups</h3>
+        <p className="mt-1 text-sm text-stone-600">Meetups are visible to signed-in McGill students.</p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Link href="/login?next=/meetups" className="inline-flex min-h-11 items-center rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">Sign in</Link>
+          <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl border border-stone-300 px-4 text-sm font-bold text-stone-800 hover:border-red-700 focus-visible:outline-2 focus-visible:outline-red-700">Create account</Link>
+        </div>
+      </div>
+    );
+  }
+
   const upcoming = await loadUpcomingMeetups();
   if (!upcoming) return <FeedUnavailable />;
 
   return (
     <>
-      {upcoming.some((meetup) => meetup.host_id === "demo-host") && (
-        <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-stone-600">
-          <FlaskConical aria-hidden="true" size={15} /> Sample meetups for preview
+      {!live && (
+        <p className="mt-3 flex flex-wrap items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          <FlaskConical aria-hidden="true" size={15} />
+          <span><strong>Preview:</strong> sample meetups, not real events. Joining and liking need Supabase. See <code>docs/SUPABASE_SETUP.md</code>.</span>
         </p>
       )}
-      <MeetupFeed meetups={upcoming} />
+      <MeetupFeed meetups={upcoming} viewerId={viewer?.id ?? null} />
     </>
   );
 }
