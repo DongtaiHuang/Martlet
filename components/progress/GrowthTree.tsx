@@ -69,6 +69,8 @@ const TREE_GROWTH: Record<3 | 4 | 5 | 6, { scale: number; clusters: number; bran
   6: { scale: 1, clusters: 9, branches: 4 },
 };
 
+const SMALL_PLANT_SCALE: Record<0 | 1 | 2, number> = { 0: 1.6, 1: 1.7, 2: 1.35 };
+
 // Falling leaves (and petals at full bloom): start inside the canopy, drift down to the ground.
 const FALLING = [
   { x: 96, y: 118, drift: -22, delay: 0 },
@@ -141,7 +143,8 @@ function Tree({ stage }: { stage: 3 | 4 | 5 | 6 }) {
 
 export function GrowthTree({ stage, unlocked, total }: { stage: TreeStage; unlocked: number; total: number }) {
   const isTree = stage >= 3;
-  const scale = isTree ? TREE_GROWTH[stage as 3 | 4 | 5 | 6].scale : 1;
+  // Seed, sprout and sapling are drawn small; enlarge them (from the ground) so they don't look lost.
+  const scale = isTree ? TREE_GROWTH[stage as 3 | 4 | 5 | 6].scale : SMALL_PLANT_SCALE[stage as 0 | 1 | 2];
   const fallers = stage >= 6 ? FALLING : stage >= 4 ? FALLING.slice(0, 3) : stage === 3 ? FALLING.slice(0, 1) : [];
 
   return (

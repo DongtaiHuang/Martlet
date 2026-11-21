@@ -72,7 +72,9 @@ export default async function ProgressPage({
           <p className="mt-1 text-stone-600">
             {toNext === null
               ? "Every landmark unlocked. Your tree is in full bloom!"
-              : `Unlock ${toNext} more ${toNext === 1 ? "landmark" : "landmarks"} to grow into a ${TREE_STAGES[stage + 1].toLowerCase()}.`}
+              : `Unlock ${toNext} more ${toNext === 1 ? "landmark" : "landmarks"} to ${stage + 1 === TREE_STAGES.length - 1
+                ? "reach full bloom"
+                : `grow into a ${TREE_STAGES[stage + 1].toLowerCase()}`}.`}
           </p>
           <ol aria-label="Growth stages" className="mt-5 flex flex-wrap justify-center gap-1.5">
             {TREE_STAGES.map((name, i) => (
