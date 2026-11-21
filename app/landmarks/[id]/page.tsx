@@ -33,7 +33,32 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
           <ArrowLeft aria-hidden="true" size={16} /> All landmarks
         </Link>
 
-        <article className="mt-3 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
+        <section aria-labelledby="gallery-heading" className="mt-3">
+          <h2 id="gallery-heading" className="text-xl font-bold">Photos from {landmark.name}</h2>
+          <div className="mt-4">
+            {landmark.unlocked ? (
+              <LandmarkGallery photos={photos} landmarkName={landmark.name} />
+            ) : (
+              <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 text-center">
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid grid-cols-3 gap-2 p-2 opacity-60 blur-sm">
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <div key={i} className="rounded-lg bg-gradient-to-br from-stone-200 to-stone-300" />
+                  ))}
+                </div>
+                <div className="relative py-6">
+                  <LockKeyhole aria-hidden="true" size={28} className="mx-auto text-stone-600" />
+                  <p className="mt-2 font-semibold text-stone-800">
+                    {others > 0
+                      ? `Unlock to see ${others} ${others === 1 ? "photo" : "photos"} from other students.`
+                      : "Be the first to unlock this landmark."}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <article className="mt-8 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap gap-2">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${landmark.unlocked ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-700"}`}>
               {landmark.unlocked ? <Star aria-hidden="true" size={14} /> : <LockKeyhole aria-hidden="true" size={14} />}
@@ -85,30 +110,6 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
           </section>
         </article>
 
-        <section aria-labelledby="gallery-heading" className="mt-8">
-          <h2 id="gallery-heading" className="text-xl font-bold">Photos from {landmark.name}</h2>
-          <div className="mt-4">
-            {landmark.unlocked ? (
-              <LandmarkGallery photos={photos} landmarkName={landmark.name} />
-            ) : (
-              <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 text-center">
-                <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid grid-cols-3 gap-2 p-2 opacity-60 blur-sm">
-                  {Array.from({ length: 6 }, (_, i) => (
-                    <div key={i} className="rounded-lg bg-gradient-to-br from-stone-200 to-stone-300" />
-                  ))}
-                </div>
-                <div className="relative py-6">
-                  <LockKeyhole aria-hidden="true" size={28} className="mx-auto text-stone-600" />
-                  <p className="mt-2 font-semibold text-stone-800">
-                    {others > 0
-                      ? `Unlock to see ${others} ${others === 1 ? "photo" : "photos"} from other students.`
-                      : "Be the first to unlock this landmark."}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
       </main>
     </div>
   );
