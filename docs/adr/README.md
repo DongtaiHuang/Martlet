@@ -5,7 +5,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | #    | Title | Status |
 |------|-------|--------|
 | 0001 | [Record architecture decisions](0001-record-architecture-decisions.md) | Accepted |
-| 0002 | [Next.js + Supabase starter overlay](0002-nextjs-supabase-starter-overlay.md) | Accepted |
+| 0002 | [Next.js + Supabase foundation](0002-nextjs-supabase-foundation.md) | Accepted |
 | 0003 | [Row-level security as the authorization boundary](0003-rls-authorization-boundary.md) | Accepted |
 | 0004 | [Approved campus locations only, no live geolocation](0004-approved-campus-locations.md) | Accepted |
 | 0005 | [Peck/Flap participation and reaction model](0005-peck-flap-model.md) | Accepted |

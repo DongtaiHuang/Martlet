@@ -10,7 +10,7 @@ The Explore page shows meetups on a campus map. Commercial map SDKs require API 
 ## Decision
 
 - Use MapLibre GL JS (open source) in `components/map/CampusMap.tsx`.
-- The style URL comes from `NEXT_PUBLIC_MAP_STYLE_URL`. If unset, fall back to MapLibre's demo tiles, which are for development only.
+- The style URL comes from `NEXT_PUBLIC_MAP_STYLE_URL`. If unset, development falls back to MapLibre's demo tiles; production shows a "map unavailable" message instead of using demo tiles.
 - Popup content is built with DOM APIs and `textContent`, never by interpolating user-provided HTML.
 - The map renders the same data as the feed (`listMeetups()`), not a separate source.
 
