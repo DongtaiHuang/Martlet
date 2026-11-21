@@ -13,6 +13,10 @@ cancelMeetup(id: string): Promise<void>
 
 The starter's `listMeetups` and `getMeetup` initially return mock data. Developer 3 replaces their internals (not their signatures).
 
+Implemented (see `docs/SUPABASE_SETUP.md`): the functions are **server-only**. Additional exports, no signature changes:
+`getMeetupDataMode(): "live" | "mock"`, error classes `AuthRequiredError`, `MeetupValidationError` (`fieldErrors`), `MeetupNotFoundError`, `MockModeError`.
+Client-safe validation lives in `lib/meetup-validation.ts` (`validateCreateMeetupInput`, `MEETUP_CATEGORIES`).
+
 ## Social service functions — Developer 4 (`lib/social.ts`)
 
 ```typescript
