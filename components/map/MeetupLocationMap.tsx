@@ -6,6 +6,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory } from "@/types/meetup";
 import { MARKER_COLORS } from "./map-config";
 import { initialMapStyle, trackMapStyle, useMapColorMode } from "./map-mode";
+import { GoogleLocationMap } from "./GoogleLocationMap";
+import { hasGoogleMaps } from "@/lib/google-maps";
 
 interface MeetupLocationMapProps {
   category?: MeetupCategory;
@@ -16,7 +18,11 @@ interface MeetupLocationMapProps {
   zoom?: number;
 }
 
-export function MeetupLocationMap({ category, color, locationName, latitude, longitude, zoom = 16.5 }: MeetupLocationMapProps) {
+export function MeetupLocationMap(props: MeetupLocationMapProps) {
+  return hasGoogleMaps ? <GoogleLocationMap {...props} /> : <MapLibreLocationMap {...props} />;
+}
+
+function MapLibreLocationMap({ category, color, locationName, latitude, longitude, zoom = 16.5 }: MeetupLocationMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const markerRef = useRef<Marker | null>(null);

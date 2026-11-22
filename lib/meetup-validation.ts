@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COURSE_CODE_PATTERN } from "@/lib/course-codes";
 import { CAMPUS_LOCATIONS, type CampusLocation } from "@/lib/locations";
 import { getPublicVenue } from "@/lib/public-venues";
 import type { CreateMeetupInput, MeetupCategory } from "@/types/meetup";
@@ -52,6 +53,7 @@ const createMeetupSchema = z.object({
   longitude: z.number("Choose a meetup location."),
   public_venue_id: z.string().min(1).optional(),
   starts_at: z.string("Choose a start time.").min(1, "Choose a start time."),
+  course_code: z.string().regex(COURSE_CODE_PATTERN, "Choose a course from the list.").nullish(),
 });
 
 export function validateCreateMeetupInput(
@@ -83,6 +85,9 @@ export function validateCreateMeetupInput(
     errors.starts_at = "Start time must be in the future.";
   }
 
+  // The database also enforces this (meetups_course_only_for_study) and that the course exists.
+  if (data.course_code && data.category !== "study") errors.course_code = "Only study meetups can have a course.";
+
   if (!location || Object.keys(errors).length > 0) return { ok: false, errors };
 
   return {
@@ -97,6 +102,7 @@ export function validateCreateMeetupInput(
       latitude: location.latitude,
       longitude: location.longitude,
       starts_at: startsAt.toISOString(),
+      course_code: data.course_code ?? null,
     },
   };
 }

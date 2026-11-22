@@ -38,7 +38,7 @@ function sample(
 export function getMockMeetups(): MeetupSummary[] {
   return [
     sample("demo-coffee", "Coffee & a study break", "coffee", 1, 20, "Alex", 3, 8),
-    sample("demo-study", "COMP 302 group study", "study", 2, 65, "Jamie", 5, 12),
+    { ...sample("demo-study", "COMP 302 group study", "study", 2, 65, "Jamie", 5, 12), course_code: "COMP 302" },
     sample("demo-sports", "Campus walk before dinner", "sports", 0, 120, "Sam", 2, 4),
     sample("demo-food", "Lunch after class?", "food", 3, 150, "Taylor", 4, 3),
   ];

@@ -3,12 +3,16 @@
 import { startTransition, useActionState, useState, type FormEvent } from "react";
 import { ArrowRight } from "lucide-react";
 import { submitMeetup, type CreateState } from "@/app/meetups/new/actions";
+import { MeetupCoursePicker } from "@/components/courses/MeetupCoursePicker";
 import { categories, categoryValues } from "@/components/feed/categories";
+import type { Course } from "@/lib/course-codes";
 import { futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
 import { CAMPUS_LOCATIONS, getCampusLocation } from "@/lib/locations";
 import { getPublicVenue, OTHER_LOCATION, PUBLIC_VENUES } from "@/lib/public-venues";
 import { LocationPreview } from "./LocationPreview";
+import { GooglePlaceSearch } from "./GooglePlaceSearch";
+import { hasGoogleMaps } from "@/lib/google-maps";
 
 const fieldStyle = "mt-2 block min-h-11 w-full min-w-0 rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-base text-ink focus-visible:outline-2 focus-visible:outline-focus aria-invalid:border-brand";
 
@@ -17,8 +21,9 @@ function FieldError({ name, fields }: { name: keyof NonNullable<CreateState["fie
   return message ? <p id={`${name}-error`} className="mt-1 text-sm text-brand-ink">{message}</p> : null;
 }
 
-export function MeetupForm() {
+export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
   const [state, dispatch, pending] = useActionState(submitMeetup, {});
+  const [category, setCategory] = useState("");
 
   const { minimum, refreshMinimum } = useFutureLocalTime();
   const [timeError, setTimeError] = useState(false);
@@ -64,7 +69,7 @@ export function MeetupForm() {
         <div className="grid min-w-0 gap-5 sm:grid-cols-2">
           <div className="min-w-0">
             <label htmlFor="category" className="font-semibold">Category</label>
-            <select id="category" name="category" required defaultValue="" className={fieldStyle} {...fieldErrorProps("category")}>
+            <select id="category" name="category" required value={category} onChange={(event) => setCategory(event.target.value)} className={fieldStyle} {...fieldErrorProps("category")}>
               <option value="" disabled>Choose a category</option>
               {categoryValues.map((category) => <option key={category} value={category}>{categories[category].label}</option>)}
             </select>
@@ -80,6 +85,9 @@ export function MeetupForm() {
             <FieldError name="location" fields={state.fields} />
           </div>
         </div>
+        {offCampus && (hasGoogleMaps ? <GooglePlaceSearch /> : (
+          <p className="text-sm text-ink-muted">Place search requires Google Maps configuration. Choose an approved venue below.</p>
+        ))}
         {offCampus && (
           <div className="min-w-0">
             <label htmlFor="publicVenue" className="font-semibold">Public venue in Montréal</label>
@@ -91,6 +99,7 @@ export function MeetupForm() {
           </div>
         )}
         {location && <LocationPreview location={location} />}
+        {category === "study" && <MeetupCoursePicker myCourses={myCourses} error={state.fields?.course_code?.[0]} />}
         <div>
           <label htmlFor="startsAt" className="font-semibold">Start date and time</label>
           <input id="startsAt" name="startsAt" type="datetime-local" min={minimum} step={60} required className={fieldStyle} onChange={() => setTimeError(false)} aria-invalid={timeError || Boolean(state.fields?.startsAt)} aria-describedby={timeError || state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />

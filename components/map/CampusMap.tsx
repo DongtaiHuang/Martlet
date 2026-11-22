@@ -11,6 +11,8 @@ import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_CENTER, CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 import { useMapColorMode } from "./map-mode";
+import { hasGoogleMaps } from "@/lib/google-maps";
+import { GoogleOverviewMap } from "./GoogleOverviewMap";
 
 const FOCUS_ZOOM = 17;
 
@@ -53,6 +55,18 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     return active === "all" ? meetups : meetups.filter((m) => m.category === active);
   }, [meetups, active, layer]);
   const shownLandmarks = useMemo(() => (layer === "meetups" ? NO_LANDMARKS : landmarks), [landmarks, layer]);
+  const googlePins = useMemo(() => hasGoogleMaps ? [
+    ...visible.map((meetup) => ({
+      id: meetup.id, title: meetup.title, latitude: meetup.latitude, longitude: meetup.longitude,
+      color: MARKER_COLORS[meetup.category],
+      content: () => popupContent(meetup, (href) => router.push(href)),
+    })),
+    ...shownLandmarks.map((landmark) => ({
+      id: landmark.id, title: landmark.name, latitude: landmark.latitude, longitude: landmark.longitude,
+      color: landmark.unlocked ? "#166534" : "#57534e",
+      content: () => landmarkPopupContent(landmark, (href) => router.push(href)),
+    })),
+  ] : [], [visible, shownLandmarks, router]);
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
   // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
   const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
@@ -157,7 +171,9 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       )}
       {/* Keep this className constant: MapLibre adds its own classes to the container, and
           React rewriting className would remove them and break the map's positioning. */}
-      <div ref={ref} aria-label="Map of McGill meetups and landmarks" className={CAMPUS_MAP_FRAME} />
+      {hasGoogleMaps ? <GoogleOverviewMap pins={googlePins} focusId={focusId} className={CAMPUS_MAP_FRAME} /> : (
+        <div ref={ref} aria-label="Map of McGill meetups and landmarks" className={CAMPUS_MAP_FRAME} />
+      )}
       {layer !== "landmarks" && visible.length === 0 && <p className="mt-3 text-sm text-ink-muted">No upcoming meetups in this category.</p>}
     </div>
   );

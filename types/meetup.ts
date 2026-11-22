@@ -20,12 +20,14 @@ export interface Meetup {
   starts_at: string;
   status: MeetupStatus;
   created_at: string;
+  /** McGill course for study meetups, e.g. "COMP 202" (issue #25). Null or absent otherwise. */
+  course_code?: string | null;
 }
 
 export type CreateMeetupInput = Pick<
   Meetup,
   "title" | "description" | "category" | "location_name" |
-  "latitude" | "longitude" | "starts_at"
+  "latitude" | "longitude" | "starts_at" | "course_code"
 > & { public_venue_id?: string };
 
 export interface MeetupSummary extends Meetup {
