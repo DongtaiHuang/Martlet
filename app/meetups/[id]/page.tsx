@@ -50,11 +50,11 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
           <dl className="mt-5 grid gap-4 rounded-xl bg-canvas p-4 [overflow-wrap:anywhere]">
             <div><dt className="relative pl-7 text-sm font-bold"><UserRound aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Host</dt><dd className="pl-7 text-sm text-ink-2">{meetup.host_display_name}</dd></div>
             <div><dt className="relative pl-7 text-sm font-bold"><CalendarDays aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Starts</dt><dd className="pl-7 text-sm text-ink-2"><MeetupStartTime startsAt={meetup.starts_at} /></dd></div>
-            <div><dt className="relative pl-7 text-sm font-bold"><MapPin aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Campus location</dt><dd className="pl-7 text-sm text-ink-2">
+            <div><dt className="relative pl-7 text-sm font-bold"><MapPin aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Meetup location</dt><dd className="pl-7 text-sm text-ink-2">
               {/* Explore only lists upcoming meetups, so only link to it while this one is upcoming. */}
               {upcoming ? (
                 <Link href={exploreMeetupHref(meetup.id)} className="font-semibold text-brand-ink underline decoration-brand-line underline-offset-2 hover:decoration-brand-ink focus-visible:outline-2 focus-visible:outline-focus">
-                  {meetup.location_name}<span className="sr-only">, view on the campus map</span>
+                  {meetup.location_name}<span className="sr-only">, view on the meetup map</span>
                 </Link>
               ) : meetup.location_name}
             </dd></div>
@@ -68,7 +68,7 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
             />
             {upcoming && (
               <Link href={exploreMeetupHref(meetup.id)} className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus">
-                <MapPin aria-hidden="true" size={15} /> See nearby meetups on the campus map
+                <MapPin aria-hidden="true" size={15} /> See nearby meetups on the meetup map
               </Link>
             )}
           </section>

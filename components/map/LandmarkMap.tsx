@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Map, Marker, Popup } from "maplibre-gl";
@@ -12,6 +12,8 @@ import { POPUP_MAX_WIDTH } from "./popup-content";
 import { landmarkZoom } from "./landmark-style";
 import { CAMPUS_MAP_FRAME, createCampusMap } from "./map-config";
 import { useMapColorMode } from "./map-mode";
+import { hasGoogleMaps } from "@/lib/google-maps";
+import { GoogleOverviewMap } from "./GoogleOverviewMap";
 
 const PIXEL = 2.25; // tower pixel size: a bit larger than the Explore map's 1.75px
 const SELECTED_GLOW = "drop-shadow(0 0 3px #991b1b) drop-shadow(0 0 2px #991b1b)";
@@ -32,6 +34,11 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
   const items = useRef(new globalThis.Map<string, HTMLLIElement>());
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
+  const googlePins = useMemo(() => hasGoogleMaps ? landmarks.map((landmark) => ({
+    id: landmark.id, title: landmark.name, latitude: landmark.latitude, longitude: landmark.longitude,
+    color: landmark.unlocked ? "#166534" : "#57534e",
+    content: () => landmarkPopupContent(landmark, (href) => router.push(href)),
+  })) : [], [landmarks, router]);
 
   useEffect(() => {
     if (!mapEl.current) return;
@@ -74,6 +81,10 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
   }, [selected]);
 
   const focusLandmark = useCallback((landmark: LandmarkSummary) => {
+    if (hasGoogleMaps) {
+      setSelected(landmark.id);
+      return;
+    }
     const map = mapRef.current;
     const marker = markers.current.get(landmark.id);
     if (!map || !marker) return;
@@ -92,12 +103,9 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
 
   return (
     <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div
-        ref={mapEl}
-        role="region"
-        aria-label="Map of landmarks"
-        className={`${CAMPUS_MAP_FRAME} scroll-mt-4`}
-      />
+      {hasGoogleMaps ? <GoogleOverviewMap pins={googlePins} focusId={selected ?? undefined} onSelect={setSelected} className={CAMPUS_MAP_FRAME} /> : (
+        <div ref={mapEl} role="region" aria-label="Map of landmarks" className={`${CAMPUS_MAP_FRAME} scroll-mt-4`} />
+      )}
 
       <aside aria-labelledby="landmark-list-heading" className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface lg:h-[65vh] lg:min-h-96">
         <div className="border-b border-line px-4 py-3">
