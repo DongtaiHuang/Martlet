@@ -92,18 +92,19 @@ function isJpeg(bytes: Uint8Array): boolean {
   return bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
 }
 
-/** All landmarks with unlock counts and whether the current user unlocked each. `[]` when signed out. */
+/** All landmarks with unlock counts and whether the current user unlocked each. Guests: nothing unlocked. */
 export async function listLandmarks(): Promise<LandmarkSummary[]> {
   if (getDataMode() === "mock") return getMockLandmarks();
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
-  if (!userId) return [];
 
   const [landmarks, counts, mine] = await Promise.all([
     supabase.from("landmarks").select(LANDMARK_COLUMNS).order("name").returns<LandmarkRow[]>(),
     unlockCounts(supabase),
-    supabase.from("landmark_unlocks").select("landmark_id").eq("user_id", userId),
+    userId
+      ? supabase.from("landmark_unlocks").select("landmark_id").eq("user_id", userId)
+      : Promise.resolve({ data: [] as { landmark_id: string }[], error: null }),
   ]);
   if (landmarks.error) throw new Error(`Failed to load landmarks: ${landmarks.error.message}`);
   if (mine.error) throw new Error(`Failed to load your unlocks: ${mine.error.message}`);
@@ -126,13 +127,13 @@ export async function getLandmark(id: string): Promise<LandmarkDetail | null> {
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
-  if (!userId) return null;
 
   const [landmark, counts, mine] = await Promise.all([
     supabase.from("landmarks").select(LANDMARK_COLUMNS).eq("id", id).maybeSingle<LandmarkRow>(),
     unlockCounts(supabase),
-    supabase.from("landmark_unlocks").select(UNLOCK_SELECT)
-      .eq("landmark_id", id).eq("user_id", userId).maybeSingle<UnlockRow>(),
+    userId
+      ? supabase.from("landmark_unlocks").select(UNLOCK_SELECT).eq("landmark_id", id).eq("user_id", userId).maybeSingle<UnlockRow>()
+      : Promise.resolve({ data: null as UnlockRow | null, error: null }),
   ]);
   if (landmark.error) throw new Error(`Failed to load landmark: ${landmark.error.message}`);
   if (mine.error) throw new Error(`Failed to load your unlock: ${mine.error.message}`);
@@ -143,7 +144,7 @@ export async function getLandmark(id: string): Promise<LandmarkDetail | null> {
     ...landmark.data,
     unlock_count: counts.get(id) ?? 0,
     unlocked: Boolean(mine.data),
-    my_unlock: mine.data ? toPhoto(mine.data, urls, userId) : null,
+    my_unlock: mine.data ? toPhoto(mine.data, urls, userId ?? "") : null,
   };
 }
 

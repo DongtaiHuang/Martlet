@@ -2,12 +2,14 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig } from "@/lib/supabase/env";
 
-// Pages reachable without a session. Everything else needs sign-in in live mode,
-// because RLS only lets authenticated users read meetups and profiles.
-const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
+// Pages reachable without a session. Guests can browse meetups, landmarks, the map and the game
+// read-only (ADR 0025); every action still needs a session (server actions + RLS check it).
+const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/landmarks", "/explore", "/play", "/achievements"];
+// Meetup pages guests may read; /meetups/new and /meetups/<id>/edit still need sign-in.
+const PUBLIC_EXACT = /^\/(?:meetups(?:\/[0-9a-f-]{36})?)?$/i;
 
 function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  return PUBLIC_EXACT.test(pathname) || PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 export async function proxy(request: NextRequest) {

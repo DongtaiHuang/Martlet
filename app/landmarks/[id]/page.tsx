@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Camera, LockKeyhole, Star, UsersRound } from "lucide-react";
+import { ArrowLeft, Camera, LockKeyhole, LogIn, Star, UsersRound } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { LandmarkGallery } from "@/components/landmarks/LandmarkGallery";
 import { UnlockForm } from "@/components/landmarks/UnlockForm";
@@ -9,6 +9,7 @@ import { LANDMARK_COLORS, landmarkZoom } from "@/components/map/landmark-style";
 import { MeetupLocationMap } from "@/components/map/MeetupLocationMap";
 import { getLandmark, listLandmarkPhotos } from "@/lib/landmarks";
 import { getDataMode } from "@/lib/supabase/env";
+import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { saveUnlockAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -20,8 +21,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function LandmarkPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const landmark = await getLandmark(id);
+  const [landmark, viewer] = await Promise.all([getLandmark(id), getMeetupViewer().catch(() => null)]);
   if (!landmark) notFound();
+  const guest = getDataMode() === "live" && !viewer;
   const photos = landmark.unlocked ? await listLandmarkPhotos(landmark.id) : [];
   const others = landmark.unlock_count - (landmark.unlocked ? 1 : 0);
 
@@ -101,6 +103,13 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
                 Your photo is missing (the upload may have failed). Add it again below.
               </p>
             )}
+            {guest ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface-muted p-4">
+                <LogIn aria-hidden="true" size={18} className="shrink-0 text-brand-ink" />
+                <p className="min-w-0 flex-1 text-sm text-ink-2">Sign in with your McGill email to post a photo, unlock this landmark and see what other students shared.</p>
+                <Link href={`/login?next=${encodeURIComponent(`/landmarks/${landmark.id}`)}`} className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Sign in</Link>
+              </div>
+            ) : (
             <div className="mt-4">
               <UnlockForm
                 action={saveUnlockAction.bind(null, landmark.id)}
@@ -108,6 +117,7 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
                 currentCaption={landmark.my_unlock?.caption ?? ""}
               />
             </div>
+            )}
           </section>
         </article>
 
