@@ -34,7 +34,8 @@ In **SQL Editor**, paste and run each file once:
 9. `supabase/migrations/009_meetup_course.sql` (optional course code on study meetups). Apply after the course catalogue. Safe to re-run.
 10. `supabase/migrations/010_trends.sql` (the feed’s Trends panel). Run once after the core schema.
 11. `supabase/migrations/010_achievements.sql` (account-backed achievements). Safe to re-run. This is a separate SQL Editor script from `010_trends.sql`.
-12. `supabase/migrations/012_expo_67_landmark.sql` (Expo 67 Biosphère landmark and photo requirement for the 67 badge). Apply after the landmarks and achievements migrations. Safe to re-run.
+12. `supabase/migrations/011_notifications.sql` (account notifications). Apply after the meetup course and Trends migrations. Safe to re-run.
+13. `supabase/migrations/012_expo_67_landmark.sql` (Expo 67 Biosphère landmark and photo requirement for the 67 badge). Apply after the landmarks and achievements migrations. Safe to re-run.
 
 `002` adds the original campus-only foreign key. On a project upgrading from 001, resolve any existing locations that fail that constraint before running 002. After applying 008, do not rerun 002 because it reinstates the campus-only foreign key.
 

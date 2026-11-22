@@ -79,6 +79,16 @@ begin
   end if;
 end $$;
 
+-- Address-free entries must serialize campusLocation as JSON null, not an all-nulls object.
+do $$
+declare recipe jsonb;
+begin
+  select e into recipe from jsonb_array_elements(public.get_trending_entries('recipe', 5)) e;
+  if recipe->>'campusLocation' is not null then
+    raise exception 'Address-free entry serialized a campusLocation: %', recipe->'campusLocation';
+  end if;
+end $$;
+
 -- Missing entries and signed-out access.
 select pg_temp.expect_error($q$select public.set_trend_like('00000000-0000-4000-8000-000000000099', true)$q$, 'P0002');
 select set_config('request.jwt.claim.sub', '', true);

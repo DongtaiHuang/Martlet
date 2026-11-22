@@ -15,6 +15,19 @@ export const ACHIEVEMENTS = [
   { id: "field-trip", icon: "🚌", title: "Field trip", description: "Visit an off-campus landmark on the map.", hidden: false },
   { id: "tourist", icon: "🗺️", title: "Tourist", description: "Explore every landmark on the map.", hidden: false },
   { id: EXPO_67_ID, icon: "67", title: "67", description: "Upload a challenge photo at the Expo 67 Biosphère.", hidden: false },
+
+  // Activity ladders (ADR 0020): earned server-side from real activity counts
+  // (see lib/activity-achievements.ts), not from browser triggers.
+  { id: "nest-builder", icon: "🪺", title: "Nest builder", description: "Host your first meetup.", hidden: false },
+  { id: "flock-leader", icon: "🎤", title: "Flock leader", description: "Host 5 meetups.", hidden: false },
+  { id: "first-flight", icon: "🐣", title: "First flight", description: "Peck (join) your first meetup.", hidden: false },
+  { id: "flock-regular", icon: "🤝", title: "Flock regular", description: "Peck 10 meetups.", hidden: false },
+  { id: "cheerful-martlet", icon: "👏", title: "Cheerful martlet", description: "Flap your first meetup.", hidden: false },
+  { id: "standing-ovation", icon: "🎉", title: "Standing ovation", description: "Flap 25 meetups.", hidden: false },
+  { id: "campus-explorer", icon: "📍", title: "Campus explorer", description: "Unlock 3 landmarks.", hidden: false },
+  { id: "full-bloom", icon: "🌸", title: "Full bloom", description: "Unlock every landmark.", hidden: false },
+  { id: "trendsetter", icon: "🔥", title: "Trendsetter", description: "Share your first trend.", hidden: false },
+  { id: "campus-taste", icon: "🏆", title: "Campus taste", description: "Collect 10 likes on trends you shared.", hidden: false },
 ] as const;
 
 export type Achievement = (typeof ACHIEVEMENTS)[number];

@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { AchievementGrid } from "@/components/achievements/AchievementGrid";
+import { EarnActivity } from "@/components/achievements/EarnActivity";
 import { AchievementsNotSetUpError, listMyAchievements } from "@/lib/achievements";
+import { activityProgress, satisfiedActivityAchievements } from "@/lib/activity-achievements";
+import { loadActivityCounts } from "@/lib/activity-counts";
 import type { EarnedMap } from "@/lib/achievement-catalog";
 import { getDataMode } from "@/lib/supabase/env";
 
@@ -28,12 +31,16 @@ async function load(): Promise<State> {
 export default async function AchievementsPage() {
   const state = await load();
   const mock = getDataMode() === "mock";
+  // Activity ladders (ADR 0020): progress display and earn-on-visit.
+  const activityCounts = await loadActivityCounts();
+  const earnedActivity = activityCounts ? satisfiedActivityAchievements(activityCounts) : [];
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-8 sm:py-12">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Achievements</h1>
+        <EarnActivity ids={earnedActivity} />
         <p className="mt-2 text-ink-muted">Some are obvious. Most are hidden. The martlets know things.</p>
 
         {state.kind === "guest" && (
@@ -54,7 +61,7 @@ export default async function AchievementsPage() {
           {state.kind === "error" ? (
             <p role="alert" className="text-sm text-ink-muted">Couldn’t load your achievements. Refresh the page to try again.</p>
           ) : (
-            <AchievementGrid earned={state.kind === "account" ? state.earned : null} />
+            <AchievementGrid earned={state.kind === "account" ? state.earned : null} progress={activityCounts ? activityProgress(activityCounts) : undefined} />
           )}
         </div>
       </main>
