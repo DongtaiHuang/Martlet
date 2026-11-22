@@ -1,0 +1,120 @@
+/*
+ * Martlet colour tokens (ADR 0014). Components use semantic utilities such as bg-canvas,
+ * bg-surface, text-ink, border-line, bg-brand and text-brand-ink, never raw palette colours.
+ * Themes and modes only change the variables below; components never change.
+ *
+ *   <html data-theme="classic" data-mode="light|dark">   (set before paint in app/layout.tsx)
+ *
+ * Light "McGill Classic" reproduces the original stone/red palette exactly.
+ */
+
+/* `dark:` utilities follow data-mode (not the OS) so the in-app switch wins. Use only for content
+   colours that aren't tokens (category hues, illustrations, gradients). */
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+@theme inline {
+  --color-canvas: var(--m-canvas);              /* page background */
+  --color-surface: var(--m-surface);            /* cards, header, inputs */
+  --color-surface-muted: var(--m-surface-muted);/* chips, subtle fills */
+  --color-line: var(--m-line);                  /* default borders */
+  --color-line-soft: var(--m-line-soft);        /* dividers inside cards */
+  --color-line-strong: var(--m-line-strong);    /* inputs, outlined buttons */
+  --color-ink: var(--m-ink);                    /* primary text */
+  --color-ink-soft: var(--m-ink-soft);          /* strong secondary text */
+  --color-ink-2: var(--m-ink-2);                /* secondary text */
+  --color-ink-muted: var(--m-ink-muted);        /* hints, metadata */
+  --color-ink-subtle: var(--m-ink-subtle);      /* icons, placeholders */
+  --color-brand: var(--m-brand);                /* primary buttons, logo tile */
+  --color-brand-hover: var(--m-brand-hover);
+  --color-brand-ink: var(--m-brand-ink);        /* links, brand-coloured text */
+  --color-brand-ink-strong: var(--m-brand-ink-strong);
+  --color-brand-soft: var(--m-brand-soft);      /* brand-tinted backgrounds, hover */
+  --color-brand-muted: var(--m-brand-muted);    /* stronger brand tint (avatars, chips) */
+  --color-brand-line: var(--m-brand-line);      /* brand-tinted borders */
+  --color-on-brand: var(--m-on-brand);          /* text on bg-brand */
+  --color-focus: var(--m-focus);                /* focus outlines */
+  --color-warn-soft: var(--m-warn-soft);
+  --color-warn-muted: var(--m-warn-muted);
+  --color-warn-line: var(--m-warn-line);
+  --color-warn-ink: var(--m-warn-ink);
+  --color-ok-soft: var(--m-ok-soft);
+  --color-ok-line: var(--m-ok-line);
+  --color-ok-ink: var(--m-ok-ink);
+}
+
+/* McGill Classic: light (default) */
+:root,
+[data-theme="classic"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #fafaf9;        /* stone-50 */
+  --m-surface: #ffffff;
+  --m-surface-muted: #f5f5f4; /* stone-100 */
+  --m-line: #e7e5e4;          /* stone-200 */
+  --m-line-soft: #f5f5f4;     /* stone-100 */
+  --m-line-strong: #d6d3d1;   /* stone-300 */
+  --m-ink: #0c0a09;           /* stone-950 */
+  --m-ink-soft: #1c1917;      /* stone-900 */
+  --m-ink-2: #44403c;         /* stone-700 */
+  --m-ink-muted: #57534e;     /* stone-600 */
+  --m-ink-subtle: #78716c;    /* stone-500 */
+  --m-brand: #991b1b;         /* red-800 */
+  --m-brand-hover: #7f1d1d;   /* red-900 */
+  --m-brand-ink: #991b1b;     /* red-800 */
+  --m-brand-ink-strong: #7f1d1d;
+  --m-brand-soft: #fef2f2;    /* red-50 */
+  --m-brand-muted: #fee2e2;   /* red-100 */
+  --m-brand-line: #fecaca;    /* red-200 */
+  --m-on-brand: #ffffff;
+  --m-focus: #b91c1c;         /* red-700 */
+  --m-warn-soft: #fffbeb;     /* amber-50 */
+  --m-warn-muted: #fef3c7;    /* amber-100 */
+  --m-warn-line: #fde68a;     /* amber-200 */
+  --m-warn-ink: #78350f;      /* amber-900 */
+  --m-ok-soft: #f0fdf4;       /* green-50 */
+  --m-ok-line: #bbf7d0;       /* green-200 */
+  --m-ok-ink: #166534;        /* green-800 */
+}
+
+/* McGill Classic: dark. Warm charcoal with clear elevation steps (canvas < surface < muted);
+   brand red is lifted for contrast on dark backgrounds. All text pairs meet WCAG AA. */
+[data-theme="classic"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #0f0d0c;
+  --m-surface: #1a1716;
+  --m-surface-muted: #262220;
+  --m-line: #2f2a27;
+  --m-line-soft: #24201e;
+  --m-line-strong: #4a433f;
+  --m-ink: #f3efec;
+  --m-ink-soft: #e6e0dc;
+  --m-ink-2: #cfc7c1;
+  --m-ink-muted: #a9a09a;
+  --m-ink-subtle: #8c837d;
+  --m-brand: #c42a2a;
+  --m-brand-hover: #d63a3a;
+  --m-brand-ink: #ff8a8a;
+  --m-brand-ink-strong: #ffb3b3;
+  --m-brand-soft: #2b1414;
+  --m-brand-muted: #3d1818;
+  --m-brand-line: #6b2424;
+  --m-on-brand: #ffffff;
+  --m-focus: #ff8a8a;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+
+/* MapLibre controls follow dark mode (they're plain DOM, not part of the map style). */
+[data-mode="dark"] .maplibregl-ctrl-group {
+  background: var(--m-surface-muted);
+  box-shadow: 0 0 0 1px var(--m-line-strong);
+}
+[data-mode="dark"] .maplibregl-ctrl-group button + button { border-top-color: var(--m-line-strong); }
+[data-mode="dark"] .maplibregl-ctrl-group button:not(:disabled):hover { background-color: var(--m-line); }
+[data-mode="dark"] .maplibregl-ctrl-icon { filter: invert(1) hue-rotate(180deg); }
+[data-mode="dark"] .maplibregl-ctrl.maplibregl-ctrl-attrib, [data-mode="dark"] .maplibregl-ctrl-attrib.maplibregl-compact { background: rgb(26 23 22 / 0.8); color: var(--m-ink-muted); }
+[data-mode="dark"] .maplibregl-ctrl-attrib a { color: var(--m-ink-2); }

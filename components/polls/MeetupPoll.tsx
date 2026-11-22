@@ -25,15 +25,15 @@ export async function MeetupPoll({ meetupId, startsAt, canCreate }: { meetupId: 
   if (result === null && !canCreate) return null;
 
   return (
-    <section aria-labelledby="meetup-poll-heading" className="mt-6 min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
-      <h2 id="meetup-poll-heading" className="mb-3 text-lg font-bold text-stone-950">Meetup poll</h2>
+    <section aria-labelledby="meetup-poll-heading" className="mt-6 min-w-0 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
+      <h2 id="meetup-poll-heading" className="mb-3 text-lg font-bold text-ink">Meetup poll</h2>
       {result === undefined ? (
         <PollRetry />
       ) : result ? (
         <PollResults key={result.id} poll={result} preview={preview} />
       ) : <CreatePollForm meetupId={meetupId} startsAt={startsAt} />}
-      {preview && <p className="mt-3 text-sm text-stone-600">Voting and poll creation are unavailable in demo mode.</p>}
-      {result !== undefined && <p className="mt-3 text-sm text-stone-600">Poll results help the host plan. Voting does not automatically change meetup details.</p>}
+      {preview && <p className="mt-3 text-sm text-ink-muted">Voting and poll creation are unavailable in demo mode.</p>}
+      {result !== undefined && <p className="mt-3 text-sm text-ink-muted">Poll results help the host plan. Voting does not automatically change meetup details.</p>}
     </section>
   );
 }

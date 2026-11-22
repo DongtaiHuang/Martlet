@@ -14,21 +14,21 @@ export default async function LandmarksPage() {
   const unlocked = landmarks.filter((l) => l.unlocked).length;
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-950">
+    <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-6xl px-4 py-7 sm:px-8 sm:py-10">
-        <p className="text-sm font-bold uppercase tracking-widest text-red-800">Martlet Landmarks</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-brand-ink">Martlet Landmarks</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">Go there. Snap it. Unlock it.</h1>
-        <p className="mt-2 max-w-2xl text-stone-600">
+        <p className="mt-2 max-w-2xl text-ink-muted">
           Visit a landmark, take a photo of yourself doing its challenge, and unlock everyone else&apos;s photos from there.
         </p>
         {landmarks.length > 0 && (
-          <Link href="/progress" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-900 hover:border-emerald-400 focus-visible:outline-2 focus-visible:outline-red-700">
+          <Link href="/progress" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-ok-line bg-ok-soft px-4 text-sm font-semibold text-ok-ink hover:border-emerald-400 focus-visible:outline-2 focus-visible:outline-focus">
             <Sprout aria-hidden="true" size={17} /> {unlocked} of {landmarks.length} unlocked · See your tree
           </Link>
         )}
         {getDataMode() === "mock" && (
-          <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <p className="mt-6 rounded-xl border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">
             Demo mode: landmarks are shown, but unlocking needs Supabase to be configured.
           </p>
         )}

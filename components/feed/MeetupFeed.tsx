@@ -24,7 +24,7 @@ export function MeetupFeed({ meetups, viewerId = null, myCourses = [] }: { meetu
     <>
       <div role="group" aria-label="Filter by category" className="mt-4 mb-5 flex flex-wrap gap-2">
         {filters.map(({ value, label, icon: Icon }) => (
-          <button key={value} type="button" aria-pressed={category === value} onClick={() => setCategory(value)} className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 ${category === value ? "border-red-800 bg-red-800 text-white" : "border-stone-200 bg-white text-stone-700 hover:border-red-300 hover:text-red-900"}`}>
+          <button key={value} type="button" aria-pressed={category === value} onClick={() => setCategory(value)} className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${category === value ? "border-brand bg-brand text-on-brand" : "border-line bg-surface text-ink-2 hover:border-brand-line hover:text-brand-ink-strong"}`}>
             <Icon aria-hidden="true" size={16} />
             {label}
           </button>
@@ -47,9 +47,9 @@ export function MeetupFeed({ meetups, viewerId = null, myCourses = [] }: { meetu
           <h3 className="text-lg font-bold text-stone-900">{courseFilter ? "No study meetups for your courses yet" : category === "all" ? "No upcoming meetups" : `No ${categories[category].label.toLowerCase()} meetups yet`}</h3>
           <p className="mt-1 text-sm text-stone-600">{courseFilter ? "Start one and pick your course, so classmates find it." : category === "all" ? "Start something near campus." : "Try another category to see what’s happening."}</p>
           {category === "all" ? (
-            <Link href="/meetups/new" className="mt-4 inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-bold text-red-800 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700">Create a meetup</Link>
+            <Link href="/meetups/new" className="mt-4 inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-bold text-brand-ink hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-focus">Create a meetup</Link>
           ) : (
-            <button type="button" onClick={() => setCategory("all")} className="mt-4 min-h-11 rounded-lg px-3 text-sm font-bold text-red-800 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700">Clear filter</button>
+            <button type="button" onClick={() => setCategory("all")} className="mt-4 min-h-11 rounded-lg px-3 text-sm font-bold text-brand-ink hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-focus">Clear filter</button>
           )}
         </div>
       )}
