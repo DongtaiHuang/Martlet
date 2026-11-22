@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, GraduationCap, MapPin, UserRound } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, GraduationCap, MapPin, Pencil, UserRound } from "lucide-react";
 import { categories } from "@/components/feed/categories";
 import { CancelMeetupForm } from "@/components/forms/CancelMeetupForm";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
@@ -27,7 +27,8 @@ async function loadMeetup(id: string) {
   return { meetup, cancelled, expired, upcoming, isHost, canCancel: upcoming && isHost, canReact: upcoming && viewer !== null };
 }
 
-export default async function MeetupDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MeetupDetailsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ updated?: string }> }) {
+  const { updated } = await searchParams;
   const { id } = await params;
   const { meetup, cancelled, expired, upcoming, isHost, canCancel, canReact } = await loadMeetup(id);
   const { icon: CategoryIcon, label, color } = categories[meetup.category];
@@ -37,6 +38,11 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
       <MartletNav />
       <main className="mx-auto max-w-3xl px-4 py-7 sm:px-8 sm:py-12">
         <Link href="/meetups" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-ink hover:underline"><ArrowLeft aria-hidden="true" size={16} /> Back to feed</Link>
+        {updated === "1" && (
+          <p role="status" className="mt-3 flex items-center gap-2 rounded-xl border border-ok-line bg-ok-soft px-4 py-3 text-sm font-semibold text-ok-ink">
+            <CheckCircle2 aria-hidden="true" size={17} /> Changes saved. People who are going were notified if the time or place changed.
+          </p>
+        )}
         <article className="mt-3 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap gap-2">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${color}`}><CategoryIcon aria-hidden="true" size={15} /> {label}</span>
@@ -89,7 +95,14 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
               </div>
             }
           />
-          {canCancel && <div className="mt-6"><CancelMeetupForm meetupId={meetup.id} /></div>}
+          {canCancel && (
+            <div className="mt-6 flex flex-wrap items-start gap-3">
+              <Link href={`/meetups/${encodeURIComponent(meetup.id)}/edit`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4 text-sm font-bold text-ink hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">
+                <Pencil aria-hidden="true" size={16} /> Edit meetup
+              </Link>
+              <CancelMeetupForm meetupId={meetup.id} />
+            </div>
+          )}
         </article>
       </main>
     </div>

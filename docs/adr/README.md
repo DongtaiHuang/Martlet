@@ -26,6 +26,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0020 | [Activity achievements computed on read](0020-activity-achievements.md) | Proposed |
 | 0021 | [Persistent, color-coded notifications](0021-notifications.md) | Proposed |
 | 0022 | [Custom meeting spots and polling retirement](0022-custom-meeting-spots.md) | Proposed |
+| 0023 | [Hosts edit their meetups through a checked database function](0023-host-meetup-editing.md) | Proposed |
 
 ## Adding a new ADR
 
