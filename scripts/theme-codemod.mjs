@@ -1,4 +1,4 @@
-// Map raw Tailwind palette classes to Martlet colour tokens (ADR 0012).
+// Map raw Tailwind palette classes to Martlet colour tokens (ADR 0014).
 //   node scripts/theme-codemod.mjs <files...>          rewrite files in place
 //   node scripts/theme-codemod.mjs --check <files...>  only report
 // Variants (hover:, focus-visible:, sm:, aria-pressed:, …) and opacity (/50) are preserved.
@@ -9,18 +9,18 @@ const MAP = {
   bg: {
     white: "surface", "stone-50": "canvas", "neutral-50": "canvas", "stone-100": "surface-muted", "stone-200": "line",
     "red-800": "brand", "red-700": "brand", "red-900": "brand-hover", "red-50": "brand-soft", "red-100": "brand-muted",
-    "amber-50": "warn-soft", "amber-100": "warn-muted", "green-50": "ok-soft",
+    "amber-50": "warn-soft", "amber-100": "warn-muted", "green-50": "ok-soft", "emerald-50": "ok-soft", "emerald-100": "ok-soft",
   },
   text: {
     "stone-950": "ink", "neutral-950": "ink", "stone-900": "ink-soft", "neutral-900": "ink-soft", "stone-800": "ink-soft", "neutral-800": "ink-soft",
     "stone-700": "ink-2", "neutral-700": "ink-2", "stone-600": "ink-muted", "neutral-600": "ink-muted", "stone-500": "ink-subtle", "neutral-500": "ink-subtle",
     "red-800": "brand-ink", "red-700": "brand-ink", "red-900": "brand-ink-strong",
-    "amber-900": "warn-ink", "amber-950": "warn-ink", "green-800": "ok-ink", "emerald-800": "ok-ink",
+    "amber-900": "warn-ink", "amber-950": "warn-ink", "green-800": "ok-ink", "emerald-800": "ok-ink", "emerald-900": "ok-ink",
   },
   border: {
     "stone-200": "line", "neutral-200": "line", "stone-100": "line-soft", "stone-300": "line-strong", "neutral-300": "line-strong",
     "red-200": "brand-line", "red-300": "brand-line", "red-800": "brand", "red-700": "brand",
-    "amber-200": "warn-line", "green-200": "ok-line",
+    "amber-200": "warn-line", "green-200": "ok-line", "emerald-200": "ok-line",
   },
   divide: { "stone-100": "line-soft", "stone-200": "line" },
   outline: { "red-700": "focus", "red-800": "focus" },

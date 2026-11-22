@@ -4,9 +4,7 @@ import { Map, Marker, NavigationControl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory } from "@/types/meetup";
 import { MARKER_COLORS } from "./map-config";
-import { styleForMode } from "./map-style";
-import { enhanceDarkBuildings } from "./dark-buildings";
-import { useColorMode } from "@/lib/useColorMode";
+import { initialMapStyle, trackMapStyle, useMapColorMode } from "./map-mode";
 
 interface MeetupLocationMapProps {
   /** Marker colour from the meetup category; ignored when `color` is given. */
@@ -22,17 +20,16 @@ interface MeetupLocationMapProps {
 export function MeetupLocationMap({ category, color, locationName, latitude, longitude, zoom = 16.5 }: MeetupLocationMapProps) {
   const ref = useRef<HTMLDivElement>(null);
   const markerColor = color ?? MARKER_COLORS[category ?? "other"];
-  const mode = useColorMode();
   const mapRef = useRef<Map | null>(null);
-  const styleRef = useRef("");
+  useMapColorMode(mapRef);
 
   useEffect(() => {
     if (!ref.current) return;
     const center: [number, number] = [longitude, latitude];
-    styleRef.current = styleForMode((document.documentElement.dataset.mode === "dark" ? "dark" : "light"));
+    const style = initialMapStyle(); // light or dark basemap (ADR 0014)
     const map = new Map({
       container: ref.current,
-      style: styleRef.current,
+      style,
       center,
       zoom,
       // Don't hijack page scrolling or rotate the map by accident on a small embed.
@@ -44,7 +41,7 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
     });
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
     // Runs after the first load and after every setStyle (mode switch).
-    map.on("style.load", () => enhanceDarkBuildings(map, styleRef.current));
+    trackMapStyle(map, style);
     map.touchZoomRotate.disableRotation();
 
     const marker = new Marker({ color: markerColor }).setLngLat(center).addTo(map);
@@ -54,11 +51,6 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
     return () => { map.remove(); mapRef.current = null; };
   }, [markerColor, locationName, latitude, longitude, zoom]);
 
-  // Follow light/dark mode (ADR 0012): swap the basemap style in place; DOM markers are kept.
-  useEffect(() => {
-    const url = styleForMode(mode);
-    if (mapRef.current && styleRef.current && styleRef.current !== url) { styleRef.current = url; mapRef.current.setStyle(url); }
-  }, [mode]);
 
   return (
     <div

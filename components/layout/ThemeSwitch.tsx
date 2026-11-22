@@ -10,7 +10,7 @@ const OPTIONS: { value: ModePreference; label: string; icon: typeof Sun }[] = [
   { value: "system", label: "System", icon: Monitor },
 ];
 
-/** Light / Dark / System segmented switch (ADR 0012). */
+/** Light / Dark / System segmented switch (ADR 0014). */
 export function ThemeSwitch() {
   const [pref, setPref] = useModePreference();
   return (

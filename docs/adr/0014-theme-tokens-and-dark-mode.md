@@ -1,4 +1,4 @@
-# 0012. Colour tokens, themes and dark mode
+# 0014. Colour tokens, themes and dark mode
 
 - **Status:** Proposed
 - **Date:** 2026-11-22

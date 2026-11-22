@@ -1,5 +1,5 @@
 /*
- * Martlet colour tokens (ADR 0012). Components use semantic utilities such as bg-canvas,
+ * Martlet colour tokens (ADR 0014). Components use semantic utilities such as bg-canvas,
  * bg-surface, text-ink, border-line, bg-brand and text-brand-ink, never raw palette colours.
  * Themes and modes only change the variables below; components never change.
  *

@@ -1,4 +1,4 @@
-// Theme + mode (ADR 0012). The inline script runs in <head> before first paint so the page never
+// Theme + mode (ADR 0014). The inline script runs in <head> before first paint so the page never
 // flashes the wrong colours. Kept dependency-free and tiny on purpose.
 // Preview/review aid: `?mode=dark|light|system` on any URL sets (and remembers) the mode.
 

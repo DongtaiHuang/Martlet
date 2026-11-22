@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // data-theme / data-mode are set before paint by themeInitScript (ADR 0012), so the server
+    // data-theme / data-mode are set before paint by themeInitScript (ADR 0014), so the server
     // markup and the client attributes can differ: suppress that one hydration warning.
     <html lang="en-CA" data-theme="classic" data-mode="light" suppressHydrationWarning>
       <head>

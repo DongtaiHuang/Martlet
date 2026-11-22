@@ -1,6 +1,6 @@
 "use client";
 
-// Current colour mode + the user's preference (ADR 0012). The resolved mode lives on
+// Current colour mode + the user's preference (ADR 0014). The resolved mode lives on
 // <html data-mode>, set before paint by themeInitScript; this hook observes it so maps and
 // 3D scenes can follow, and lets the nav switch change it.
 import { useCallback, useSyncExternalStore } from "react";

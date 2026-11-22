@@ -1,7 +1,7 @@
 // Kept free of maplibre-gl so Server Components can import it.
 
-/** Landmark pins (ADR 0009): gold once unlocked, grey while locked. */
-export const LANDMARK_COLORS = { unlocked: "#ca8a04", locked: "#78716c" } as const;
+/** Landmark pins: gold while still to discover, green once completed (unlocked). */
+export const LANDMARK_COLORS = { unlocked: "#059669", locked: "#ca8a04" } as const; // emerald-600 / yellow-600
 
 /** Zoom that roughly fits a landmark's check-in radius in a small map. */
 export function landmarkZoom(radiusM: number): number {
