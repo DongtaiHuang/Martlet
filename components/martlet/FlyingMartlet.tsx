@@ -2,14 +2,29 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { MCGILL_FACTS } from "@/lib/mcgill-facts";
+import { MARTY_TIPS } from "@/lib/marty-tips";
 import { FlyingMartletSprite } from "./FlyingMartletSprite";
 import { MartletNest, MartletZzz } from "./MartletNest";
 import { martletHopGroup, type HopDirection } from "./martlet-hops";
 
-function pickFact(previous?: string): string {
-  const options = MCGILL_FACTS.filter((fact) => fact !== previous);
+/** A random line from `list`, never the same as `previous` twice in a row. */
+function pickFrom(list: readonly string[], previous?: string): string {
+  const options = list.filter((line) => line !== previous);
   return options[Math.floor(Math.random() * options.length)];
 }
+
+/** Keep a bubble on screen near the edges: align it to Marty's side instead of centring. */
+function edgeAlignment(element: Element | null) {
+  if (!element) return "left-1/2 -translate-x-1/2";
+  const bounds = element.getBoundingClientRect();
+  const center = bounds.left + bounds.width / 2;
+  return center < 124 ? "left-0" : center > window.innerWidth - 124 ? "right-0" : "left-1/2 -translate-x-1/2";
+}
+
+// Fun facts pop up on their own every 10–30 seconds and stay for a few seconds.
+const CHATTER_MIN_MS = 10_000;
+const CHATTER_MAX_MS = 30_000;
+const CHATTER_SHOW_MS = 7_000; // matches the martlet-chatter animation in globals.css
 
 type Point = { x: number; y: number };
 type Drag = { id: number; start: Point; offset: Point | null };
@@ -23,8 +38,9 @@ const NEST_REACH_Y = 120;
 type NestState = "away" | "homing" | "asleep";
 
 /**
- * Marty, the martlet mascot: hops along the bottom of the screen sharing McGill facts on
- * hover, can be dragged around, and naps in the nest at the bottom-left end of the lane.
+ * Marty, the martlet mascot: hops along the bottom of the screen, gives tips on using Martlet
+ * when hovered, focused or tapped, says a McGill fun fact in a speech bubble every 10–30
+ * seconds, can be dragged around, and naps in the nest at the bottom-left end of the lane.
  */
 export function FlyingMartlet() {
   const [direction, setDirection] = useState<HopDirection>(1);
@@ -34,14 +50,15 @@ export function FlyingMartlet() {
   const stageRef = useRef<HTMLDivElement>(null);
   const dockInNest = useRef<(() => void) | null>(null);
   const docking = useRef(false);
-  const [tooltip, setTooltip] = useState<{ fact: string; alignment: string; below: boolean } | null>(null);
+  const [tooltip, setTooltip] = useState<{ tip: string; alignment: string; below: boolean } | null>(null);
+  const [chatter, setChatter] = useState<{ fact: string; alignment: string } | null>(null);
+  const previousTip = useRef<string>(undefined);
   const [position, setPosition] = useState<{ level: number; drag: Point | null }>({ level: 0, drag: null });
   const pointer = useRef<Drag | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const birdRef = useRef<HTMLButtonElement>(null);
   const hops = useRef<Animation[]>([]);
   const dropAlongLane = useRef<((offsetX: number) => void) | null>(null);
-  const previousFact = useRef<string>(undefined);
   const dragged = useRef(false);
   const tooltipId = useId();
 
@@ -266,24 +283,51 @@ export function FlyingMartlet() {
   }
 
   function turn(event: MouseEvent<HTMLButtonElement>) {
-    if (!atEdge || (event.detail > 0 && dragged.current)) return;
+    if (event.detail > 0 && dragged.current) return;
+    // Away from the edges a tap or click asks for (another) tip; touch has no hover.
+    if (!atEdge) {
+      showTip(event.currentTarget);
+      return;
+    }
     setAtEdge(false);
     setNest("away");
     setDirection((heading) => heading === 1 ? -1 : 1);
   }
 
-  function showFact(event: PointerEvent<HTMLButtonElement>) {
-    if (event.pointerType === "touch") return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const center = bounds.left + bounds.width / 2;
-    const alignment = center < 124 ? "left-0" : center > window.innerWidth - 124 ? "right-0" : "left-1/2 -translate-x-1/2";
-    const fact = pickFact(previousFact.current);
-    previousFact.current = fact;
-    setTooltip({ fact, alignment, below: bounds.top < 120 });
+  function showTip(button: HTMLElement) {
+    const tip = pickFrom(MARTY_TIPS, previousTip.current);
+    previousTip.current = tip;
+    setTooltip({ tip, alignment: edgeAlignment(button), below: button.getBoundingClientRect().top < 120 });
   }
 
-  const visibleFact = position.drag ? null : tooltip;
+  // Every 10–30 seconds Marty says a fun fact in a speech bubble (skipped while the tab is
+  // hidden). The bubble is decorative: it isn't announced, so screen readers aren't
+  // interrupted every few seconds; the tips on focus are the accessible part.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    let previous: string | undefined;
+    function wait() {
+      timer = setTimeout(speak, CHATTER_MIN_MS + Math.random() * (CHATTER_MAX_MS - CHATTER_MIN_MS));
+    }
+    function speak() {
+      if (document.visibilityState !== "visible") return wait();
+      const fact = pickFrom(MCGILL_FACTS, previous);
+      previous = fact;
+      setChatter({ fact, alignment: edgeAlignment(birdRef.current) });
+      timer = setTimeout(() => {
+        setChatter(null);
+        wait();
+      }, CHATTER_SHOW_MS);
+    }
+    wait();
+    return () => clearTimeout(timer);
+  }, []);
+
+  const visibleTip = position.drag ? null : tooltip;
   const asleep = nest === "asleep";
+  // Marty doesn't chat while showing a tip, being dragged, or napping.
+  const visibleChatter = visibleTip || position.drag || nest !== "away" ? null : chatter;
+  const tail = (alignment: string) => alignment === "left-0" ? "left-8" : alignment === "right-0" ? "right-8" : "left-1/2 -translate-x-1/2";
 
   return (
     <div ref={stageRef} className="martlet-stage pointer-events-none fixed inset-0 z-40 overflow-hidden" data-nest={nest} data-over-nest={overNest}>
@@ -298,10 +342,22 @@ export function FlyingMartlet() {
           data-direction={direction === 1 ? "right" : "left"}
           className="relative w-max"
         >
-          {visibleFact && (
-            <span id={tooltipId} role="tooltip" className={`absolute w-max max-w-[min(14rem,calc(100vw-1rem))] rounded-xl border border-brand-line bg-surface px-3 py-2 text-sm text-ink shadow-lg ${visibleFact.below ? "top-full mt-2" : "bottom-full mb-2"} ${visibleFact.alignment}`}>
-              <span className="block text-xs font-bold text-brand-ink">Marty says</span>
-              {visibleFact.fact}
+          {visibleChatter && (
+            <span
+              key={visibleChatter.fact}
+              aria-hidden="true"
+              className={`martlet-chatter absolute bottom-full mb-3 w-max max-w-[min(15rem,calc(100vw-2rem))] rounded-2xl border-2 border-brand-line bg-surface px-3 py-2 text-sm text-ink shadow-lg ${visibleChatter.alignment}`}
+            >
+              <span className="block text-[0.7rem] font-bold tracking-wide text-brand-ink uppercase">Fun fact</span>
+              <span className="italic">“{visibleChatter.fact}”</span>
+              {/* Speech-bubble tail pointing down at Marty. */}
+              <span className={`absolute -bottom-[7px] size-3 rotate-45 border-r-2 border-b-2 border-brand-line bg-surface ${tail(visibleChatter.alignment)}`} />
+            </span>
+          )}
+          {visibleTip && (
+            <span id={tooltipId} role="tooltip" className={`absolute w-max max-w-[min(15rem,calc(100vw-1rem))] rounded-xl border border-brand-line bg-surface px-3 py-2 text-sm text-ink shadow-lg ${visibleTip.below ? "top-full mt-2" : "bottom-full mb-2"} ${visibleTip.alignment}`}>
+              <span className="block text-xs font-bold text-brand-ink">Marty’s tip</span>
+              {visibleTip.tip}
               {atEdge && <span className="mt-1 block text-xs text-ink-muted">{asleep ? "Shh, Marty's napping. Click to wake Marty up." : "Click to turn Marty around"}</span>}
             </span>
           )}
@@ -309,11 +365,13 @@ export function FlyingMartlet() {
             ref={birdRef}
             type="button"
             aria-label={asleep ? "Marty is asleep in the nest. Wake Marty up" : atEdge ? "Marty, turn around" : "Marty the martlet"}
-            aria-describedby={visibleFact ? tooltipId : undefined}
+            aria-describedby={visibleTip ? tooltipId : undefined}
             className={`pointer-events-auto block touch-none select-none rounded-lg focus-visible:outline-2 focus-visible:outline-focus active:cursor-grabbing ${atEdge ? "cursor-pointer" : "cursor-grab"}`}
             onPointerDown={grab}
-            onPointerEnter={showFact}
+            onPointerEnter={(event) => { if (event.pointerType !== "touch") showTip(event.currentTarget); }}
             onPointerLeave={() => setTooltip(null)}
+            onFocus={(event) => { if (event.currentTarget.matches(":focus-visible")) showTip(event.currentTarget); }}
+            onBlur={() => setTooltip(null)}
             onClick={turn}
           >
             <FlyingMartletSprite />
