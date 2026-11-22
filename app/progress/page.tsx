@@ -3,7 +3,10 @@ import Link from "next/link";
 import { ArrowUpRight, CheckCircle2, Eye, LockKeyhole } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { EarnOnMount } from "@/components/achievements/EarnOnMount";
+import { EarnActivity } from "@/components/achievements/EarnActivity";
 import { GrowthTree, type TreeFruit } from "@/components/progress/GrowthTree";
+import { loadActivityCounts } from "@/lib/activity-counts";
+import { satisfiedActivityAchievements } from "@/lib/activity-achievements";
 import { listLandmarks, listMyUnlocks } from "@/lib/landmarks";
 import { TREE_STAGES, treeStage, unlocksToNextStage, type TreeStage } from "@/lib/progress";
 import { getDataMode } from "@/lib/supabase/env";
@@ -37,11 +40,15 @@ export default async function ProgressPage({
 
   const toNext = unlocksToNextStage(unlocked, total);
   const percent = total > 0 ? Math.round((unlocked / total) * 100) : 0;
+  // Activity ladders (ADR 0020): earn any that this visit satisfies.
+  const activityCounts = await loadActivityCounts();
+  const earnedActivity = activityCounts ? satisfiedActivityAchievements(activityCounts) : [];
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-3xl px-4 py-7 sm:px-8 sm:py-12">
+        <EarnActivity ids={earnedActivity} />
         <p className="text-sm font-bold uppercase tracking-widest text-brand-ink">Your progress</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">Grow your Martlet tree</h1>
 
