@@ -9,6 +9,7 @@ import { HeroCarousel } from "@/components/feed/HeroCarousel";
 import { LandmarkFeedList } from "@/components/landmarks/LandmarkFeedList";
 import { DailyCard } from "@/components/news/DailyCard";
 import { NewsPreview } from "@/components/news/NewsPreview";
+import { FlightLeaderboard } from "@/components/game/FlightLeaderboard";
 import { MartletFlightLoader } from "@/components/game/MartletFlightLoader";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
@@ -141,6 +142,7 @@ export default async function MeetupsPage({
                 <Link href="/play" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-ink hover:underline">Full screen <ArrowRight aria-hidden="true" size={14} /></Link>
               </div>
               <MartletFlightLoader embedded />
+              <FlightLeaderboard limit={3} compact />
             </section>
           </aside>
         </div>

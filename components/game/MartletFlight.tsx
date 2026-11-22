@@ -1,6 +1,8 @@
 "use client";
 
 import { earn } from "@/components/achievements/earn";
+import { startRunAction, submitScoreAction } from "@/app/play/actions";
+import { FLIGHT_SCORE_EVENT } from "./FlightLeaderboard";
 
 // Martlet Flight (issue #75): an original tap-to-fly mini-game. Fly the martlet between campus
 // columns, collect landmark pins. Canvas-rendered; day scene in light mode, night in dark mode.
@@ -75,6 +77,7 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
   const [best, setBest] = useState(0);
   const flapRef = useRef<() => void>(() => {});
   const stateRef = useRef<State>("ready");
+  const runRef = useRef<Promise<string | null> | null>(null);
   const modeRef = useRef(mode);
 
   useEffect(() => { modeRef.current = mode; }, [mode]);
@@ -112,13 +115,18 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
 
     flapRef.current = () => {
       const s = stateRef.current;
-      if (s === "ready" || s === "over") { reset(); for (let i = 0; i < 3; i++) spawn(W + 60 + i * SPACING); setState("playing"); stateRef.current = "playing"; }
+      if (s === "ready" || s === "over") {
+        // Leaderboard (ADR 0026): the server times the run; guests just get null.
+        runRef.current = startRunAction().catch(() => null);
+        reset(); for (let i = 0; i < 3; i++) spawn(W + 60 + i * SPACING); setState("playing"); stateRef.current = "playing"; }
       if (stateRef.current === "playing") { bird.vy = FLAP; wingT = 0; }
     };
 
     const die = () => {
       stateRef.current = "over"; setState("over");
       if (points >= 10) void earn("high-flyer");
+      const final = points, run = runRef.current; runRef.current = null;
+      if (run && final > 0) void run.then((id) => id && submitScoreAction(id, final)).then((r) => { if (r === "new-best" || r === "saved") window.dispatchEvent(new Event(FLIGHT_SCORE_EVENT)); }).catch(() => {});
       setBest((b) => { const nb = Math.max(b, points); if (nb > b) saveBest(nb); return nb; });
     };
 
