@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, CheckCircle2, FlaskConical, LockKeyhole } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Eye, LockKeyhole } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { GrowthTree } from "@/components/progress/GrowthTree";
 import { listLandmarks } from "@/lib/landmarks";
-import { TREE_STAGES, treeStage, unlocksToNextStage } from "@/lib/progress";
+import { TREE_STAGES, treeStage, unlocksToNextStage, type TreeStage } from "@/lib/progress";
 import { getDataMode } from "@/lib/supabase/env";
 
 export const metadata: Metadata = { title: "Progress · McGill Martlet" };
@@ -13,19 +13,19 @@ export const dynamic = "force-dynamic";
 export default async function ProgressPage({
   searchParams,
 }: {
-  searchParams: Promise<{ preview?: string | string[] }>;
+  searchParams: Promise<{ stage?: string | string[] }>;
 }) {
-  const [landmarks, { preview }] = await Promise.all([listLandmarks(), searchParams]);
+  const [landmarks, { stage: stageParam }] = await Promise.all([listLandmarks(), searchParams]);
   const total = landmarks.length;
-  const actual = landmarks.filter((l) => l.unlocked).length;
+  const unlocked = landmarks.filter((l) => l.unlocked).length;
+  const realStage = treeStage(unlocked, total);
 
-  // Development only: /progress?preview=3 shows the tree as if 3 landmarks were unlocked.
-  const previewCount = process.env.NODE_ENV !== "production" && typeof preview === "string" && /^\d+$/.test(preview)
-    ? Math.min(Number(preview), total)
-    : null;
-  const unlocked = previewCount ?? actual;
+  // /progress?stage=6 temporarily shows another growth stage. It only changes the picture,
+  // never the user's real progress (the bar, checklist and unlocks stay as they are).
+  const requested = typeof stageParam === "string" && /^[0-6]$/.test(stageParam) ? (Number(stageParam) as TreeStage) : null;
+  const previewing = requested !== null && requested !== realStage;
+  const stage = previewing ? requested : realStage;
 
-  const stage = treeStage(unlocked, total);
   const toNext = unlocksToNextStage(unlocked, total);
   const percent = total > 0 ? Math.round((unlocked / total) * 100) : 0;
 
@@ -53,12 +53,16 @@ export default async function ProgressPage({
           </div>
         </section>
 
-        {previewCount !== null && (
-          <p className="mt-4 flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">
-            <FlaskConical aria-hidden="true" size={16} /> Development preview: showing {previewCount} unlocked (you have {actual}).
+        {previewing && (
+          <p role="status" className="mt-4 flex items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">
+            <Eye aria-hidden="true" size={16} className="shrink-0" />
+            <span className="min-w-0 flex-1">
+              Previewing <strong>{TREE_STAGES[stage]}</strong>. Your real progress hasn&apos;t changed.{" "}
+              <Link href="/progress" scroll={false} className="font-bold whitespace-nowrap underline">Back to your tree</Link>
+            </span>
           </p>
         )}
-        {getDataMode() === "mock" && previewCount === null && (
+        {getDataMode() === "mock" && !previewing && (
           <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             Demo mode: unlocking needs Supabase, so your tree is still a seed.
           </p>
@@ -66,26 +70,43 @@ export default async function ProgressPage({
 
         <section aria-labelledby="tree-heading" className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 text-center shadow-sm sm:p-8">
           <div className="overflow-hidden rounded-xl border border-stone-200">
-            <GrowthTree stage={stage} unlocked={unlocked} total={total} />
+            <GrowthTree stage={stage} unlocked={unlocked} total={total} preview={previewing} />
           </div>
           <h2 id="tree-heading" className="mt-3 text-2xl font-extrabold tracking-tight">{TREE_STAGES[stage]}</h2>
           <p className="mt-1 text-stone-600">
-            {toNext === null
+            {previewing
+              ? `This is what your tree looks like at the ${TREE_STAGES[stage].toLowerCase()} stage.`
+              : toNext === null
               ? "Every landmark unlocked. Your tree is in full bloom!"
               : `Unlock ${toNext} more ${toNext === 1 ? "landmark" : "landmarks"} to ${stage + 1 === TREE_STAGES.length - 1
                 ? "reach full bloom"
                 : `grow into a ${TREE_STAGES[stage + 1].toLowerCase()}`}.`}
           </p>
-          <ol aria-label="Growth stages" className="mt-5 flex flex-wrap justify-center gap-1.5">
-            {TREE_STAGES.map((name, i) => (
-              <li
-                key={name}
-                aria-current={i === stage ? "step" : undefined}
-                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${i === stage ? "bg-emerald-700 text-white" : i < stage ? "bg-emerald-100 text-emerald-900" : "bg-stone-100 text-stone-500"}`}
-              >
-                {name}
-              </li>
-            ))}
+          <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-stone-500">Tap a stage to preview it</p>
+          <ol aria-label="Growth stages" className="mt-2 flex flex-wrap justify-center gap-1.5">
+            {TREE_STAGES.map((name, i) => {
+              const shown = i === stage;
+              const reached = i <= realStage;
+              return (
+                <li key={name}>
+                  <Link
+                    href={i === realStage ? "/progress" : `/progress?stage=${i}`}
+                    scroll={false}
+                    aria-current={shown ? "step" : undefined}
+                    aria-label={`${name}${i === realStage ? " (your stage)" : reached ? " (reached)" : ""}${shown && previewing ? ", previewing" : ""}`}
+                    className={`inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 ${
+                      shown
+                        ? "bg-emerald-700 text-white"
+                        : reached
+                          ? "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                          : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    } ${i === realStage && !shown ? "ring-2 ring-emerald-600" : ""}`}
+                  >
+                    {name}
+                  </Link>
+                </li>
+              );
+            })}
           </ol>
         </section>
 

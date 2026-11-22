@@ -11,7 +11,8 @@ const HORIZON = 41;
 const BASE_X = 60; // tree is centred
 const BASE_Y = 47; // ground row the plant stands on
 
-export const PALETTE = {
+/** Black and white (the original look). */
+const BW = {
   sky1: "#c4c4c4",
   sky2: "#d2d2d2",
   sky3: "#dfdfdf",
@@ -39,7 +40,39 @@ export const PALETTE = {
   ink: "#111111",
 } as const;
 
-export type PixelColor = keyof typeof PALETTE;
+/** Colour, inspired by a bright open-field landscape: blue sky, golden field, green tree. */
+const COLOR: Record<keyof typeof BW, string> = {
+  sky1: "#3f86d4",
+  sky2: "#579ade",
+  sky3: "#73afe8",
+  sky4: "#94c6f0",
+  cloud: "#ffffff",
+  cloudShade: "#cfe2f4",
+  hill: "#a7c3dc",
+  hillTop: "#8fb0cd",
+  fieldFar: "#ead48a",
+  field: "#d3bd60",
+  fieldNear: "#a9b24c",
+  blade: "#7c9838",
+  bush: "#2f6a33",
+  bushDark: "#1e4a24",
+  flower: "#e0413f",
+  shadow: "#8c9a3f",
+  mound: "#7a5230",
+  wood: "#4a2f1d",
+  woodLight: "#71492b",
+  leaf0: "#1d4a2a",
+  leaf1: "#2e7638",
+  leaf2: "#4c9d44",
+  leaf3: "#8bc65a",
+  blossom: "#e0314a", // McGill-ish red blossoms at full bloom
+  ink: "#1d2a3a",
+};
+
+export const PALETTES = { color: COLOR, bw: BW } as const;
+export type PixelPalette = keyof typeof PALETTES;
+
+export type PixelColor = keyof typeof BW;
 type Grid = (PixelColor | undefined)[];
 export interface PixelPath { color: PixelColor; d: string }
 export interface PixelLeaf { x: number; y: number; fall: number; drift: number; delay: number; color: PixelColor }
