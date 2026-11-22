@@ -6,6 +6,7 @@ import { Building2 } from "lucide-react";
 import { MeetupLocationMap } from "@/components/map/MeetupLocationMap";
 import { LOCATION_PHOTOS } from "@/lib/location-photos";
 import type { CampusLocation } from "@/lib/locations";
+import type { MeetupCategory } from "@/types/meetup";
 
 function LocationPhoto({ location }: { location: CampusLocation }) {
   const photo = LOCATION_PHOTOS[location.id];
@@ -42,7 +43,11 @@ function LocationPhoto({ location }: { location: CampusLocation }) {
   );
 }
 
-export function LocationPreview({ location }: { location: CampusLocation & { address?: string } }) {
+/**
+ * Photo of a campus location next to its map. Used when creating or editing a meetup and on
+ * the meetup's page, so both show the place the same way. `category` colours the map pin.
+ */
+export function LocationPreview({ location, category }: { location: CampusLocation & { address?: string }; category?: MeetupCategory }) {
   return (
     <section aria-label="Location preview" className="min-w-0 space-y-3 rounded-2xl border border-line bg-canvas p-3">
       <div className="px-1">
@@ -51,7 +56,7 @@ export function LocationPreview({ location }: { location: CampusLocation & { add
       </div>
       <div className="grid min-w-0 gap-3 md:grid-cols-2">
         <LocationPhoto key={location.id} location={location} />
-        <MeetupLocationMap locationName={location.name} latitude={location.latitude} longitude={location.longitude} />
+        <MeetupLocationMap category={category} locationName={location.name} latitude={location.latitude} longitude={location.longitude} />
       </div>
     </section>
   );

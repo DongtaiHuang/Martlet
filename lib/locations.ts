@@ -28,3 +28,11 @@ export const CAMPUS_LOCATIONS: CampusLocation[] = [
 export function getCampusLocation(id: string): CampusLocation | undefined {
   return CAMPUS_LOCATIONS.find((place) => place.id === id);
 }
+
+/**
+ * The campus location a saved meetup was created at, if any. Meetups store the location's
+ * name and coordinates (not its id), so all three must match; custom spots return undefined.
+ */
+export function findCampusLocationForMeetup(meetup: { location_name: string; latitude: number | null; longitude: number | null }): CampusLocation | undefined {
+  return CAMPUS_LOCATIONS.find((l) => l.name === meetup.location_name && l.latitude === meetup.latitude && l.longitude === meetup.longitude);
+}

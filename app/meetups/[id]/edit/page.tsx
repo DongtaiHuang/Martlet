@@ -6,7 +6,7 @@ import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
 import type { Course } from "@/lib/course-codes";
 import { listMyCourses, searchCourses } from "@/lib/courses";
-import { CAMPUS_LOCATIONS } from "@/lib/locations";
+import { findCampusLocationForMeetup } from "@/lib/locations";
 import { getMeetup } from "@/lib/meetups";
 import { OTHER_LOCATION } from "@/lib/public-venues";
 import type { MeetupSummary } from "@/types/meetup";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 /** Map a saved meetup back to the form's location choice. */
 function locationChoice(m: MeetupSummary): { locationId: string; customLocation: string } {
-  const campus = CAMPUS_LOCATIONS.find((l) => l.name === m.location_name && l.latitude === m.latitude && l.longitude === m.longitude);
+  const campus = findCampusLocationForMeetup(m);
   if (campus) return { locationId: campus.id, customLocation: "" };
   // Custom spots and older public-venue meetups are edited as "Other" text.
   return { locationId: OTHER_LOCATION, customLocation: m.location_name };
