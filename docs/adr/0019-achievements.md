@@ -31,6 +31,7 @@ Constraints:
   | Old school | Type ↑ ↑ ↓ ↓ ← → ← → B A | Yes |
   | Field trip | Visit an off-campus landmark (more than 1.5 km from campus) on a map | No |
   | Tourist | Explore every landmark on a map | No |
+  | 67 | Successfully upload a challenge photo for Expo 67 Biosphère | No |
 
 ### Saving
 - Migration `010_achievements.sql` was written when this decision was numbered 0015.
@@ -40,6 +41,7 @@ Constraints:
 - Server action `earnAchievement(id)` (`app/achievements/actions.ts`) gets the user from the session and returns `new`, `already`, `guest`, `invalid` or `error`. It never takes a user id.
 - **Guests** (signed out, or demo mode) get `guest`, and the browser keeps their achievements in `localStorage`. They aren't copied to an account on sign-in, because a shared browser could hand one person's achievements to another.
 - Counters that span visits (quotes heard, landmarks opened) are kept per browser in `localStorage`; only the earned achievement is saved to the account.
+- The Expo 67 badge is awarded after the landmark photo upload succeeds. The database requires a photo at the signed-in user's Expo 67 path. The visit follows the existing honour-system challenge in ADR 0009.
 
 ### Triggering and the toast
 - `earn(id)` (`components/achievements/earn.ts`) is the one entry point. It's called from:
@@ -70,7 +72,7 @@ Constraints:
 ## Consequences
 
 - Students get small rewards for exploring, and the demo has a fun moment to show.
-- One new table, readable only by its owner. Anyone signed in can earn any achievement by calling the server action directly; that's accepted because they're cosmetic.
+- One new table, readable only by its owner. The browser action accepts interaction badges. The 67 badge requires a stored photo and is awarded by the upload action.
 - Adding an achievement is a code change (catalogue entry plus a trigger). Removing one leaves old rows that the page ignores.
 - The toaster is on every page, as a small client component with a few listeners.
 - `app/profile/` and `components/layout/` (Developer 1) and the migrations (Developer 3) gain small additions; coordinate in the PR.

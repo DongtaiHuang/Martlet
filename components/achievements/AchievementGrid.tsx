@@ -2,6 +2,7 @@
 import { LockKeyhole } from "lucide-react";
 import { ACHIEVEMENTS, type Achievement, type EarnedMap } from "@/lib/achievement-catalog";
 import { useEarned } from "./useEarned";
+import { AchievementIcon } from "./AchievementIcon";
 
 const dateFormat = new Intl.DateTimeFormat("en-CA", { dateStyle: "medium" });
 
@@ -13,7 +14,7 @@ function Card({ achievement: a, at }: { achievement: Achievement; at?: string })
         aria-hidden="true"
         className={`grid size-12 shrink-0 place-items-center rounded-xl text-2xl ${at ? "bg-amber-200/60 dark:bg-amber-300/20" : "bg-surface-muted text-ink-subtle grayscale"}`}
       >
-        {secret ? <LockKeyhole size={20} /> : a.icon}
+        {secret ? <LockKeyhole size={20} /> : <AchievementIcon achievement={a} />}
       </span>
       <span className="min-w-0">
         <span className={`block font-bold ${at ? "text-ink-soft" : "text-ink-2"}`}>{secret ? "???" : a.title}</span>

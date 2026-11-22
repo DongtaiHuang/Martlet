@@ -202,6 +202,19 @@ button.martlet-popup__bird:focus-visible {
   animation: martlet-toast 6s ease both;
 }
 
+@keyframes martlet-67-hands {
+  from { transform: translateY(-3px); }
+  to { transform: translateY(3px); }
+}
+
+.martlet-67-hand { transform: translateY(-3px); }
+.martlet-67-hand-right { transform: translateY(3px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .martlet-67-hand { animation: martlet-67-hands 0.55s ease-in-out 8 alternate; }
+  .martlet-67-hand-right { animation-direction: alternate-reverse; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .martlet-toast { animation: none; }
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { getAchievement, isAchievementId, type AchievementId } from "@/lib/achievement-catalog";
 import { ACHIEVEMENT_EVENT, earn } from "./earn";
+import { AchievementIcon } from "./AchievementIcon";
 
 const SHOW_MS = 6000;
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
@@ -73,7 +74,7 @@ export function AchievementToaster() {
             className="martlet-toast pointer-events-auto flex items-start gap-3 rounded-2xl border border-amber-300/60 bg-stone-900 p-3 text-white shadow-xl"
             style={{ animationDuration: `${SHOW_MS}ms` }}
           >
-            <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-300/15 text-2xl">{achievement.icon}</span>
+            <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-300/15 text-2xl"><AchievementIcon achievement={achievement} /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-[0.7rem] font-bold tracking-wider text-amber-300 uppercase">Achievement unlocked</span>
               <span className="block font-bold">{achievement.title}</span>

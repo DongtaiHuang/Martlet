@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useState, type FormEvent } from "react";
 import { Camera, Info } from "lucide-react";
 import type { UnlockState } from "@/app/landmarks/[id]/actions";
+import { announceAchievement } from "@/components/achievements/earn";
 import { prepareLandmarkPhoto } from "@/lib/landmark-photo";
 
 const CAPTION_MAX = 200;
@@ -27,6 +28,9 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
 
   // Free the preview object URL when it changes or the form unmounts.
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  useEffect(() => {
+    if (state.achievement) announceAchievement(state.achievement, true);
+  }, [state.achievement]);
 
   // After a successful save, clear the chosen file (adjusting state during render,
   // instead of in an effect; the new key resets the file input).
@@ -123,6 +127,7 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
 
         {error && <p role="alert" className="rounded-lg border border-brand-line bg-brand-soft p-3 text-sm text-brand-ink">{error}</p>}
         {state.success && !error && <p role="status" className="rounded-lg border border-ok-line bg-ok-soft p-3 text-sm text-ok-ink">{state.success}</p>}
+        {state.achievementWarning && !error && <p role="status" className="rounded-lg border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">{state.achievementWarning}</p>}
 
         <button type="submit" className="w-full rounded-xl bg-brand px-5 py-3 font-semibold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-auto">
           {preparing ? "Preparing photo…" : pending ? "Saving…" : unlocked ? "Save changes" : "Unlock landmark"}

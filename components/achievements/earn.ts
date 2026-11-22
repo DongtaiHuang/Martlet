@@ -64,9 +64,15 @@ export async function earn(id: AchievementId) {
     guest[id] = now;
     writeStore(GUEST_KEY, guest);
   }
+  announceAchievement(id, result === "new", now);
+}
+
+/** Publish a newly earned badge after its save succeeds, including saves from other actions. */
+export function announceAchievement(id: AchievementId, saved: boolean, now = new Date().toISOString()) {
+  if (sessionEarned[id]) return;
   sessionEarned = { ...sessionEarned, [id]: now };
   sessionSnap = JSON.stringify(sessionEarned);
-  window.dispatchEvent(new CustomEvent(ACHIEVEMENT_EVENT, { detail: { id, saved: result === "new" } }));
+  window.dispatchEvent(new CustomEvent(ACHIEVEMENT_EVENT, { detail: { id, saved } }));
 }
 
 /** Counts distinct quotes heard on this device; 10 earns Chatterbox. */
