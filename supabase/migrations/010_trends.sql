@@ -51,7 +51,9 @@ begin
 
   with ranked as (
     select e.id, e.title, e.type, e.detail, e.link, e.created_by, e.created_at,
-      jsonb_build_object('id', c.id, 'name', c.name, 'latitude', c.latitude, 'longitude', c.longitude) as campus_location,
+      case when c.id is null then null
+        else jsonb_build_object('id', c.id, 'name', c.name, 'latitude', c.latitude, 'longitude', c.longitude)
+      end as campus_location,
       (select count(*) from public.trend_likes l where l.entry_id = e.id) as like_count,
       exists (select 1 from public.trend_likes l where l.entry_id = e.id and l.user_id = viewer) as liked_by_me
     from public.trend_entries e
