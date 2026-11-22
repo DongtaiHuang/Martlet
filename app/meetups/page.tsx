@@ -7,6 +7,8 @@ import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle"
 import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import { HeroCarousel } from "@/components/feed/HeroCarousel";
 import { LandmarkFeedList } from "@/components/landmarks/LandmarkFeedList";
+import { DailyCard } from "@/components/news/DailyCard";
+import { NewsPreview } from "@/components/news/NewsPreview";
 import { MartletFlightLoader } from "@/components/game/MartletFlightLoader";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
@@ -136,6 +138,8 @@ export default async function MeetupsPage({
             <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
               <TrendPanel view={view} activeType={trend} />
             </Suspense>
+            <DailyCard />
+            <Suspense fallback={null}><NewsPreview /></Suspense>
             <section aria-labelledby="flight-heading" className="mt-6 rounded-2xl border border-line bg-surface p-4 shadow-sm">
               <div className="mb-3 flex items-baseline justify-between gap-3">
                 <h2 id="flight-heading" className="flex items-center gap-2 text-lg font-bold text-ink"><Gamepad2 aria-hidden="true" size={18} className="text-brand-ink" />Martlet Flight</h2>
