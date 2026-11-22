@@ -626,3 +626,12 @@ body:has(> .martlet-footer) > .martlet-page > .min-h-screen {
 @keyframes martlet-shake { 0%, 100% { transform: none; } 15% { transform: translateX(-10px) rotate(-1deg); } 30% { transform: translateX(9px) rotate(1deg); } 45% { transform: translateX(-7px); } 60% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
 @keyframes martlet-wiggle { 0%, 60%, 100% { transform: rotate(0); } 10%, 30%, 50% { transform: rotate(-14deg); } 20%, 40% { transform: rotate(14deg); } }
 @keyframes martlet-sparkle { from { opacity: 1; transform: translate(-50%, -50%) rotate(var(--a)) translateX(0) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--d)) scale(0.3); } }
+
+/* Phones (issue: phone optimization): bigger map buttons on touch, and keep floating things above the bottom tab bar. */
+@media (pointer: coarse) {
+  .maplibregl-ctrl-group button { width: 40px; height: 40px; }
+}
+@media (max-width: 639px) {
+  .martlet-stage .martlet-lane { bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  .martlet-season-floor { bottom: calc(3.75rem + env(safe-area-inset-bottom)); }
+}

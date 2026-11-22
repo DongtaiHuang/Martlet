@@ -285,7 +285,7 @@ function FallScene() {
           </span>
         ))}
       </div>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
+      <div className="martlet-season-floor pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
         <div aria-hidden="true" className="season-leaf-ground absolute inset-x-0 bottom-0" style={{ height: litter * 14, backgroundImage: LITTER_TILE }} />
         {slots.map((x, index) => {
           const pile = piles[index];
@@ -435,7 +435,7 @@ function WinterScene() {
         <div className="season-moon" />
         <div className="season-shimmer" />
       </div>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
+      <div className="martlet-season-floor pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
         <div aria-hidden="true" className="season-snow-ground absolute inset-x-0 bottom-0" style={{ height: ground * 14 }} />
         {slots.map((x, index) => {
           const man = snowmen[index];
@@ -585,7 +585,7 @@ function SummerScene() {
           </span>
         ))}
       </div>
-      <div className="season-beach pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
+      <div className="season-beach martlet-season-floor pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
         {/* Sand under the nest, then water with rolling waves. */}
         <div aria-hidden="true" className="season-sand absolute bottom-0 left-0" style={{ width: SHORE + 30, backgroundImage: SAND_TILE }} />
         <div aria-hidden="true" className="season-water absolute right-0 bottom-0" style={{ left: SHORE, backgroundImage: WATER_TILE }} />
@@ -771,7 +771,7 @@ function NewYearScene() {
           </span>
         ))}
       </div>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
+      <div className="martlet-season-floor pointer-events-none fixed inset-x-0 bottom-0 z-30 h-0">
         {slots.map((x, index) => {
           const mound = mounds[index];
           if (!mound?.count) return null;
