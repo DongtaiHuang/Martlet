@@ -14,6 +14,7 @@ import { findCampusLocationForMeetup } from "@/lib/locations";
 import { hasMeetupCoordinates, UNMAPPED_LOCATION_NOTE } from "@/lib/meetup-location";
 import { getMeetup } from "@/lib/meetups";
 import { MeetupReactions } from "./MeetupReactions";
+import { ReportButton } from "@/components/moderation/ReportButton";
 import { MeetupStartTime } from "./MeetupStartTime";
 
 export const dynamic = "force-dynamic";
@@ -102,6 +103,9 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
               </div>
             }
           />
+          {canReact && !isHost && (
+            <div className="mt-4 flex justify-end"><ReportButton type="meetup" id={meetup.id} /></div>
+          )}
           {canCancel && (
             <div className="mt-6 flex flex-wrap items-start gap-3">
               <Link href={`/meetups/${encodeURIComponent(meetup.id)}/edit`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4 text-sm font-bold text-ink hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">

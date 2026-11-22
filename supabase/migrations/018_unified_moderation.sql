@@ -230,6 +230,22 @@ grant execute on function public.report_community_content(text,uuid,text,text,te
 -- Prevent moderator actions that bypass the audit: the application now uses moderate_community_content.
 revoke execute on function public.moderate_content(text,uuid,text) from authenticated;
 
+-- Prevent the owner from changing a photo while it is under review or removed.
+-- These restrictive storage policies run alongside existing owner-write policies.
+drop policy if exists "No replacements of moderated landmark photos" on storage.objects;
+create policy "No replacements of moderated landmark photos" on storage.objects
+  as restrictive for update to authenticated using (
+    bucket_id <> 'landmark-photos' or exists (
+      select 1 from public.landmark_unlocks u
+      where u.photo_path = objects.name and u.moderation_status = 'visible'
+    )
+  ) with check (
+    bucket_id <> 'landmark-photos' or exists (
+      select 1 from public.landmark_unlocks u
+      where u.photo_path = objects.name and u.moderation_status = 'visible'
+    )
+  );
+
 -- The guest RPC is SECURITY DEFINER and bypasses meetup RLS; explicitly filter moderated rows.
 create or replace function public.guest_meetups(p_id uuid default null)
 returns setof jsonb
