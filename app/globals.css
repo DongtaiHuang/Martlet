@@ -1,21 +1,90 @@
 @import "tailwindcss";
 @import "./theme.css";
 
-/* Flying martlet (components/martlet/FlyingMartlet.tsx) */
-@keyframes martlet-fly {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100vw); }
+/* Marty, the flying martlet (components/martlet/FlyingMartlet.tsx). Everything is sized in
+   Marty's pixel grid: --martlet-px is one sprite pixel, and the sprite is 34 pixels wide. */
+.martlet-stage { --martlet-px: calc(6rem / 41); --martlet-w: calc(34 * var(--martlet-px)); }
+@media (min-width: 40rem) { .martlet-stage { --martlet-px: calc(7rem / 41); } }
+
+.martlet-hop-body { transform-origin: center bottom; }
+[data-direction="left"] > button > .martlet-hop-body { transform: scaleX(-1); }
+
+@keyframes martlet-drag-flap {
+  from { transform: rotate(-35deg); }
+  to { transform: rotate(24deg); }
 }
-@keyframes martlet-flap {
-  50% { transform: translateY(-6px) rotate(-8deg); }
+
+/* Flap while dragged or gliding home; the wing pivots at the shoulder (sprite pixels). */
+.martlet-drag-offset[data-dragging="true"] .martlet-drag-wing,
+.martlet-stage[data-nest="homing"] .martlet-drag-wing {
+  transform-origin: 23px 11px;
+  animation: martlet-drag-flap 95ms steps(2, end) infinite alternate;
 }
-.martlet-flight { animation: martlet-fly 18s linear infinite; }
-.martlet-flap { animation: martlet-flap 0.6s ease-in-out infinite; }
+
+/* The nest (MartletNest.tsx) sits 1rem from the screen edge; the lane starts where Marty
+   fits in it, so the left end of the lane is the nest. */
+.martlet-lane {
+  left: calc(1rem + 7 * var(--martlet-px));
+  right: 0.5rem;
+}
+.martlet-nest {
+  width: calc(44 * var(--martlet-px));
+  height: auto;
+  left: 1rem;
+  bottom: calc(2.75rem - 5 * var(--martlet-px));
+  transform-origin: center bottom;
+  transition: transform 150ms ease, filter 150ms ease;
+}
+/* Dragging Marty over the nest's drop zone: the nest glows to show it will catch him. */
+.martlet-stage[data-over-nest="true"] .martlet-nest {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 0.4rem rgb(253 230 138 / 0.95));
+}
+.martlet-eye-closed { display: none; }
+
+/* Gliding home: ease the lane back down. */
+.martlet-stage[data-nest="homing"] .martlet-drag-offset { transition: transform 700ms ease-in-out; }
+
+/* Asleep: settle into the nest, close the eye, breathe slowly, and puff Zs. */
+@keyframes martlet-breathe {
+  0%, 100% { transform: translateY(8%) scaleX(-1) scaleY(1); }
+  50% { transform: translateY(8%) scaleX(-1) scaleY(1.05); }
+}
+.martlet-stage[data-nest="asleep"] [data-direction="left"] > button > .martlet-hop-body {
+  transform: translateY(8%) scaleX(-1);
+  animation: martlet-breathe 3s ease-in-out infinite;
+}
+.martlet-stage[data-nest="asleep"] .martlet-eye-open { display: none; }
+.martlet-stage[data-nest="asleep"] .martlet-eye-closed { display: inline; }
+
+/* Small, soft Zs drifting slowly up from the head (above the left side when facing left). */
+.martlet-zzz-anchor {
+  left: calc(6 * var(--martlet-px));
+  top: 0;
+}
+.martlet-zzz {
+  width: calc(5 * var(--martlet-px));
+  height: auto;
+  opacity: 0;
+  animation: martlet-zzz 6s ease-out infinite;
+}
+@keyframes martlet-zzz {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  15% { opacity: 0.55; }
+  70% { opacity: 0.45; }
+  100% { opacity: 0; transform: translate(0.8rem, -2.4rem) scale(1.1); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .martlet-flight,
-  .martlet-flap { animation: none; }
-  .martlet-flight { transform: none; margin-left: 1rem; }
+  .martlet-drag-offset[data-dragging="true"] .martlet-drag-wing,
+  .martlet-stage[data-nest="homing"] .martlet-drag-wing,
+  .martlet-stage[data-nest="asleep"] [data-direction="left"] > button > .martlet-hop-body { animation: none; }
+  .martlet-stage[data-nest="homing"] .martlet-drag-offset,
+  .martlet-nest { transition: none; }
+  /* Still Zs, stepped up and away from the head. */
+  .martlet-zzz { animation: none; opacity: 0.5; }
+  .martlet-zzz:nth-child(2) { transform: translate(0.4rem, -1rem) scale(0.85); }
+  .martlet-zzz:nth-child(3) { transform: translate(0.8rem, -2rem) scale(1.05); }
 }
 
 /* Pixel-art progress tree (components/progress/GrowthTree.tsx).
