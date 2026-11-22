@@ -250,6 +250,39 @@
 /* Water droplets (the snow chunk, in blue). */
 .season-drop { background: #8fd8ea; box-shadow: inset -2px -2px 0 #4fb3d1, 0 0 0 1px #1f5f7a; border-radius: 2px; }
 
+/* Chinese New Year: a warm red-orange glow behind the page (decorative; text sits on cards). */
+.season-festive {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -5%, rgb(230 40 30 / 0.32), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 0% 100%, rgb(255 120 30 / 0.3), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 100% 100%, rgb(255 120 30 / 0.3), transparent 70%);
+}
+[data-mode="dark"] .season-festive {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -5%, rgb(220 30 20 / 0.4), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 0% 100%, rgb(255 110 20 / 0.22), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 100% 100%, rgb(255 110 20 / 0.22), transparent 70%);
+}
+
+/* The gold key-pattern border down each side of the screen (tile from season-sprites.ts). */
+.season-fret {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  background-size: 30px 30px;
+  background-repeat: repeat-y;
+  image-rendering: pixelated;
+  opacity: 0.55;
+  border-inline: 3px solid rgb(196 20 28 / 0.45);
+}
+[data-mode="dark"] .season-fret { opacity: 0.75; }
+@keyframes season-twinkle {
+  0%, 100% { opacity: 0.15; scale: 0.6; }
+  50% { opacity: 1; scale: 1; }
+}
+.season-twinkle { animation: season-twinkle 3.4s ease-in-out infinite; }
+
 /* Chinese New Year: coins fly out of a pecked or opened red-pocket mound; an opened mound
    bursts and disappears. */
 @keyframes season-coin {
@@ -287,6 +320,7 @@
 @media (prefers-reduced-motion: reduce) {
   .season-moon, .season-shimmer, .season-pop, .season-leaf-sway, .season-pile-leaf, .season-water, .season-duck-bob, .season-duck-sway, .season-rays { animation: none; }
   .season-coin { display: none; }
+  .season-twinkle { animation: none; opacity: 0.6; }
   .season-mound-open { animation: season-fade 0.5s ease forwards; }
   .season-duck-pop { animation: season-fade 0.4s ease forwards; }
   .season-chunk { display: none; }

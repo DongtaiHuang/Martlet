@@ -223,24 +223,107 @@ export const SAND_TILE = tile([
 
 // ---- Chinese New Year: lantern, goat, red pocket, gold coin ------------------------------------
 const CNY = { K: "#4a0d0d", R: "#d7262e", r: "#a3161c", G: "#f5c84c", g: "#c9962a", W: "#fff1d0", T: "#e2a72c" };
-// Round red lantern with gold caps, ribs and a tassel.
+// Palace lantern: gold caps and frame, red body with little plum-blossom flowers, a tassel.
+// (W = blossom, Y = blossom centre.)
 const LANTERN_ROWS = [
-  "....G....",
-  "...GGG...",
-  "..gGGGg..",
-  ".RRRRRRr.",
-  "RRGRRGRrr",
-  "RRGRRGRrr",
-  "RRGRRGRrr",
-  "RRGRRGRrr",
-  ".RRRRRRr.",
-  "..gGGGg..",
-  "...GGG...",
-  "....T....",
-  "...TTT...",
-  "...T.T...",
+  ".....g.....",
+  ".....g.....",
+  "..GGGGGGG..",
+  "..ggggggg..",
+  ".RRRRRRRRr.",
+  "RRWWRRRRRrr",
+  "RWYWRRWWRrr",
+  "RRWWRRWYWrr",
+  "RRRRRRRWWrr",
+  "RWWRRRRRRrr",
+  "WYWRRWWRRrr",
+  "RWWRRWYWRrr",
+  ".RRRRRWWRr.",
+  "..GGGGGGG..",
+  "..ggggggg..",
+  ".....T.....",
+  "....TTT....",
+  "....TTT....",
+  "....T.T....",
 ];
-export const LANTERN = toSprite(outlined(padded(LANTERN_ROWS).map((r) => [...r]), "K"), CNY);
+export const LANTERN = toSprite(outlined(padded(LANTERN_ROWS).map((r) => [...r]), "K"), { ...CNY, W: "#ffd9e2", Y: "#f5c84c" });
+
+// A red scroll with gold rollers and a gold 福 ("good fortune"), the classic New Year greeting.
+const FU_GLYPH = [
+  "..G.........",
+  "GGGG.GGGGGGG",
+  "...G........",
+  "..G...GGGGG.",
+  ".GGG..G...G.",
+  "G.G.G.GGGGG.",
+  "..G..GGGGGGG",
+  "..G..G..G..G",
+  "..G..GGGGGGG",
+  "..G..G..G..G",
+  "..G..GGGGGGG",
+];
+function fuScroll(): Sprite {
+  const w = 18, h = 21;
+  const g = blank(w, h);
+  const roller = (y: number) => {
+    for (let x = 0; x < w; x++) g[y][x] = x < 2 || x > w - 3 ? "G" : "r";
+    for (let x = 2; x < w - 2; x++) g[y + 1][x] = "R";
+  };
+  roller(0);
+  for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) g[y][x] = x === 2 || x === w - 3 || y === 2 || y === h - 3 ? "g" : "R";
+  roller(h - 2);
+  FU_GLYPH.forEach((row, y) => [...row].forEach((c, x) => { if (c === "G") g[y + 5][x + 3] = "G"; }));
+  return toSprite(outlined(padded(g.map((r) => r.join(""))).map((r) => [...r]), "K"), CNY);
+}
+export const FU_SCROLL = fuScroll();
+
+// A string of red firecrackers with gold bands on a cord.
+const FIRECRACKER_ROWS = [
+  "...c...",
+  "...c...",
+  ".RRcRR.",
+  ".GGcGG.",
+  ".RRcRr.",
+  ".RRcRr.",
+  ".GGcGG.",
+  ".RRcRR.",
+  ".GGcGG.",
+  ".RRcRr.",
+  ".RRcRr.",
+  ".GGcGG.",
+  ".RRcRR.",
+  ".GGcGG.",
+  ".RRcRr.",
+  "...c...",
+  "..T.T..",
+];
+export const FIRECRACKERS = toSprite(outlined(padded(FIRECRACKER_ROWS).map((r) => [...r]), "K"), { ...CNY, c: "#7a4d0c" });
+
+// A mandarin orange with a green leaf (oranges for luck).
+const ORANGE_ROWS = [
+  "....LL..",
+  "...nLLL.",
+  "..OOnOO.",
+  ".OHOOOOo",
+  "OHOOOOOo",
+  "OOOOOOOo",
+  "OOOOOOoo",
+  ".OOOOoo.",
+  "..oooo..",
+];
+export const MANDARIN = toSprite(outlined(padded(ORANGE_ROWS).map((r) => [...r]), "K"), {
+  K: "#6b2a08", O: "#ff8a1f", o: "#d9620e", H: "#ffd29a", L: "#3fa34d", n: "#2a6b33",
+});
+
+// A four-point gold sparkle for the background.
+const SPARKLE_ROWS = [
+  "..G..",
+  "..G..",
+  "GGWGG",
+  "..G..",
+  "..G..",
+];
+export const SPARKLE = toSprite(SPARKLE_ROWS.map((r) => [...r]), { G: "#f5c84c", W: "#fff6d8" });
 
 // A cute goat (2027 is the Year of the Goat): cream wool, curled horns, little beard.
 const GOAT_ROWS = [
@@ -285,3 +368,17 @@ const COIN_ROWS = [
   ".gggg.",
 ];
 export const COIN = toSprite(outlined(padded(COIN_ROWS).map((r) => [...r]), "K"), { ...CNY, K: "#7a4d0c" });
+
+// Gold key-pattern (回纹) border, for the strips down both sides of the screen.
+export const FRET_TILE = tile([
+  "GGGGGGGGGG",
+  "G........G",
+  "G.GGGGGG.G",
+  "G.G....G.G",
+  "G.G.GG.G.G",
+  "G.G.G..G.G",
+  "G.G.GGGG.G",
+  "G.G......G",
+  "G.GGGGGGGG",
+  "G.........",
+], { G: "#e2b545" });

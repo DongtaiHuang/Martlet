@@ -354,29 +354,30 @@
   --m-ok-ink: #8ce0aa;
 }
 
-/* Chinese New Year: crimson and gold (lanterns, goats and red pockets: SeasonalScene.tsx). */
+/* Chinese New Year: festive red and orange with gold, on a red-orange glow (lanterns, goats and
+   red pockets: SeasonalScene.tsx). */
 [data-theme="cny"][data-mode="light"] {
   color-scheme: light;
-  --m-canvas: #fff3e6;
-  --m-surface: #fffaf2;
-  --m-surface-muted: #fbe4cc;
-  --m-line: #f1cfa6;
-  --m-line-soft: #fbe4cc;
-  --m-line-strong: #ddb07a;
-  --m-ink: #2a0b0b;
-  --m-ink-soft: #3a1210;
-  --m-ink-2: #5c2a20;
-  --m-ink-muted: #6b3528;
-  --m-ink-subtle: #8a5340;
-  --m-brand: #b3111c;
-  --m-brand-hover: #920d16;
-  --m-brand-ink: #a10f19;
-  --m-brand-ink-strong: #7d0b12;
-  --m-brand-soft: #fdf0d2;
-  --m-brand-muted: #f8dda0;
-  --m-brand-line: #e2b545;
+  --m-canvas: #ffdfc9;
+  --m-surface: #fff4ea;
+  --m-surface-muted: #ffd3b5;
+  --m-line: #f7b892;
+  --m-line-soft: #ffd3b5;
+  --m-line-strong: #e8936a;
+  --m-ink: #2b0606;
+  --m-ink-soft: #3d0b09;
+  --m-ink-2: #5e1c12;
+  --m-ink-muted: #6e2415;
+  --m-ink-subtle: #8c3d24;
+  --m-brand: #c4141c;
+  --m-brand-hover: #a10f16;
+  --m-brand-ink: #a8121a;
+  --m-brand-ink-strong: #820c12;
+  --m-brand-soft: #ffe8cf;
+  --m-brand-muted: #ffc99a;
+  --m-brand-line: #f08a3c;
   --m-on-brand: #ffffff;
-  --m-focus: #c8141f;
+  --m-focus: #d9411a;
   --m-warn-soft: #fffbeb;
   --m-warn-muted: #fef3c7;
   --m-warn-line: #fde68a;
@@ -387,26 +388,26 @@
 }
 [data-theme="cny"][data-mode="dark"] {
   color-scheme: dark;
-  --m-canvas: #180506;
-  --m-surface: #240a0b;
-  --m-surface-muted: #321112;
-  --m-line: #45191a;
-  --m-line-soft: #2c0f10;
-  --m-line-strong: #6b2b28;
-  --m-ink: #fbefe6;
-  --m-ink-soft: #f3dfd1;
-  --m-ink-2: #e2c3ad;
-  --m-ink-muted: #c9a389;
-  --m-ink-subtle: #ab866c;
-  --m-brand: #b5161f;
-  --m-brand-hover: #c61f28;
-  --m-brand-ink: #f5c84c;
-  --m-brand-ink-strong: #ffe08a;
-  --m-brand-soft: #2e1207;
-  --m-brand-muted: #45200b;
-  --m-brand-line: #8a6420;
+  --m-canvas: #2a0606;
+  --m-surface: #3a0a0a;
+  --m-surface-muted: #4b100e;
+  --m-line: #611a14;
+  --m-line-soft: #44100c;
+  --m-line-strong: #93321d;
+  --m-ink: #fff1e6;
+  --m-ink-soft: #ffe2cf;
+  --m-ink-2: #f6c9ab;
+  --m-ink-muted: #e6ab86;
+  --m-ink-subtle: #cf9068;
+  --m-brand: #c4141c;
+  --m-brand-hover: #b0121a;
+  --m-brand-ink: #ffb054;
+  --m-brand-ink-strong: #ffd29a;
+  --m-brand-soft: #4a1508;
+  --m-brand-muted: #63200b;
+  --m-brand-line: #b5521c;
   --m-on-brand: #ffffff;
-  --m-focus: #f5c84c;
+  --m-focus: #ffb054;
   --m-warn-soft: #2a1f0a;
   --m-warn-muted: #3a2a0c;
   --m-warn-line: #6b4d12;

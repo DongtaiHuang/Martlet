@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type AnimationEvent, type CSSProperties } from "react";
 import { earn } from "@/components/achievements/earn";
-import { COIN, DUCK, GOAT, LANTERN, LEAVES, RED_POCKET, SAND_TILE, SNOW_MOUND, SNOWMAN_FULL, SNOWMAN_STAGES, WATER_POOL, WATER_TILE, type Sprite } from "./season-sprites";
+import { COIN, DUCK, FIRECRACKERS, FRET_TILE, FU_SCROLL, GOAT, LANTERN, LEAVES, MANDARIN, RED_POCKET, SAND_TILE, SPARKLE, SNOW_MOUND, SNOWMAN_FULL, SNOWMAN_STAGES, WATER_POOL, WATER_TILE, type Sprite } from "./season-sprites";
 
 /*
  * Seasonal decorations for the Winter and Fall themes (app/theme.css). Purely decorative and
@@ -634,7 +634,30 @@ function SummerScene() {
 
 // ---- Chinese New Year: lanterns, goats and red pockets -------------------------------------
 
-type Drifter = { id: number; x: number; kind: "lantern" | "goat"; fall: number; sway: number };
+type DrifterKind = "lantern" | "scroll" | "firecrackers" | "mandarin" | "goat";
+type Drifter = { id: number; x: number; kind: DrifterKind; fall: number; sway: number };
+
+// What drifts down behind the page, how big, and how often (weights).
+const DRIFTERS: Record<DrifterKind, { sprite: Sprite; scale: number; weight: number }> = {
+  lantern: { sprite: LANTERN, scale: 2.8, weight: 4 },
+  scroll: { sprite: FU_SCROLL, scale: 2.4, weight: 2 },
+  firecrackers: { sprite: FIRECRACKERS, scale: 2.6, weight: 2 },
+  mandarin: { sprite: MANDARIN, scale: 2.6, weight: 2 },
+  goat: { sprite: GOAT, scale: 2.6, weight: 3 },
+};
+function pickDrifter(): DrifterKind {
+  const kinds = Object.keys(DRIFTERS) as DrifterKind[];
+  let roll = Math.random() * kinds.reduce((sum, k) => sum + DRIFTERS[k].weight, 0);
+  for (const kind of kinds) { roll -= DRIFTERS[kind].weight; if (roll < 0) return kind; }
+  return "lantern";
+}
+
+// Gold sparkles twinkling in the background: [x%, y%, delay s, size].
+const SPARKLES: [number, number, number, number][] = [
+  [6, 18, 0, 3], [14, 62, 1.2, 2], [22, 34, 2.1, 2.5], [31, 82, 0.6, 2], [38, 12, 1.7, 3], [47, 48, 2.8, 2],
+  [55, 74, 0.3, 2.5], [63, 26, 1.4, 2], [71, 58, 2.4, 3], [79, 16, 0.9, 2], [86, 40, 1.9, 2.5], [93, 70, 0.4, 2],
+  [10, 90, 2.6, 2], [68, 90, 1.1, 2.5], [44, 30, 3.2, 2], [88, 86, 2.2, 3],
+];
 type FallingPocket = { id: number; x: number; fall: number; sway: number };
 type PocketMound = { count: number; opening: boolean };
 /** A gold coin flying out of a mound from (x, y) by (dx, dy) px. */
@@ -689,7 +712,7 @@ function NewYearScene() {
       setDrifters((current) => current.length >= (small ? MAX_DRIFTERS / 2 : MAX_DRIFTERS) ? current : [...current, {
         id: nextId.current++,
         x: 12 + Math.random() * (window.innerWidth - 60),
-        kind: Math.random() < 0.6 ? "lantern" : "goat",
+        kind: pickDrifter(),
         fall: 10 + Math.random() * 5,
         sway: 2.8 + Math.random() * 1.6,
       }]);
@@ -753,6 +776,15 @@ function NewYearScene() {
 
   return (
     <>
+      {/* Behind everything: a festive red-orange glow, a gold key-pattern border down both
+          sides, and twinkling gold sparkles. */}
+      <div aria-hidden="true" className="season-festive pointer-events-none fixed inset-0 -z-10">
+        <div className="season-fret left-0" style={{ backgroundImage: FRET_TILE }} />
+        <div className="season-fret right-0" style={{ backgroundImage: FRET_TILE }} />
+        {SPARKLES.map(([x, y, delay, size], i) => (
+          <PixelSprite key={i} sprite={SPARKLE} scale={size} className="season-twinkle absolute" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${delay}s` }} />
+        ))}
+      </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {drifters.map((d) => (
           <span
@@ -762,7 +794,7 @@ function NewYearScene() {
             onAnimationEnd={(event) => { if (event.target === event.currentTarget) setDrifters((current) => current.filter((x) => x.id !== d.id)); }}
           >
             <span className="season-duck-sway block" style={{ animationDuration: `${d.sway}s` }}>
-              <PixelSprite sprite={d.kind === "lantern" ? LANTERN : GOAT} scale={d.kind === "lantern" ? 3 : 2.6} />
+              <PixelSprite sprite={DRIFTERS[d.kind].sprite} scale={DRIFTERS[d.kind].scale} />
             </span>
           </span>
         ))}
