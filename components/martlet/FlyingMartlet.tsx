@@ -22,7 +22,7 @@ export function FlyingMartlet() {
   if (!fact) return null;
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-24 z-40 overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 bottom-8 z-40 overflow-hidden">
       <div
         className="martlet-flight flex w-max items-center gap-2"
         // Fires when the loop restarts, while the bird is off-screen, so the text never swaps in view.
