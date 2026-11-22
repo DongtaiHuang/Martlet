@@ -111,8 +111,8 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
         <div className="relative flex h-full min-h-0 flex-col">
           {/* Ambient backdrop: the same photo, blurred and glowing, so the room takes its colour. */}
           {photo.photo_url && (
-            // eslint-disable-next-line @next/next/no-img-element
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element -- signed URL, see gallery */}
               <img key={`bg-${index}`} src={photo.photo_url} alt=""
                 className="h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-150 animate-[martlet-fade-in_600ms_ease-out]" />
             </div>
