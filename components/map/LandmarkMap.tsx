@@ -2,18 +2,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LngLatBounds, Map, Marker, Popup } from "maplibre-gl";
+import { Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { ArrowUpRight, CheckCircle2, LockKeyhole, UsersRound } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
-import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
+import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
+import { towerSvg, towerTier } from "./landmark-tower";
 import { POPUP_MAX_WIDTH } from "./popup-content";
 import { landmarkZoom } from "./landmark-style";
 import { CAMPUS_MAP_FRAME, createCampusMap } from "./map-config";
 
-const PIN_SIZE = 38; // a bit larger than the Explore map's 30px pins
-const SELECTED_RING = "0 0 0 4px rgba(153,27,27,.85), 0 2px 8px rgba(0,0,0,.4)";
-const DEFAULT_SHADOW = "0 1px 4px rgba(0,0,0,.35)";
+const PIXEL = 2.25; // tower pixel size: a bit larger than the Explore map's 1.75px
+const SELECTED_GLOW = "drop-shadow(0 0 3px #991b1b) drop-shadow(0 0 2px #991b1b)";
+const DEFAULT_SHADOW = "drop-shadow(0 2px 2px rgba(0,0,0,.35))";
 
 const isWide = () => window.matchMedia("(min-width: 1024px)").matches;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -32,25 +33,22 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
 
   useEffect(() => {
     if (!mapEl.current) return;
-    // Same map as Explore (style, controls), but opening zoomed out far enough to show
-    // every landmark, including the off-campus ones.
+    // Exactly the Explore map, opening on campus in 3D. (Zooming out to fit the off-campus
+    // landmarks would drop below zoom 13, where the map has no 3D buildings; the list flies
+    // to those instead.)
     const map = createCampusMap(mapEl.current);
-    if (landmarks.length > 0) {
-      const bounds = new LngLatBounds();
-      for (const l of landmarks) bounds.extend([l.longitude, l.latitude]);
-      map.fitBounds(bounds, { padding: 56, maxZoom: 16, duration: 0 });
-    }
 
     const byId = markers.current;
     for (const landmark of landmarks) {
-      const popup = new Popup({ offset: PIN_SIZE / 2 + 4, maxWidth: POPUP_MAX_WIDTH })
+      const { element, height } = landmarkMarker(landmark, PIXEL);
+      const popup = new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH })
         .setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href)));
       popup.on("open", () => {
         // One popup at a time, and keep the list in sync.
         byId.forEach((other, id) => { if (id !== landmark.id && other.getPopup()?.isOpen()) other.togglePopup(); });
         setSelected(landmark.id);
       });
-      const marker = new Marker({ element: landmarkMarkerElement(landmark, PIN_SIZE) })
+      const marker = new Marker({ element, anchor: "bottom" })
         .setLngLat([landmark.longitude, landmark.latitude])
         .setPopup(popup)
         .addTo(map);
@@ -65,7 +63,7 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
   useEffect(() => {
     markers.current.forEach((marker, id) => {
       const el = marker.getElement();
-      el.style.boxShadow = id === selected ? SELECTED_RING : DEFAULT_SHADOW;
+      el.style.filter = id === selected ? SELECTED_GLOW : DEFAULT_SHADOW;
       el.style.zIndex = id === selected ? "2" : "";
     });
     if (selected && isWide()) {
@@ -122,12 +120,12 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
                 >
                   <span className="flex items-start justify-between gap-2">
                     <span className="flex items-center gap-2 font-semibold text-stone-900">
+                      {/* Static markup: towerSvg only emits constant colours and numbers. */}
                       <span
                         aria-hidden="true"
-                        className={`grid size-6 shrink-0 place-items-center rounded-full text-xs text-white ${landmark.unlocked ? "bg-emerald-600" : "bg-yellow-600"}`}
-                      >
-                        ★
-                      </span>
+                        className="grid h-7 w-6 shrink-0 place-items-end justify-center"
+                        dangerouslySetInnerHTML={{ __html: towerSvg(towerTier(landmark.unlock_count), landmark.unlocked, { height: 28 }) }}
+                      />
                       {landmark.name}
                     </span>
                     <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${landmark.unlocked ? "bg-emerald-100 text-emerald-900" : "bg-stone-100 text-stone-700"}`}>

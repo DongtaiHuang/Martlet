@@ -6,6 +6,8 @@ import { birdColor, birdIcon } from "./popup-bird";
 export interface PopupOptions {
   /** Stable id used to pick the bird's colour. */
   seed: string;
+  /** Grey bird with no quote (an undiscovered landmark). */
+  muted?: boolean;
   tag: string;
   tagTone?: "neutral" | "gold" | "green";
   title: string;
@@ -19,7 +21,7 @@ export interface PopupOptions {
 /** Max width passed to MapLibre's Popup so the rounded card has room to breathe. */
 export const POPUP_MAX_WIDTH = "280px";
 
-export function buildPopup({ seed, tag, tagTone = "neutral", title, body, meta = [], cta, onOpen }: PopupOptions) {
+export function buildPopup({ seed, muted = false, tag, tagTone = "neutral", title, body, meta = [], cta, onOpen }: PopupOptions) {
   const el = (tag: string, className: string, text?: string) => {
     const node = document.createElement(tag);
     node.className = className;
@@ -29,7 +31,7 @@ export function buildPopup({ seed, tag, tagTone = "neutral", title, body, meta =
 
   const root = el("div", "martlet-popup");
   const header = el("div", "martlet-popup__header");
-  header.append(birdIcon(birdColor(seed)), el("span", `martlet-popup__tag martlet-popup__tag--${tagTone}`, tag));
+  header.append(birdIcon(birdColor(seed), muted), el("span", `martlet-popup__tag martlet-popup__tag--${tagTone}`, tag));
   root.append(header, el("strong", "martlet-popup__title", title));
   if (body) root.append(el("p", "martlet-popup__body", body));
   for (const line of meta) root.append(el("p", "martlet-popup__meta", line));

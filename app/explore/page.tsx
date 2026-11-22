@@ -24,7 +24,7 @@ export default async function ExplorePage({
       <p className="mt-3 text-xs text-neutral-500">Tap a marker for details. Meetup locations are approved campus landmarks only.</p>
       {landmarks.length > 0 && (
         <p className="mt-1 text-xs text-neutral-500">
-          ★ pins are <Link href="/landmarks" className="font-semibold text-red-800 underline">landmarks</Link> to unlock with a photo. Some are off campus; zoom out to find them.
+          Tower pins are <Link href="/landmarks" className="font-semibold text-red-800 underline">landmarks</Link> to unlock with a photo; they grow as more photos are shared. Some are off campus; zoom out to find them.
         </p>
       )}
     </main></div>;

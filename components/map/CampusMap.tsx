@@ -6,7 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import type { LandmarkSummary } from "@/types/landmark";
 import { categories, categoryValues } from "@/components/feed/categories";
-import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
+import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 
@@ -31,7 +31,7 @@ const NO_LANDMARKS: LandmarkSummary[] = [];
 
 /**
  * `focusId` (from /explore?meetup=<id>) centres the map on that meetup and opens its popup once.
- * `landmarks` (ADR 0009) are always shown as star pins, independent of the category filter.
+ * `landmarks` (ADR 0009) are shown as tower pins, independent of the category filter.
  */
 export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   meetups: MeetupSummary[];
@@ -80,11 +80,13 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const markers = shownLandmarks.map((landmark) =>
-      new Marker({ element: landmarkMarkerElement(landmark) })
+    const markers = shownLandmarks.map((landmark) => {
+      const { element, height } = landmarkMarker(landmark, 1.75);
+      return new Marker({ element, anchor: "bottom" })
         .setLngLat([landmark.longitude, landmark.latitude])
-        .setPopup(new Popup({ offset: 18, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
-        .addTo(map));
+        .setPopup(new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
+        .addTo(map);
+    });
     return () => markers.forEach((m) => m.remove());
   }, [shownLandmarks, router]);
 
@@ -113,7 +115,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
           {([
             ["all", `All (${meetups.length + landmarks.length})`],
             ["meetups", `Meetups (${meetups.length})`],
-            ["landmarks", `★ Landmarks (${landmarks.length})`],
+            ["landmarks", `Landmarks (${landmarks.length})`],
           ] as const).map(([value, label]) => (
             <button
               key={value}

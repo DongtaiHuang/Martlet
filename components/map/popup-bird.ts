@@ -3,6 +3,8 @@
 // The body colour looks random per landmark/meetup but is derived from its id, so the
 // same place always shows the same bird.
 
+import { randomQuote } from "./bird-quotes";
+
 const BIRD_COLORS = [
   "#facc15", // yellow (the classic chick)
   "#fb923c", // orange
@@ -58,9 +60,14 @@ const FIXED: Record<string, string> = {
   R: "#e2661c", // beak (bottom)
 };
 
-/** SVG markup for the chick with a `color` body. Exported for previews/tests. */
-export function birdSvg(color: string, size = 34): string {
-  const fills: Record<string, string> = { ...FIXED, Y: color, S: shade(color, 0.18) };
+const GREY: Record<string, string> = { K: "#3f3f46", B: "#71717a", O: "#a1a1aa", R: "#8b8b93" };
+export const MUTED_BIRD = "#d4d4d8";
+
+/** SVG markup for the chick with a `color` body (`muted` = all greyscale). Exported for previews/tests. */
+export function birdSvg(color: string, size = 34, muted = false): string {
+  const fills: Record<string, string> = muted
+    ? { ...GREY, Y: MUTED_BIRD, S: shade(MUTED_BIRD, 0.18) }
+    : { ...FIXED, Y: color, S: shade(color, 0.18) };
   // One <path> per colour, built from horizontal runs of pixels.
   const runs: Record<string, string[]> = {};
   SPRITE.forEach((row, y) => {
@@ -78,11 +85,27 @@ export function birdSvg(color: string, size = 34): string {
   return `<svg viewBox="0 0 18 18" width="${size}" height="${size}" shape-rendering="crispEdges">${paths}</svg>`;
 }
 
-/** The bird as a decorative element for popups. */
-export function birdIcon(color: string): HTMLSpanElement {
+/**
+ * The bird for popups. A muted (grey) bird is purely decorative; a coloured one says a
+ * random McGill/Montreal quote in a speech bubble on hover or keyboard focus.
+ */
+export function birdIcon(color: string, muted = false): HTMLSpanElement {
   const span = document.createElement("span");
   span.className = "martlet-popup__bird";
-  span.setAttribute("aria-hidden", "true");
-  span.innerHTML = birdSvg(color, 28);
+  span.innerHTML = birdSvg(color, 28, muted);
+  if (muted) {
+    span.setAttribute("aria-hidden", "true");
+    return span;
+  }
+  const bubble = document.createElement("span");
+  bubble.className = "martlet-popup__quote";
+  bubble.setAttribute("role", "tooltip");
+  span.append(bubble);
+  span.tabIndex = 0;
+  span.setAttribute("aria-label", "Martlet says something");
+  const speak = () => { bubble.textContent = randomQuote(); };
+  speak();
+  span.addEventListener("mouseenter", speak);
+  span.addEventListener("focus", speak);
   return span;
 }
