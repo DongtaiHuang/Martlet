@@ -1,0 +1,53 @@
+name: Release
+
+# Push a tag like v1.1.0 on main (see docs/RELEASES.md):
+#   1. creates the GitHub release with notes generated from merged PRs
+#   2. publishes a matching Docker image: ghcr.io/<owner>/martlet:v1.1.0 (and :latest)
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Image name (lowercase owner)
+        id: img
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/martlet" >> "$GITHUB_OUTPUT"
+
+      # NEXT_PUBLIC_* are public browser values; set them as repository *variables* (not secrets).
+      # Without them the image runs in demo mode.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.img.outputs.name }}:${{ github.ref_name }}
+            ${{ steps.img.outputs.name }}:latest
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_MAP_STYLE_URL=${{ vars.NEXT_PUBLIC_MAP_STYLE_URL }}
+            NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ vars.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_GOOGLE_MAP_ID=${{ vars.NEXT_PUBLIC_GOOGLE_MAP_ID }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

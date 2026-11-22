@@ -1,0 +1,16 @@
+# Keep the build context small and never send secrets to the Docker daemon.
+.git
+.github
+.next
+node_modules
+.env
+.env.*
+!.env.example
+.vercel
+.claude
+coverage
+*.log
+npm-debug.log*
+Dockerfile
+.dockerignore
+docs
