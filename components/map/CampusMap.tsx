@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GeolocateControl, Map, Marker, NavigationControl, Popup } from "maplibre-gl";
+import { Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import type { LandmarkSummary } from "@/types/landmark";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
-import { CAMPUS_CENTER, MARKER_COLORS } from "./map-config";
-import { mapStyleUrl } from "./map-style";
+import { CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 
 const FOCUS_ZOOM = 17;
 
@@ -66,15 +65,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
 
   useEffect(() => {
     if (!ref.current) return;
-    const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
-    map.addControl(new NavigationControl(), "top-right");
-    // ADR 0008: opt-in, one-shot "show my location". The position stays in the
-    // browser (MapLibre draws a dot); it is never sent to our server or stored.
-    map.addControl(new GeolocateControl({
-      trackUserLocation: false,
-      positionOptions: { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 },
-      fitBoundsOptions: { maxZoom: 16 },
-    }), "top-right");
+    const map = createCampusMap(ref.current);
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -136,7 +127,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
           </button>
         ))}
       </div>
-      <div ref={ref} aria-label="Map of McGill meetups" className="h-[65vh] min-h-96 w-full overflow-hidden rounded-2xl border border-neutral-200" />
+      <div ref={ref} aria-label="Map of McGill meetups" className={CAMPUS_MAP_FRAME} />
       {visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
     </div>
   );

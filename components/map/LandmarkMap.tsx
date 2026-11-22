@@ -2,14 +2,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LngLatBounds, Map, Marker, NavigationControl, Popup } from "maplibre-gl";
+import { Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { ArrowUpRight, LockKeyhole, Star, UsersRound } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
 import { landmarkZoom } from "./landmark-style";
-import { CAMPUS_CENTER } from "./map-config";
-import { mapStyleUrl } from "./map-style";
+import { CAMPUS_MAP_FRAME, createCampusMap } from "./map-config";
 
 const PIN_SIZE = 38; // a bit larger than the Explore map's 30px pins
 const SELECTED_RING = "0 0 0 4px rgba(153,27,27,.85), 0 2px 8px rgba(0,0,0,.4)";
@@ -32,15 +31,9 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
 
   useEffect(() => {
     if (!mapEl.current) return;
-    const map = new Map({ container: mapEl.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 13 });
-    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
-
-    // Start zoomed out far enough to show every landmark, including the off-campus ones.
-    if (landmarks.length > 0) {
-      const bounds = new LngLatBounds();
-      for (const l of landmarks) bounds.extend([l.longitude, l.latitude]);
-      map.fitBounds(bounds, { padding: 56, maxZoom: 15, duration: 0 });
-    }
+    // Same map as Explore (style, campus view, controls); off-campus landmarks are a
+    // sidebar click away.
+    const map = createCampusMap(mapEl.current);
 
     const byId = markers.current;
     for (const landmark of landmarks) {
@@ -97,10 +90,10 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
         ref={mapEl}
         role="region"
         aria-label="Map of landmarks"
-        className="h-[55vh] min-h-80 w-full scroll-mt-4 overflow-hidden rounded-2xl border border-stone-200 lg:h-[72vh]"
+        className={`${CAMPUS_MAP_FRAME} scroll-mt-4`}
       />
 
-      <aside aria-labelledby="landmark-list-heading" className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white lg:h-[72vh]">
+      <aside aria-labelledby="landmark-list-heading" className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white lg:h-[65vh] lg:min-h-96">
         <div className="border-b border-stone-200 px-4 py-3">
           <h2 id="landmark-list-heading" className="font-bold text-stone-900">Landmarks</h2>
           <p className="text-xs text-stone-600">{landmarks.length} to discover · {unlockedCount} unlocked</p>
