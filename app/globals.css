@@ -57,6 +57,18 @@
 .martlet-stage[data-nest="asleep"] .martlet-eye-open { display: none; }
 .martlet-stage[data-nest="asleep"] .martlet-eye-closed { display: inline; }
 
+/* Fun-fact speech bubble (FlyingMartlet.tsx): pops up, stays, then fades. The duration
+   matches CHATTER_SHOW_MS. */
+@keyframes martlet-chatter {
+  0% { opacity: 0; transform: translateY(0.4rem) scale(0.9); }
+  6%, 90% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-0.2rem); }
+}
+.martlet-chatter {
+  transform-origin: bottom center;
+  animation: martlet-chatter 7s ease-out both;
+}
+
 /* Small, soft Zs drifting slowly up from the head (above the left side when facing left). */
 .martlet-zzz-anchor {
   left: calc(6 * var(--martlet-px));
@@ -83,6 +95,7 @@
   .martlet-nest { transition: none; }
   /* Still Zs, stepped up and away from the head. */
   .martlet-zzz { animation: none; opacity: 0.5; }
+  .martlet-chatter { animation: none; }
   .martlet-zzz:nth-child(2) { transform: translate(0.4rem, -1rem) scale(0.85); }
   .martlet-zzz:nth-child(3) { transform: translate(0.8rem, -2rem) scale(1.05); }
 }

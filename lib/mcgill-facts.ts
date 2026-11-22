@@ -7,4 +7,11 @@ export const MCGILL_FACTS = [
   "McGill and Harvard played a football game in 1874 that helped shape American football.",
   "McGill students helped play the first organized indoor ice hockey game, in Montreal in 1875.",
   "The Roddick Gates on Sherbrooke Street have been McGill's main entrance since 1925.",
+  "McGill's motto, Grandescunt Aucta Labore, means “by work, all things increase and grow.”",
+  "The Redpath Museum, opened in 1882, is the oldest building in Canada built to be a museum.",
+  "McGill's varsity teams are the Redbirds and the Martlets.",
+  "Wilder Penfield founded the Montreal Neurological Institute at McGill in 1934.",
+  "Leonard Cohen studied at McGill before becoming a poet and singer.",
+  "William Shatner, Star Trek's Captain Kirk, graduated from McGill in 1952.",
+  "McGill's downtown campus sits right at the foot of Mount Royal.",
 ] as const;
