@@ -5,6 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory } from "@/types/meetup";
 import { MARKER_COLORS } from "./map-config";
 import { styleForMode } from "./map-style";
+import { enhanceDarkBuildings } from "./dark-buildings";
 import { useColorMode } from "@/lib/useColorMode";
 
 interface MeetupLocationMapProps {
@@ -42,6 +43,8 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
       attributionControl: { compact: true },
     });
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    // Runs after the first load and after every setStyle (mode switch).
+    map.on("style.load", () => enhanceDarkBuildings(map, styleRef.current));
     map.touchZoomRotate.disableRotation();
 
     const marker = new Marker({ color: markerColor }).setLngLat(center).addTo(map);

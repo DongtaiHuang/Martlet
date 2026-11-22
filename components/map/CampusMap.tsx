@@ -9,6 +9,7 @@ import { categories, categoryValues } from "@/components/feed/categories";
 import { LANDMARK_COLORS } from "./landmark-style";
 import { CAMPUS_CENTER, MARKER_COLORS } from "./map-config";
 import { styleForMode } from "./map-style";
+import { enhanceDarkBuildings } from "./dark-buildings";
 import { useColorMode } from "@/lib/useColorMode";
 
 const FOCUS_ZOOM = 17;
@@ -110,6 +111,8 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     styleRef.current = styleForMode((document.documentElement.dataset.mode === "dark" ? "dark" : "light"));
     const map = new Map({ container: ref.current, style: styleRef.current, center: CAMPUS_CENTER, zoom: 16 });
     map.addControl(new NavigationControl(), "top-right");
+    // Runs after the first load and after every setStyle (mode switch).
+    map.on("style.load", () => enhanceDarkBuildings(map, styleRef.current));
     // ADR 0008: opt-in, one-shot "show my location". The position stays in the
     // browser (MapLibre draws a dot); it is never sent to our server or stored.
     map.addControl(new GeolocateControl({
