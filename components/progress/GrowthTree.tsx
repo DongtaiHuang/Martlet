@@ -83,23 +83,23 @@ export function GrowthTree({ stage, unlocked, total, preview = false, palette = 
             style={{ left: `${left}%`, top: `${top}%` }}
           >
             {/* Hover/focus indicator around the fruit. */}
-            <span aria-hidden="true" className="absolute inset-0 rounded-full ring-2 ring-white/0 transition group-hover:bg-white/25 group-hover:ring-white group-focus-visible:bg-white/25 group-focus-visible:ring-white" />
+            <span aria-hidden="true" className="absolute inset-0 rounded-full ring-2 ring-white/0 transition group-hover:bg-surface/25 group-hover:ring-white group-focus-visible:bg-surface/25 group-focus-visible:ring-white" />
             {/* Preview card. */}
             <span
               aria-hidden="true"
-              className={`pointer-events-none invisible absolute top-full mt-2 w-40 overflow-hidden rounded-xl border border-stone-200 bg-white text-left opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 sm:w-48 ${align}`}
+              className={`pointer-events-none invisible absolute top-full mt-2 w-40 overflow-hidden rounded-xl border border-line bg-surface text-left opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 sm:w-48 ${align}`}
             >
               {fruit.photoUrl ? (
                 // Short-lived signed Supabase URL; next/image would need remote config.
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={fruit.photoUrl} alt="" loading="lazy" className="block aspect-[4/3] w-full bg-stone-100 object-cover" />
+                <img src={fruit.photoUrl} alt="" loading="lazy" className="block aspect-[4/3] w-full bg-surface-muted object-cover" />
               ) : (
-                <span className="flex aspect-[4/3] w-full items-center justify-center bg-stone-100 text-stone-400"><ImageOff size={22} /></span>
+                <span className="flex aspect-[4/3] w-full items-center justify-center bg-surface-muted text-stone-400"><ImageOff size={22} /></span>
               )}
               <span className="block p-2">
-                <span className="block text-sm font-bold text-stone-900">{fruit.landmarkName}</span>
-                {fruit.caption && <span className="mt-0.5 line-clamp-2 block text-xs text-stone-600">{fruit.caption}</span>}
-                <span className="mt-1 block text-xs font-semibold text-red-800">Open your photo →</span>
+                <span className="block text-sm font-bold text-ink-soft">{fruit.landmarkName}</span>
+                {fruit.caption && <span className="mt-0.5 line-clamp-2 block text-xs text-ink-muted">{fruit.caption}</span>}
+                <span className="mt-1 block text-xs font-semibold text-brand-ink">Open your photo →</span>
               </span>
             </span>
           </Link>

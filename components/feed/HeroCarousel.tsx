@@ -8,7 +8,7 @@ import { heroPhotoLicense, heroSlides } from "./hero-slides";
 
 const ROTATION_MS = 6000;
 const motionPreference = "(prefers-reduced-motion: reduce)";
-const controlClass = "inline-grid min-h-11 min-w-11 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50";
+const controlClass = "inline-grid min-h-11 min-w-11 place-items-center rounded-lg text-white hover:bg-surface/10 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50";
 const photoSizes = "(min-width: 1152px) 726px, (min-width: 768px) 64vw, calc(100vw - 32px)";
 
 function subscribeToMotionPreference(onChange: () => void) {
@@ -118,7 +118,7 @@ export function HeroCarousel() {
               <p className="mt-2 max-w-[35ch] text-base leading-6 text-stone-100 lg:text-lg lg:leading-7">{item.description}</p>
               <div className="mt-5 flex flex-wrap gap-2.5">
                 {item.actions.map(({ label, href }, actionIndex) => (
-                  <Link key={href} href={href} prefetch={index === current ? undefined : false} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${actionIndex === 0 ? "bg-red-800 hover:bg-red-900" : "border border-white/50 bg-stone-950/60 hover:bg-stone-950"}`}>
+                  <Link key={href} href={href} prefetch={index === current ? undefined : false} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${actionIndex === 0 ? "bg-brand hover:bg-brand-hover" : "border border-white/50 bg-stone-950/60 hover:bg-stone-950"}`}>
                     {label} <ArrowUpRight aria-hidden="true" size={16} />
                   </Link>
                 ))}
@@ -137,7 +137,7 @@ export function HeroCarousel() {
               type="button"
               aria-label={`Slide ${index + 1}: ${item.title}`}
               aria-current={index === current ? "true" : undefined}
-              className="inline-grid h-11 w-9 place-items-center rounded-lg hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white"
+              className="inline-grid h-11 w-9 place-items-center rounded-lg hover:bg-surface/10 focus-visible:outline-2 focus-visible:outline-white"
               onClick={() => navigate(index)}
             >
               <span aria-hidden="true" className={`h-1.5 rounded-full ${index === current ? "w-6 bg-red-400" : "w-2 bg-stone-300/75"}`} />

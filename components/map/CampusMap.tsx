@@ -9,6 +9,7 @@ import { categories, categoryValues } from "@/components/feed/categories";
 import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
+import { useMapColorMode } from "./map-mode";
 
 const FOCUS_ZOOM = 17;
 
@@ -40,6 +41,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  useMapColorMode(mapRef);
   const markersRef = useRef(new globalThis.Map<string, Marker>());
   const router = useRouter();
   const [active, setActive] = useState<MeetupCategory | "all">("all");
@@ -100,18 +102,18 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     if (!marker.getPopup()?.isOpen()) marker.togglePopup();
   }, [focusId]);
 
-  const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-red-700";
-  const chipState = (on: boolean) => (on ? "border-red-700 bg-red-700 text-white" : "border-stone-300 bg-white text-stone-800 hover:border-red-700");
+  const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-focus";
+  const chipState = (on: boolean) => (on ? "border-brand bg-brand text-on-brand" : "border-line-strong bg-surface text-ink-soft hover:border-brand");
 
   return (
     <div>
       {focusMissing && (
-        <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p role="status" className="mb-4 rounded-xl border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">
           That meetup isn’t on the map anymore. It may have been cancelled or already started.
         </p>
       )}
       {landmarks.length > 0 && (
-        <div role="group" aria-label="Show on map" className="mb-3 inline-flex w-full max-w-md rounded-2xl border border-stone-200 bg-white p-1 shadow-sm sm:w-auto">
+        <div role="group" aria-label="Show on map" className="mb-3 inline-flex w-full max-w-md rounded-2xl border border-line bg-surface p-1 shadow-sm sm:w-auto">
           {([
             ["all", `All (${meetups.length + landmarks.length})`],
             ["meetups", `Meetups (${meetups.length})`],
@@ -122,7 +124,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
               type="button"
               aria-pressed={layer === value}
               onClick={() => setLayer(value)}
-              className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-bold whitespace-nowrap max-[359px]:px-1.5 max-[359px]:text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 sm:flex-none sm:px-4 ${layer === value ? "bg-red-800 text-white shadow-sm" : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"}`}
+              className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-bold whitespace-nowrap max-[359px]:px-1.5 max-[359px]:text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:flex-none sm:px-4 ${layer === value ? "bg-brand text-on-brand shadow-sm" : "text-ink-muted hover:bg-surface-muted hover:text-ink-soft"}`}
             >
               {label}
             </button>
@@ -144,7 +146,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       {/* Keep this className constant: MapLibre adds its own classes to the container, and
           React rewriting className would remove them and break the map's positioning. */}
       <div ref={ref} aria-label="Map of McGill meetups and landmarks" className={CAMPUS_MAP_FRAME} />
-      {layer !== "landmarks" && visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
+      {layer !== "landmarks" && visible.length === 0 && <p className="mt-3 text-sm text-ink-muted">No upcoming meetups in this category.</p>}
     </div>
   );
 }
