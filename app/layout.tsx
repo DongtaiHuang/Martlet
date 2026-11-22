@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AchievementToaster } from "@/components/achievements/AchievementToaster";
+import { FlyingMartlet } from "@/components/martlet/FlyingMartlet";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="bg-canvas text-ink">
         {children}
+        <FlyingMartlet />
         <AchievementToaster />
       </body>
     </html>
