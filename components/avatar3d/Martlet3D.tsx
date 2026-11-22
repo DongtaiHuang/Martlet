@@ -256,7 +256,7 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
 
 export default function Martlet3D(props: Props & { name: string }) {
   return (
-    <div className="aspect-square w-full max-w-[520px] overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50 to-stone-100">
+    <div className="aspect-square w-full max-w-[520px] overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50 to-stone-100 dark:from-stone-800 dark:to-stone-950">
       <Canvas
         dpr={[1, 2]} camera={{ position: [0, 2.0, 6.3], fov: 36 }}
         onCreated={({ camera }) => camera.lookAt(0, 1.15, 0)}

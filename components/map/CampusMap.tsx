@@ -8,7 +8,8 @@ import type { LandmarkSummary } from "@/types/landmark";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { LANDMARK_COLORS } from "./landmark-style";
 import { CAMPUS_CENTER, MARKER_COLORS } from "./map-config";
-import { mapStyleUrl } from "./map-style";
+import { styleForMode } from "./map-style";
+import { useColorMode } from "@/lib/useColorMode";
 
 const FOCUS_ZOOM = 17;
 
@@ -93,6 +94,8 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   const markersRef = useRef(new globalThis.Map<string, Marker>());
   const router = useRouter();
   const [active, setActive] = useState<MeetupCategory | "all">("all");
+  const mode = useColorMode();
+  const styleRef = useRef("");
 
   const visible = useMemo(
     () => (active === "all" ? meetups : meetups.filter((m) => m.category === active)),
@@ -104,7 +107,8 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
 
   useEffect(() => {
     if (!ref.current) return;
-    const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
+    styleRef.current = styleForMode((document.documentElement.dataset.mode === "dark" ? "dark" : "light"));
+    const map = new Map({ container: ref.current, style: styleRef.current, center: CAMPUS_CENTER, zoom: 16 });
     map.addControl(new NavigationControl(), "top-right");
     // ADR 0008: opt-in, one-shot "show my location". The position stays in the
     // browser (MapLibre draws a dot); it is never sent to our server or stored.
@@ -116,6 +120,12 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
+
+  // Follow light/dark mode (ADR 0012): swap the basemap style in place; DOM markers are kept.
+  useEffect(() => {
+    const url = styleForMode(mode);
+    if (mapRef.current && styleRef.current && styleRef.current !== url) { styleRef.current = url; mapRef.current.setStyle(url); }
+  }, [mode]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -154,13 +164,13 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     if (!marker.getPopup()?.isOpen()) marker.togglePopup();
   }, [focusId]);
 
-  const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-red-700";
-  const chipState = (on: boolean) => (on ? "border-red-700 bg-red-700 text-white" : "border-stone-300 bg-white text-stone-800 hover:border-red-700");
+  const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-focus";
+  const chipState = (on: boolean) => (on ? "border-brand bg-brand text-on-brand" : "border-line-strong bg-surface text-ink-soft hover:border-brand");
 
   return (
     <div>
       {focusMissing && (
-        <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p role="status" className="mb-4 rounded-xl border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">
           That meetup isn’t on the map anymore. It may have been cancelled or already started.
         </p>
       )}
@@ -174,8 +184,8 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
           </button>
         ))}
       </div>
-      <div ref={ref} aria-label="Map of McGill meetups" className="h-[65vh] min-h-96 w-full overflow-hidden rounded-2xl border border-neutral-200" />
-      {visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
+      <div ref={ref} aria-label="Map of McGill meetups" className="h-[65vh] min-h-96 w-full overflow-hidden rounded-2xl border border-line" />
+      {visible.length === 0 && <p className="mt-3 text-sm text-ink-muted">No upcoming meetups in this category.</p>}
     </div>
   );
 }

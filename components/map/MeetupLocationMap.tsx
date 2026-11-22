@@ -4,7 +4,8 @@ import { Map, Marker, NavigationControl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory } from "@/types/meetup";
 import { MARKER_COLORS } from "./map-config";
-import { mapStyleUrl } from "./map-style";
+import { styleForMode } from "./map-style";
+import { useColorMode } from "@/lib/useColorMode";
 
 interface MeetupLocationMapProps {
   /** Marker colour from the meetup category; ignored when `color` is given. */
@@ -20,13 +21,17 @@ interface MeetupLocationMapProps {
 export function MeetupLocationMap({ category, color, locationName, latitude, longitude, zoom = 16.5 }: MeetupLocationMapProps) {
   const ref = useRef<HTMLDivElement>(null);
   const markerColor = color ?? MARKER_COLORS[category ?? "other"];
+  const mode = useColorMode();
+  const mapRef = useRef<Map | null>(null);
+  const styleRef = useRef("");
 
   useEffect(() => {
     if (!ref.current) return;
     const center: [number, number] = [longitude, latitude];
+    styleRef.current = styleForMode((document.documentElement.dataset.mode === "dark" ? "dark" : "light"));
     const map = new Map({
       container: ref.current,
-      style: mapStyleUrl,
+      style: styleRef.current,
       center,
       zoom,
       // Don't hijack page scrolling or rotate the map by accident on a small embed.
@@ -42,15 +47,22 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
     const marker = new Marker({ color: markerColor }).setLngLat(center).addTo(map);
     marker.getElement().setAttribute("aria-label", locationName);
 
-    return () => map.remove();
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; };
   }, [markerColor, locationName, latitude, longitude, zoom]);
+
+  // Follow light/dark mode (ADR 0012): swap the basemap style in place; DOM markers are kept.
+  useEffect(() => {
+    const url = styleForMode(mode);
+    if (mapRef.current && styleRef.current && styleRef.current !== url) { styleRef.current = url; mapRef.current.setStyle(url); }
+  }, [mode]);
 
   return (
     <div
       ref={ref}
       role="region"
       aria-label={`Map showing ${locationName}`}
-      className="h-56 w-full overflow-hidden rounded-xl border border-stone-200 sm:h-72"
+      className="h-56 w-full overflow-hidden rounded-xl border border-line sm:h-72"
     />
   );
 }

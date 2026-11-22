@@ -8,8 +8,8 @@ import { useFutureLocalTime } from "@/components/forms/useFutureLocalTime";
 import type { PollType } from "@/types/poll";
 import { submitPoll } from "./actions";
 
-const field = "mt-1 block w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 py-2 text-base";
-const secondary = "min-h-11 rounded-lg px-3 text-sm font-bold text-red-800 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700";
+const field = "mt-1 block w-full min-w-0 rounded-lg border border-line-strong bg-surface px-3 py-2 text-base";
+const secondary = "min-h-11 rounded-lg px-3 text-sm font-bold text-brand-ink hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-focus";
 
 export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; startsAt: string }) {
   const [type, setType] = useState<PollType>("activity");
@@ -51,7 +51,7 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
 
   return (
     <details>
-      <summary className="w-fit cursor-pointer rounded-lg px-1 py-2 font-bold text-red-800 focus-visible:outline-2 focus-visible:outline-red-700">Create a poll</summary>
+      <summary className="w-fit cursor-pointer rounded-lg px-1 py-2 font-bold text-brand-ink focus-visible:outline-2 focus-visible:outline-focus">Create a poll</summary>
       <form action={dispatch} onSubmit={handleSubmit} onFocus={refreshMinimum} onChange={() => setTimeError("")} className="mt-2">
         <fieldset disabled={pending} className="min-w-0 space-y-4 disabled:opacity-70">
           <label className="block text-sm font-semibold">Poll type
@@ -71,7 +71,7 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
             <legend className="text-sm font-semibold">Choices</legend>
             {options.map((choice, index) => (
               <div key={index} className="flex min-w-0 items-end gap-2">
-                <label className="min-w-0 flex-1 text-xs font-medium text-stone-700">
+                <label className="min-w-0 flex-1 text-xs font-medium text-ink-2">
                   Choice {index + 1}
                   {type === "location" ? (
                     <select name="option" className={field} value={choice} onChange={(event) => updateChoice(index, event.target.value)} required>
@@ -90,9 +90,9 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
           <label className="block text-sm font-semibold">Voting closes
             <input name="closesAt" type="datetime-local" min={minimum} max={maximumDeadline} aria-describedby="poll-deadline-hint" className={field} required />
           </label>
-          <p id="poll-deadline-hint" className="text-sm text-stone-600">Use your device’s local time. Close voting by the meetup start on <MeetupStartTime startsAt={startsAt} />.</p>
-          {(timeError || state.error) && <p role="alert" className="text-sm text-red-900">{timeError || state.error}</p>}
-          <button type="submit" className="min-h-11 rounded-lg bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
+          <p id="poll-deadline-hint" className="text-sm text-ink-muted">Use your device’s local time. Close voting by the meetup start on <MeetupStartTime startsAt={startsAt} />.</p>
+          {(timeError || state.error) && <p role="alert" className="text-sm text-brand-ink-strong">{timeError || state.error}</p>}
+          <button type="submit" className="min-h-11 rounded-lg bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
             {pending ? "Creating poll…" : "Publish poll"}
           </button>
         </fieldset>

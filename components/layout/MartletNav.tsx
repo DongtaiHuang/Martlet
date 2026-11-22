@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Bird } from "lucide-react";
 import { AuthStatus } from "@/components/auth/AuthStatus";
 import { MartletNavLinks } from "./MartletNavLinks";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 /** Server component: render session-aware controls alongside the client-side active links. */
 export function MartletNav() {
@@ -14,7 +15,7 @@ export function MartletNav() {
         </Link>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
           <MartletNavLinks />
-          <div className="flex min-h-10 items-center gap-2"><AuthStatus /></div>
+          <div className="flex min-h-10 flex-wrap items-center gap-2"><AuthStatus /><ThemeSwitch /></div>
         </div>
       </div>
     </header>

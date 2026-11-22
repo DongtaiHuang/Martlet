@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 const MAP = {
   bg: {
     white: "surface", "stone-50": "canvas", "neutral-50": "canvas", "stone-100": "surface-muted", "stone-200": "line",
-    "red-800": "brand", "red-900": "brand-hover", "red-50": "brand-soft",
+    "red-800": "brand", "red-700": "brand", "red-900": "brand-hover", "red-50": "brand-soft", "red-100": "brand-muted",
     "amber-50": "warn-soft", "amber-100": "warn-muted", "green-50": "ok-soft",
   },
   text: {
@@ -18,7 +18,7 @@ const MAP = {
     "amber-900": "warn-ink", "amber-950": "warn-ink", "green-800": "ok-ink", "emerald-800": "ok-ink",
   },
   border: {
-    "stone-200": "line", "neutral-200": "line", "stone-100": "line-soft", "stone-300": "line-strong",
+    "stone-200": "line", "neutral-200": "line", "stone-100": "line-soft", "stone-300": "line-strong", "neutral-300": "line-strong",
     "red-200": "brand-line", "red-300": "brand-line", "red-800": "brand", "red-700": "brand",
     "amber-200": "warn-line", "green-200": "ok-line",
   },
@@ -26,6 +26,7 @@ const MAP = {
   outline: { "red-700": "focus", "red-800": "focus" },
   ring: { "red-700": "focus", "red-100": "brand-soft" },
   accent: { "red-800": "brand" },
+  decoration: { "red-300": "brand-line", "red-800": "brand-ink" },
 };
 const COLOR = "(?:white|black|(?:stone|neutral|red|amber|green|emerald|rose|sky|slate|gray|zinc|orange|indigo|violet)-\\d{2,3})";
 const RE = new RegExp(`(?<=^|[\\s"'\`{])((?:[a-z0-9-]+:)*)(bg|text|border|divide|outline|ring|accent|from|via|to|fill|stroke|placeholder|decoration)-(${COLOR})(\\/\\d+)?(?=$|[\\s"'\`}])`, "g");

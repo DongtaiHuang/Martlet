@@ -1,4 +1,4 @@
-// Theme + mode (ADR 0011). The inline script runs in <head> before first paint so the page never
+// Theme + mode (ADR 0012). The inline script runs in <head> before first paint so the page never
 // flashes the wrong colours. Kept dependency-free and tiny on purpose.
 // Preview/review aid: `?mode=dark|light|system` on any URL sets (and remembers) the mode.
 
@@ -10,11 +10,8 @@ export type ModePreference = (typeof MODES)[number];
 export const THEME_KEY = "martlet.theme";
 export const MODE_KEY = "martlet.mode";
 
-/**
- * Until every area is migrated to tokens, the default mode is "light" (no visual change).
- * Flip DEFAULT_MODE to "system" when dark mode ships.
- */
-export const DEFAULT_MODE: ModePreference = "light";
+/** Follow the device setting until the user picks Light or Dark in the nav switch. */
+export const DEFAULT_MODE: ModePreference = "system";
 
 export const themeInitScript = `(function(){try{
 var d=document.documentElement,s=localStorage;

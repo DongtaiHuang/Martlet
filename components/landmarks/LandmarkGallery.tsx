@@ -6,7 +6,7 @@ const EDIT_THRESHOLD_MS = 60_000;
 /** Photos from everyone who unlocked a landmark. Only rendered once the viewer has unlocked it. */
 export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhoto[]; landmarkName: string }) {
   if (photos.length === 0) {
-    return <p className="text-sm text-stone-600">No photos yet.</p>;
+    return <p className="text-sm text-ink-muted">No photos yet.</p>;
   }
 
   return (
@@ -14,7 +14,7 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
       {photos.map((photo) => {
         const edited = Date.parse(photo.updated_at) - Date.parse(photo.created_at) > EDIT_THRESHOLD_MS;
         return (
-          <li key={photo.user_id} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+          <li key={photo.user_id} className="overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
             {photo.photo_url ? (
               // Short-lived signed Supabase URLs; next/image would need remote config and re-optimize each token.
               // eslint-disable-next-line @next/next/no-img-element
@@ -22,21 +22,21 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
                 src={photo.photo_url}
                 alt={`${photo.display_name} at ${landmarkName}`}
                 loading="lazy"
-                className="aspect-[4/3] w-full bg-stone-100 object-cover"
+                className="aspect-[4/3] w-full bg-surface-muted object-cover"
               />
             ) : (
-              <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 bg-stone-100 text-sm text-stone-500">
+              <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 bg-surface-muted text-sm text-ink-subtle">
                 <ImageOff aria-hidden="true" size={24} />
                 Photo unavailable
               </div>
             )}
             <div className="p-4">
-              <p className="text-sm font-bold text-stone-900">
+              <p className="text-sm font-bold text-ink-soft">
                 {photo.display_name}
-                {photo.is_mine && <span className="ml-2 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">You</span>}
+                {photo.is_mine && <span className="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-ink">You</span>}
               </p>
-              {photo.caption && <p className="mt-1 text-sm text-stone-700 [overflow-wrap:anywhere]">{photo.caption}</p>}
-              <p className="mt-1 text-xs text-stone-500">
+              {photo.caption && <p className="mt-1 text-sm text-ink-2 [overflow-wrap:anywhere]">{photo.caption}</p>}
+              <p className="mt-1 text-xs text-ink-subtle">
                 <time dateTime={photo.created_at}>{new Date(photo.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}</time>
                 {edited && " · edited"}
               </p>
