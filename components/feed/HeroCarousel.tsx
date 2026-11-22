@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { heroPhotoLicense, heroSlides } from "./hero-slides";
 
-const ROTATION_MS = 6000;
+const ROTATION_MS = 5000;
 const motionPreference = "(prefers-reduced-motion: reduce)";
-const controlClass = "inline-grid min-h-11 min-w-11 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50";
+const controlClass = "inline-grid min-h-11 min-w-11 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white";
 const photoSizes = "(min-width: 1152px) 726px, (min-width: 768px) 64vw, calc(100vw - 32px)";
 
 function subscribeToMotionPreference(onChange: () => void) {
@@ -20,7 +20,6 @@ function subscribeToMotionPreference(onChange: () => void) {
 export function HeroCarousel() {
   const [selection, setSelection] = useState({ current: 0, previous: -1 });
   const [imageReady, setImageReady] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const reducedMotion = useSyncExternalStore(
@@ -32,7 +31,7 @@ export function HeroCarousel() {
   const { current, previous } = selection;
   const next = (current + 1) % heroSlides.length;
   const slide = heroSlides[current];
-  const rotating = !paused && !hovered && !focused && !reducedMotion;
+  const rotating = !hovered && !focused && !reducedMotion;
 
   useEffect(() => {
     if (!rotating) return;
@@ -145,15 +144,6 @@ export function HeroCarousel() {
           ))}
           <button type="button" aria-label="Next slide" className={controlClass} onClick={() => navigate(current + 1)}>
             <ChevronRight aria-hidden="true" size={20} />
-          </button>
-          <button
-            type="button"
-            aria-label={reducedMotion ? "Automatic rotation disabled by reduced motion" : paused ? "Play slideshow" : "Pause slideshow"}
-            className={controlClass}
-            disabled={reducedMotion}
-            onClick={() => setPaused((value) => !value)}
-          >
-            {paused || reducedMotion ? <Play aria-hidden="true" size={16} /> : <Pause aria-hidden="true" size={16} />}
           </button>
         </div>
         <p aria-live={rotating ? "off" : "polite"} aria-atomic="true" className="sr-only">
