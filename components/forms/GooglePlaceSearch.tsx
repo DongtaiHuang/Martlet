@@ -73,7 +73,7 @@ export function GooglePlaceSearch() {
       <p className="font-semibold">Search for a public place</p>
       <div ref={host} />
       {status && <p role="status" className="text-sm text-ink-muted">{status}</p>}
-      <p className="text-sm text-ink-muted">Search results are available for preview. Choose an approved venue below to publish.</p>
+      <p className="text-sm text-ink-muted">Use this lookup to check a place. The meetup publishes the meeting instructions you type.</p>
       {place && <div className="space-y-2">
         <p className="font-semibold">{place.name}</p>
         <p className="text-sm text-ink-muted">{place.address}</p>

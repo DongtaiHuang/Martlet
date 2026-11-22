@@ -61,7 +61,7 @@ Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-val
 - `status='cancelled'` hides meetup from the upcoming feed, but can still render a cancelled detail page.
 - Cancelled/past meetups cannot receive new pecks or flaps.
 - Time is stored in UTC `timestamptz`; display in user's local timezone.
-- The creation form submits a campus location ID from `CAMPUS_LOCATIONS` or a venue ID from `PUBLIC_VENUES`. The server resolves the ID into the canonical name and coordinates. It also passes `public_venue_id` to `createMeetup` for off-campus venues. Read contracts are unchanged.
+- The creation form submits an approved campus ID or a custom meeting spot. The server resolves campus IDs to canonical coordinates. Custom locations store 3–160 characters of trimmed text and null coordinates. Existing public venue rows retain their verified coordinates. Consumers must check both coordinates before rendering a marker.
 - `auth.users` handles auth; `profiles` contains public-facing display names.
 
 ## UX component API

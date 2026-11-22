@@ -45,6 +45,17 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
                 <time dateTime={photo.created_at}>{new Date(photo.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}</time>
                 {edited && " · edited"}
               </p>
+
+              {/* Only the owner can replace their photo */}
+              {photo.is_mine && (
+                <a
+                  href="#edit-my-photo"
+                  className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-brand bg-brand-soft px-4 py-2 text-sm font-semibold text-brand-ink transition-colors hover:bg-brand hover:text-on-brand"
+                >
+                  Replace Photo
+                </a>
+              )}
+
             </div>
           </li>
         );
