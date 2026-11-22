@@ -130,7 +130,7 @@ export default async function MeetupsPage({
       <MartletNav />
       <main className="mx-auto max-w-6xl px-4 pt-5 pb-12 sm:px-8 sm:pt-8">
         <HeroCarousel />
-        <section aria-labelledby="feed-heading" className="mt-8 sm:mt-10">
+        <section id="meetup-feed" tabIndex={-1} aria-labelledby="feed-heading" className="mt-8 scroll-mt-4 sm:mt-10">
           <h2 id="feed-heading" className="sr-only">{view === "landmarks" ? "Landmarks" : "Upcoming meetups"}</h2>
           <FeedViewToggle view={view} />
           {/* key: show the loading state again when switching views */}

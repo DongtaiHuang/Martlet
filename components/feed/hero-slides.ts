@@ -14,7 +14,7 @@ export const heroSlides = [
     description: "Find your people. Create spontaneous meetups, grab coffee, study together, and make new friends.",
     actions: [
       { label: "Create Meetup", href: "/meetups/new" },
-      { label: "Browse Meetups", href: "/meetups" },
+      { label: "Browse Meetups", href: "/meetups#meetup-feed" },
     ],
   },
   {
