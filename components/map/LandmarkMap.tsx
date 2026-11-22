@@ -118,7 +118,7 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
                     <span className="flex items-center gap-2 font-semibold text-stone-900">
                       <span
                         aria-hidden="true"
-                        className={`grid size-6 shrink-0 place-items-center rounded-full text-xs text-white ${landmark.unlocked ? "bg-yellow-600" : "bg-stone-500"}`}
+                        className={`grid size-6 shrink-0 place-items-center rounded-full text-xs text-white ${landmark.unlocked ? "bg-emerald-600" : "bg-yellow-600"}`}
                       >
                         ★
                       </span>

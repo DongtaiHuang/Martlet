@@ -3,7 +3,7 @@
 import type { LandmarkSummary } from "@/types/landmark";
 import { LANDMARK_COLORS } from "./landmark-style";
 
-/** Star pin: grey while locked, gold once unlocked. `size` in CSS px. */
+/** Star pin: gold while still to discover, green once completed. `size` in CSS px. */
 export function landmarkMarkerElement(landmark: LandmarkSummary, size = 30) {
   const el = document.createElement("div");
   el.textContent = "★";
