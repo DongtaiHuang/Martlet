@@ -69,7 +69,9 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
   // Keep the active thumbnail centred and warm the neighbours' images.
   useEffect(() => {
     if (index === null) return;
-    stripRef.current?.querySelector<HTMLElement>(`[data-i="${index}"]`)?.scrollIntoView({ block: "nearest", inline: "center", behavior: reduced ? "auto" : "smooth" });
+    // Scroll only the filmstrip. scrollIntoView would also scroll the dialog sideways and shift the photo.
+    const strip = stripRef.current, thumb = strip?.querySelector<HTMLElement>(`[data-i="${index}"]`);
+    if (strip && thumb) strip.scrollTo({ left: thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2, behavior: reduced ? "auto" : "smooth" });
     for (const i of [index - 1, index + 1]) {
       const url = photos[(i + count) % count]?.photo_url;
       if (url) new Image().src = url;
@@ -103,15 +105,17 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
         else if (e.key === " " && e.target === e.currentTarget) { e.preventDefault(); setPlaying((p) => !p); }
         else if (handleZoomKey(e)) e.preventDefault();
       }}
-      className="fixed inset-0 m-0 h-[100dvh] max-h-none w-screen max-w-none overflow-hidden border-0 bg-black p-0 text-white backdrop:bg-black open:animate-[martlet-viewer-in_220ms_ease-out]"
+      className="fixed inset-0 m-0 h-[100dvh] max-h-none w-full max-w-none overflow-clip border-0 bg-black p-0 text-white backdrop:bg-black open:animate-[martlet-viewer-in_220ms_ease-out]"
     >
       {photo && (
         <div className="relative flex h-full min-h-0 flex-col">
           {/* Ambient backdrop: the same photo, blurred and glowing, so the room takes its colour. */}
           {photo.photo_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={`bg-${index}`} src={photo.photo_url} alt="" aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-150 animate-[martlet-fade-in_600ms_ease-out]" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element -- signed URL, see gallery */}
+              <img key={`bg-${index}`} src={photo.photo_url} alt=""
+                className="h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-150 animate-[martlet-fade-in_600ms_ease-out]" />
+            </div>
           )}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgb(0_0_0/0.55)_70%,rgb(0_0_0/0.85)_100%)]" />
 
@@ -155,7 +159,7 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
               style={reduced ? undefined : { animation: `${direction === 1 ? "martlet-slide-from-right" : "martlet-slide-from-left"} 380ms cubic-bezier(.2,.8,.2,1)` }}
             >
               {photo.photo_url ? (
-                <div className={!reduced && !zoomed && !playing ? "animate-[martlet-kenburns_14s_ease-in-out_infinite_alternate]" : ""} style={{ maxHeight: "100%", maxWidth: "100%", display: "flex" }}>
+                <div className={!reduced && !zoomed && !playing ? "animate-[martlet-kenburns_14s_ease-in-out_infinite_alternate]" : ""} style={{ height: "100%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {/* Same short-lived signed URL as the tile; no new Storage permissions. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -163,7 +167,7 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
                     src={photo.photo_url}
                     alt={`${photo.display_name} at ${landmarkName}`}
                     draggable={false}
-                    className="pointer-events-none max-h-[calc(100dvh-13rem)] max-w-full select-none rounded-xl object-contain shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)]"
+                    className="pointer-events-none max-h-full max-w-full select-none rounded-xl object-contain shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)]"
                     style={{ ...imageStyle, viewTransitionName: morphIndex === index ? VIEWER_TRANSITION_NAME : undefined }}
                   />
                 </div>
