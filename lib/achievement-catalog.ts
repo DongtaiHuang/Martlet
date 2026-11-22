@@ -2,6 +2,8 @@
 // Hidden achievements show as "???" until earned. Adding one is a code change only;
 // ids must match the shape checked in supabase/migrations/010_achievements.sql.
 
+export const EXPO_67_ID = "expo-67";
+
 export const ACHIEVEMENTS = [
   { id: "bird-whisperer", icon: "🐦", title: "Bird whisperer", description: "Hovered over a martlet until it spoke.", hidden: true },
   { id: "chatterbox", icon: "🗣️", title: "Chatterbox", description: "Heard 10 different martlet quotes.", hidden: true },
@@ -12,6 +14,8 @@ export const ACHIEVEMENTS = [
   { id: "old-school", icon: "🎮", title: "Old school", description: "Entered ↑ ↑ ↓ ↓ ← → ← → B A.", hidden: true },
   { id: "field-trip", icon: "🚌", title: "Field trip", description: "Visit an off-campus landmark on the map.", hidden: false },
   { id: "tourist", icon: "🗺️", title: "Tourist", description: "Explore every landmark on the map.", hidden: false },
+  { id: EXPO_67_ID, icon: "67", title: "67", description: "Upload a challenge photo at the Expo 67 Biosphère.", hidden: false },
+
   // Activity ladders (ADR 0020): earned server-side from real activity counts
   // (see lib/activity-achievements.ts), not from browser triggers.
   { id: "nest-builder", icon: "🪺", title: "Nest builder", description: "Host your first meetup.", hidden: false },

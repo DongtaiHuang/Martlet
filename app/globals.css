@@ -135,11 +135,11 @@
   position: relative;
 }
 
-.martlet-popup__bird[tabindex] {
+button.martlet-popup__bird {
   cursor: help;
 }
 
-.martlet-popup__bird[tabindex]:focus-visible {
+button.martlet-popup__bird:focus-visible {
   outline: 2px solid #b91c1c;
   outline-offset: 2px;
 }
@@ -179,7 +179,8 @@
 }
 
 .martlet-popup__bird:hover .martlet-popup__quote,
-.martlet-popup__bird:focus-visible .martlet-popup__quote {
+.martlet-popup__bird:focus-visible .martlet-popup__quote,
+.martlet-popup__bird--speaking .martlet-popup__quote {
   opacity: 1;
   visibility: visible;
   transform: none;
@@ -199,6 +200,19 @@
 
 .martlet-toast {
   animation: martlet-toast 6s ease both;
+}
+
+@keyframes martlet-67-hands {
+  from { transform: translateY(-3px); }
+  to { transform: translateY(3px); }
+}
+
+.martlet-67-hand { transform: translateY(-3px); }
+.martlet-67-hand-right { transform: translateY(3px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .martlet-67-hand { animation: martlet-67-hands 0.55s ease-in-out 8 alternate; }
+  .martlet-67-hand-right { animation-direction: alternate-reverse; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,5 @@
 import type { LandmarkSummary } from "@/types/landmark";
+import { EXPO_67_ID } from "@/lib/achievement-catalog";
 
 // Mock-mode copy of the landmarks seeded in supabase/migrations/006_landmarks.sql.
 // Keep the two in sync. In mock mode everything is locked and there are no photos.
@@ -33,6 +34,11 @@ export function getMockLandmarks(): LandmarkSummary[] {
       id: "la-banquise", name: "La Banquise", latitude: 45.5254, longitude: -73.5749, radius_m: 75,
       challenge_prompt: "Take a photo outside La Banquise. No purchase needed (poutine optional).",
       description: "The 24-hour poutine institution on Rue Rachel in the Plateau.",
+    },
+    {
+      id: EXPO_67_ID, name: "Expo 67 Biosphère", latitude: 45.514092, longitude: -73.531389, radius_m: 100,
+      challenge_prompt: "Take a photo doing the 67 hand gesture with the Biosphère dome behind you.",
+      description: "The geodesic dome at Parc Jean-Drapeau was the United States pavilion at Expo 67.",
     },
   ].map((landmark) => ({ ...landmark, unlock_count: 0, unlocked: false }));
 }

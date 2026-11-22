@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { EXPO_67_ID, type AchievementId } from "@/lib/achievement-catalog";
+import { recordAchievement } from "@/lib/achievements";
 import {
   AuthRequiredError,
   LandmarkNotFoundError,
@@ -13,6 +15,8 @@ import {
 export interface UnlockState {
   error?: string;
   success?: string;
+  achievement?: AchievementId;
+  achievementWarning?: string;
 }
 
 const EXPECTED_ERRORS = [
@@ -42,6 +46,17 @@ export async function saveUnlockAction(
   }
 
   revalidateLandmark(landmarkId);
+  if (hadPhoto && landmarkId === EXPO_67_ID) {
+    const success = "Saved! Your photo is up.";
+    try {
+      const result = await recordAchievement(EXPO_67_ID);
+      if (result === "new") return { success, achievement: EXPO_67_ID };
+      if (result === "already") return { success };
+    } catch (error) {
+      console.error("Failed to save the 67 achievement", error);
+    }
+    return { success, achievementWarning: "The 67 achievement couldn’t be saved. Upload your photo again to retry." };
+  }
   return { success: hadPhoto ? "Saved! Your photo is up." : "Caption saved." };
 }
 
