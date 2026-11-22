@@ -17,7 +17,7 @@ const linkClass = "flex min-h-11 flex-col items-center justify-center gap-0.5 ro
 export function MartletNavLinks() {
   const pathname = usePathname();
   const activePath = pathname.startsWith("/meetups/") && pathname !== "/meetups/new" ? "/meetups"
-    : pathname.startsWith("/landmarks/") ? "/landmarks" : pathname === "/avatar" || pathname === "/achievements" ? "/profile" : pathname;
+    : pathname.startsWith("/landmarks/") ? "/landmarks" : pathname === "/avatar" || pathname === "/achievements" || pathname === "/play" ? "/profile" : pathname;
   const current = (href: string) => (activePath === href ? (pathname === href ? "page" : "location") : undefined);
   const tone = (href: string) => (activePath === href ? "bg-brand-soft text-brand-ink-strong" : "text-ink-muted hover:bg-surface-muted");
 

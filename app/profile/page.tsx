@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Bird, LogIn, Trophy, UserRound } from "lucide-react";
+import { ArrowRight, Bird, LogIn, Trophy, UserRound, Gamepad2 } from "lucide-react";
 import { CourseCodesForm } from "@/components/courses/CourseCodesForm";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
@@ -72,7 +72,7 @@ export default async function ProfilePage() {
           </div>
           {state.kind === "ready" && <DisplayNameForm current={state.user.display_name} />}
           {state.kind === "ready" && state.courses && <CourseCodesForm initial={state.courses} />}
-          {state.kind === "ready" && (
+          {state.kind === "ready" && (<>
             <Link href="/avatar" className="mt-4 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
               <Bird aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />
               <span className="min-w-0">
@@ -81,7 +81,15 @@ export default async function ProfilePage() {
               </span>
               <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
             </Link>
-          )}
+            <Link href="/play" className="mt-4 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
+              <Gamepad2 aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />
+              <span className="min-w-0">
+                <span className="block text-sm font-bold">Martlet Flight</span>
+                <span className="block text-xs text-ink-muted">Fly your martlet between campus columns. Beat your best score.</span>
+              </span>
+              <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
+            </Link>
+          </>)}
           {/* Everyone can open achievements; guests' are kept in the browser. */}
           <Link href="/achievements" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
             <Trophy aria-hidden="true" size={22} className="shrink-0 text-amber-600" />
