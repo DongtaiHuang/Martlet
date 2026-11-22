@@ -28,7 +28,7 @@ unflap(meetupId: string): Promise<void>
 
 Use the authenticated Supabase user ID internally; **never accept a `userId` argument from the browser**.
 
-## Trend service functions — `lib/trends.ts` (issue #43, ADR 0015)
+## Trend service functions — `lib/trends.ts` (issue #43, ADR 0017)
 
 ```typescript
 listTrends(type?: TrendType, limit?: number): Promise<TrendEntry[]>
@@ -50,7 +50,7 @@ Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-val
 - `status='cancelled'` hides meetup from the upcoming feed, but can still render a cancelled detail page.
 - Cancelled/past meetups cannot receive new pecks or flaps.
 - Time is stored in UTC `timestamptz`; display in user's local timezone.
-- Campus locations are chosen from `CAMPUS_LOCATIONS`; frontend must submit name and coordinates from the selected entry, not free-form coordinates. Server should revalidate the approved location rather than trust client-side coordinate values.
+- The creation form submits a campus location ID from `CAMPUS_LOCATIONS` or a venue ID from `PUBLIC_VENUES`. The server resolves the ID into the canonical name and coordinates. It also passes `public_venue_id` to `createMeetup` for off-campus venues. Read contracts are unchanged.
 - `auth.users` handles auth; `profiles` contains public-facing display names.
 
 ## UX component API
@@ -78,5 +78,5 @@ Cards render Developer 4's `PeckButton`/`FlapButton` (which call `lib/social.ts`
 - Unauthorized user cannot create, like, join, or cancel.
 - Duplicate peck/flap does not increase count.
 - Past/cancelled meetups cannot be joined.
-- Future timestamp and approved campus place validation prevents bad data.
+- Future timestamp and approved location validation prevents bad data.
 - Mobile screen 375px wide usable without horizontal scroll.
