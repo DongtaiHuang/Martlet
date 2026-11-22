@@ -38,8 +38,6 @@ export function birdSvg(color: string, size = 34): string {
         <path d="M29.5 27 L38.5 30.5 L36.6 32 L30 31.5 Z" fill="${color}" />
         <!-- round fluffy body -->
         <path d="M18.5 7.5 C28 7.5 33.5 14 33 22.5 C32.5 30.5 26.5 35.5 18.5 35.5 C10 35.5 4.5 30 4.8 21.8 C5 13.5 10 7.5 18.5 7.5 Z" fill="${CREAM}" />
-        <!-- fluffy chest tufts -->
-        <path d="M5.2 19 L3.6 20.4 L5 21.2 M5 24 L3.4 25.6 L5.3 26" fill="none" />
       </g>
       <!-- soft shading on the lower belly -->
       <ellipse cx="18" cy="30.5" rx="11" ry="4.5" fill="${color}" opacity="0.16" />
