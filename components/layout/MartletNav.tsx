@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { Bird } from "lucide-react";
 import { AuthStatus } from "@/components/auth/AuthStatus";
+import { getCurrentUser } from "@/lib/supabase/auth";
+import { getDataMode } from "@/lib/supabase/env";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { MartletNavLinks } from "./MartletNavLinks";
 import { ThemeSwitch } from "./ThemeSwitch";
 
 /** Server component: render session-aware controls alongside the client-side active links. */
-export function MartletNav() {
+export async function MartletNav() {
+  // Looked up once here and shared: the Profile link shows the name, AuthStatus shows sign-in/out.
+  const user = getDataMode() === "live" ? await getCurrentUser().catch(() => null) : null;
+
   return (
     <header className="border-b border-line bg-surface text-ink-soft">
       {/* < xl: row 1 = logo + account/theme, row 2 = links. xl: one row. Rendered once; order does the layout. */}
@@ -15,8 +20,8 @@ export function MartletNav() {
           <span className="grid size-9 place-items-center rounded-xl bg-brand text-on-brand"><Bird aria-hidden="true" size={21} /></span>
           McGill Martlet
         </Link>
-        <div className="order-2 ml-auto flex min-h-10 flex-wrap items-center justify-end gap-2 xl:order-3 xl:ml-0"><NotificationBell /><AuthStatus /><ThemeSwitch /></div>
-        <div className="order-3 w-full min-w-0 xl:order-2 xl:ml-auto xl:w-auto"><MartletNavLinks /></div>
+        <div className="order-2 ml-auto flex min-h-10 flex-wrap items-center justify-end gap-2 xl:order-3 xl:ml-0"><NotificationBell /><AuthStatus user={user} /><ThemeSwitch /></div>
+        <div className="order-3 w-full min-w-0 xl:order-2 xl:ml-auto xl:w-auto"><MartletNavLinks profileName={user?.display_name} /></div>
       </div>
     </header>
   );

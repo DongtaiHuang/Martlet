@@ -11,7 +11,7 @@ import { useEarned } from "@/components/achievements/useEarned";
  * with Your profile and Achievements (with a count). Phones have no hover, so
  * tapping goes to the profile, which links to Achievements too.
  */
-export function ProfileNavItem({ className, current }: { className: string; current?: "page" | "location" }) {
+export function ProfileNavItem({ className, current, name }: { className: string; current?: "page" | "location"; name?: string }) {
   const [account, setAccount] = useState<EarnedMap | null | undefined>(undefined);
   const loading = useRef(false);
   const earned = useEarned(account);
@@ -30,7 +30,15 @@ export function ProfileNavItem({ className, current }: { className: string; curr
     <div className="group relative" onMouseEnter={load} onFocus={load}>
       <Link href="/profile" aria-current={current} className={className}>
         <UserRound aria-hidden="true" size={16} className="shrink-0" />
-        Profile
+        {name ? (
+          // Signed in: show the user's name, still announced as their profile.
+          // Phones have narrow nav cells, so they get the first name; larger screens get the full name.
+          <span title={name} className="max-w-full min-w-0 truncate sm:max-w-40">
+            <span className="sm:hidden">{name.trim().split(/\s+/)[0]}</span>
+            <span className="hidden sm:inline">{name}</span>
+            <span className="sr-only">, your profile</span>
+          </span>
+        ) : "Profile"}
       </Link>
       {/* pt-2 bridges the gap so the menu doesn't close while the pointer moves onto it. */}
       <div className="absolute top-full right-0 z-50 hidden w-60 pt-2 sm:group-hover:block sm:group-focus-within:block">

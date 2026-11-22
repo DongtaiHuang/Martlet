@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { getDataMode } from "@/lib/supabase/env";
-import { getCurrentUser } from "@/lib/supabase/auth";
+import type { CurrentUser } from "@/lib/supabase/auth";
 import { SignOutButton } from "./SignOutButton";
 
-/** Server-rendered sign-in/up controls, or authenticated profile + sign-out. */
-export async function AuthStatus() {
+/**
+ * Sign-in/up links, or sign-out when signed in. The signed-in user's name is shown on the
+ * Profile nav link instead (MartletNav looks the user up once and passes it to both).
+ */
+export function AuthStatus({ user }: { user: CurrentUser | null }) {
   if (getDataMode() === "mock") {
     return (
       <div className="flex flex-wrap items-center gap-2">
@@ -15,7 +18,6 @@ export async function AuthStatus() {
     );
   }
 
-  const user = await getCurrentUser();
   if (!user) {
     return (
       <div className="flex flex-wrap items-center gap-2">
@@ -27,7 +29,6 @@ export async function AuthStatus() {
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="font-medium text-ink-2">{user.display_name}</span>
       <SignOutButton />
     </div>
   );
