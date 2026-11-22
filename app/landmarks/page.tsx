@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MartletNav } from "@/components/layout/MartletNav";
-import { LandmarkPreviewCard } from "@/components/landmarks/LandmarkPreviewCard";
+import { LandmarkMap } from "@/components/map/LandmarkMap";
 import { listLandmarks } from "@/lib/landmarks";
 import { getDataMode } from "@/lib/supabase/env";
 
@@ -14,7 +14,7 @@ export default async function LandmarksPage() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-950">
       <MartletNav />
-      <main className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-12">
+      <main className="mx-auto max-w-6xl px-4 py-7 sm:px-8 sm:py-10">
         <p className="text-sm font-bold uppercase tracking-widest text-red-800">Martlet Landmarks</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">Go there. Snap it. Unlock it.</h1>
         <p className="mt-2 max-w-2xl text-stone-600">
@@ -33,10 +33,7 @@ export default async function LandmarksPage() {
             Demo mode: landmarks are shown, but unlocking needs Supabase to be configured.
           </p>
         )}
-        <section aria-label="Landmarks" className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {landmarks.map((landmark) => <LandmarkPreviewCard key={landmark.id} landmark={landmark} />)}
-        </section>
-        {landmarks.length === 0 && <p className="mt-7 text-stone-600">No landmarks yet.</p>}
+        <LandmarkMap landmarks={landmarks} />
       </main>
     </div>
   );
