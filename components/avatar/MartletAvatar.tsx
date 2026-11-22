@@ -1,21 +1,19 @@
-// Original martlet-inspired swallow avatar (prototype). Layered SVG: base bird + unlockable
-// accessories + optional face-loop medallion. Not the McGill crest artwork.
-import type { ReactNode } from "react";
+// Flat 2D martlet: fallback for devices without WebGL (see ADR 0010). Layered SVG: base bird +
+// unlockable accessories. An original swallow-style character, not the McGill crest artwork.
 import type { ItemId, Plumage } from "./items";
 
 const RED = "#a6192e";
 
-export function MartletAvatar({ plumage, wearing, pins = 0, medallion, size = 360, title = "Martlet avatar" }: {
-  plumage: Plumage; wearing: Set<ItemId>; pins?: number; medallion?: ReactNode; size?: number; title?: string;
+export function MartletAvatar({ plumage, wearing, pins = 0, size = 360, title = "Martlet avatar" }: {
+  plumage: Plumage; wearing: Set<ItemId>; pins?: number; size?: number; title?: string;
 }) {
   const { body, wing } = plumage;
-  const W = medallion ? 540 : 420; // widen the scene to make room for the medallion
+  const W = 420;
   return (
     <svg viewBox={`0 0 ${W} 380`} width={size} height={(size * 380) / W} role="img" aria-label={title} className="max-w-full">
       <defs>
         <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fdf6ec" /><stop offset="1" stopColor="#f3e6d6" /></linearGradient>
         <radialGradient id="sheen" cx="0.35" cy="0.3" r="0.7"><stop offset="0" stopColor="#fff" stopOpacity="0.28" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></radialGradient>
-        <clipPath id="medallion"><circle cx="468" cy="214" r="52" /></clipPath>
       </defs>
       <rect width={W} height="380" rx="28" fill="url(#sky)" />
 
@@ -24,17 +22,6 @@ export function MartletAvatar({ plumage, wearing, pins = 0, medallion, size = 36
       <path d="M330 300 C 350 280, 372 276, 390 280" stroke="#5b4031" strokeWidth="7" strokeLinecap="round" fill="none" />
       <ellipse cx="392" cy="276" rx="16" ry="8" fill="#6b8f4e" transform="rotate(-20 392 276)" />
       <ellipse cx="60" cy="300" rx="18" ry="8" fill="#7aa35a" transform="rotate(15 60 300)" />
-
-      {/* Optional face-loop medallion, standing on the branch */}
-      {medallion && (
-        <g>
-          <path d="M452 284 L468 266 L484 284" stroke="#8a6a2f" strokeWidth="6" strokeLinecap="round" fill="none" />
-          <circle cx="468" cy="214" r="58" fill="#c8a24a" />
-          <circle cx="468" cy="214" r="54" fill="#fff8ea" />
-          <g clipPath="url(#medallion)">{medallion}</g>
-          <circle cx="468" cy="214" r="52" fill="none" stroke="#a8842f" strokeWidth="2" />
-        </g>
-      )}
 
       {/* Forked tail */}
       <path d="M150 228 C 110 252, 70 282, 34 330 C 78 300, 112 282, 160 258 Z" fill={wing} />
