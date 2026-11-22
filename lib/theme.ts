@@ -2,7 +2,7 @@
 // flashes the wrong colours. Kept dependency-free and tiny on purpose.
 // Preview/review aid: `?mode=dark|light|system` and `?theme=<id>` on any URL set (and remember) them.
 
-export const THEMES = ["classic", "redpath", "mountroyal", "contrast"] as const;
+export const THEMES = ["classic", "redpath", "mountroyal", "summer", "fall", "winter", "cny", "contrast"] as const;
 export const MODES = ["light", "dark", "system"] as const;
 export type ThemeId = (typeof THEMES)[number];
 export type ModePreference = (typeof MODES)[number];
@@ -12,6 +12,10 @@ export const THEME_INFO: Record<(typeof THEMES)[number], { label: string; descri
   classic: { label: "McGill Classic", description: "Red, white and charcoal" },
   redpath: { label: "Redpath", description: "Warm sandstone and deep red" },
   mountroyal: { label: "Mount Royal", description: "Forest greens and cream" },
+  summer: { label: "Summer", description: "Warm sun, beach sand and rubber duckies" },
+  fall: { label: "Fall", description: "Fallen-leaf orange, rust and bark brown" },
+  winter: { label: "Winter", description: "Icy blues, snow white and falling snow" },
+  cny: { label: "Chinese New Year", description: "Crimson and gold, lanterns and red pockets" },
   contrast: { label: "High contrast", description: "Maximum legibility" },
 };
 
