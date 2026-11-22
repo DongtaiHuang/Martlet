@@ -48,7 +48,7 @@ export default async function EditMeetupPage({ params }: { params: Promise<{ id:
       findCourse(meetup.course_code ?? null).then((course) => ({
         title: meetup.title,
         description: meetup.description ?? "",
-        category: meetup.category,
+        categories: meetup.categories,
         ...locationChoice(meetup),
         startsAt: meetup.starts_at,
         course,

@@ -2,9 +2,9 @@ import type { Meetup } from "@/types/meetup";
 import { requireUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
-export type ProfileHistoryMeetup = Pick<Meetup, "id" | "title" | "category" | "starts_at" | "location_name" | "status">;
+export type ProfileHistoryMeetup = Pick<Meetup, "id" | "title" | "categories" | "starts_at" | "location_name" | "status">;
 
-const HISTORY_COLUMNS = "id,title,category,starts_at,location_name,status";
+const HISTORY_COLUMNS = "id,title,categories,starts_at,location_name,status";
 export const PROFILE_HISTORY_LIMIT = 25;
 
 export async function listProfileMeetupHistory() {

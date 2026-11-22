@@ -1,5 +1,6 @@
 import { BookOpen, Coffee, Dumbbell, Gamepad2, Shapes, Utensils } from "lucide-react";
 import type { MeetupCategory } from "@/types/meetup";
+import { MEETUP_CATEGORIES } from "@/lib/meetup-categories";
 
 export const categories = {
   coffee: { label: "Coffee", icon: Coffee, color: "bg-warn-muted text-warn-ink dark:bg-amber-400/15 dark:text-amber-200", accent: "border-t-amber-400" },
@@ -10,4 +11,4 @@ export const categories = {
   other: { label: "Other", icon: Shapes, color: "bg-surface-muted text-ink-soft", accent: "border-t-stone-400" },
 } satisfies Record<MeetupCategory, { label: string; icon: typeof Coffee; color: string; accent: string }>;
 
-export const categoryValues = Object.keys(categories) as MeetupCategory[];
+export const categoryValues = MEETUP_CATEGORIES;

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { CalendarDays, GraduationCap, LayoutGrid } from "lucide-react";
 import { mentionsAnyCourse } from "@/lib/course-codes";
+import { filterMeetupsByCategory } from "@/lib/meetup-categories";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import { categories, categoryValues } from "./categories";
 import { MeetupCard } from "./MeetupCard";
@@ -14,7 +15,7 @@ export function MeetupFeed({ meetups, viewerId = null, myCourses = [] }: { meetu
   const [onlyMyCourses, setOnlyMyCourses] = useState(true);
   // Study meetups for the student's courses: the meetup's course, or a course code in its title or description (issue #25).
   const courseFilter = category === "study" && myCourses.length > 0 && onlyMyCourses;
-  const inCategory = category === "all" ? meetups : meetups.filter((meetup) => meetup.category === category);
+  const inCategory = filterMeetupsByCategory(meetups, category);
   const visible = courseFilter ? inCategory.filter((meetup) => mentionsAnyCourse(`${meetup.course_code ?? ""} ${meetup.title} ${meetup.description}`, myCourses)) : inCategory;
   const { page, pageCount, pageItems, firstShown, lastShown, goToPage, resetPage, listTop } = usePagination(visible);
 
