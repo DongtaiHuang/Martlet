@@ -31,6 +31,10 @@ In **SQL Editor**, paste and run each file once:
 7. `supabase/migrations/007_meetup_polls.sql` (advisory meetup polls). After 001–006 are applied, open a new SQL Editor query, paste the full 007 file, and run it once before deploying the poll UI.
 8. `supabase/migrations/008_off_campus_meetups.sql` (curated public venues). After verifying 001–007, have the database owner run 008 once before deploying off-campus creation. Existing meetups keep their stored locations. The migration replaces the original campus foreign key with separately enforced campus and public venue foreign keys.
 
+9. `supabase/migrations/009_meetup_course.sql` (optional course code on study meetups). Apply after the course catalogue. Safe to re-run.
+10. `supabase/migrations/010_trends.sql` (the feed’s Trends panel). Run once after the core schema.
+11. `supabase/migrations/010_achievements.sql` (account-backed achievements). Safe to re-run. This is a separate SQL Editor script from `010_trends.sql`.
+
 `002` adds the original campus-only foreign key. On a project upgrading from 001, resolve any existing locations that fail that constraint before running 002. After applying 008, do not rerun 002 because it reinstates the campus-only foreign key.
 
 **When adding a campus location**, update `lib/locations.ts` and create a new idempotent migration to insert the matching canonical name and coordinates in `public.campus_locations`; then run it in Supabase. Do not rewrite migrations that teammates may have already applied.

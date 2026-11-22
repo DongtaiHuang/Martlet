@@ -1,4 +1,4 @@
-// Map triggers for achievements (ADR 0017). Kept out of components/achievements so the
+// Map triggers for achievements (ADR 0019). Kept out of components/achievements so the
 // app-wide toaster doesn't pull in map code.
 import type { Map } from "maplibre-gl";
 import type { LandmarkSummary } from "@/types/landmark";

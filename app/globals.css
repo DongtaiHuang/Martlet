@@ -189,7 +189,7 @@
   .martlet-popup__quote { transition: none; }
 }
 
-/* Achievement toast: slides in from the right, stays, then fades out (ADR 0017).
+/* Achievement toast: slides in from the right, stays, then fades out (ADR 0019).
    The duration is set inline to match how long the toast is shown. */
 @keyframes martlet-toast {
   0% { opacity: 0; transform: translateX(1.5rem); }
