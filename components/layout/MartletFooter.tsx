@@ -19,6 +19,7 @@ const sections = [
     links: [
       { href: "/meetups/new", label: "Create a Meetup" },
       { href: "/profile", label: "Student Profile" },
+      { href: "/board", label: "Campus Board" },
       { href: "/achievements", label: "Achievements" },
       { href: "/play", label: "Play Martlet" },
     ],
