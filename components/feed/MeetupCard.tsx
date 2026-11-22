@@ -40,9 +40,9 @@ export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
           <CategoryIcon aria-hidden="true" size={15} />
           {label}
         </span>
-        {meetup.course_code && <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={14} />{meetup.course_code}</span>}
+        {meetup.course_code && <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={14} />{meetup.course_code}</span>}
         {isHost && <span className="rounded-full bg-stone-900 px-2.5 py-1 text-xs font-semibold text-white">Hosting</span>}
-        {joined && <span className="rounded-full bg-red-800 px-2.5 py-1 text-xs font-semibold text-white">You’re going</span>}
+        {joined && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-on-brand">You’re going</span>}
       </div>
       <h3 className="mt-4 text-xl font-bold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]">{meetup.title}</h3>
       <p className="mt-1 text-sm text-ink-muted [overflow-wrap:anywhere]">Hosted by {meetup.host_display_name}</p>

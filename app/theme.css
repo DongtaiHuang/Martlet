@@ -108,6 +108,189 @@
   --m-ok-ink: #8ce0aa;
 }
 
+
+/* Extra themes (ADR 0014, issue #50). Same tokens, different values; components never change. */
+[data-theme="redpath"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #f7f1e8;
+  --m-surface: #fffaf3;
+  --m-surface-muted: #efe5d6;
+  --m-line: #e2d5c2;
+  --m-line-soft: #efe5d6;
+  --m-line-strong: #cdbba3;
+  --m-ink: #2a1d14;
+  --m-ink-soft: #3a2a1e;
+  --m-ink-2: #5a4636;
+  --m-ink-muted: #6b5746;
+  --m-ink-subtle: #7f6a57;
+  --m-brand: #8c1c13;
+  --m-brand-hover: #6f150e;
+  --m-brand-ink: #8c1c13;
+  --m-brand-ink-strong: #6f150e;
+  --m-brand-soft: #f8e6df;
+  --m-brand-muted: #f0d3c8;
+  --m-brand-line: #e4b7a8;
+  --m-on-brand: #ffffff;
+  --m-focus: #b4321f;
+  --m-warn-soft: #fffbeb;
+  --m-warn-muted: #fef3c7;
+  --m-warn-line: #fde68a;
+  --m-warn-ink: #78350f;
+  --m-ok-soft: #f0fdf4;
+  --m-ok-line: #bbf7d0;
+  --m-ok-ink: #166534;
+}
+[data-theme="redpath"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #17110d;
+  --m-surface: #211812;
+  --m-surface-muted: #2d2119;
+  --m-line: #3b2c21;
+  --m-line-soft: #2b2018;
+  --m-line-strong: #5a4636;
+  --m-ink: #f5ece2;
+  --m-ink-soft: #ebdfd1;
+  --m-ink-2: #d6c6b4;
+  --m-ink-muted: #b8a592;
+  --m-ink-subtle: #9b8774;
+  --m-brand: #b8322a;
+  --m-brand-hover: #c94137;
+  --m-brand-ink: #ff9a85;
+  --m-brand-ink-strong: #ffc0b0;
+  --m-brand-soft: #2e1612;
+  --m-brand-muted: #40201a;
+  --m-brand-line: #6e2b20;
+  --m-on-brand: #ffffff;
+  --m-focus: #ff9a85;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+[data-theme="mountroyal"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #f5f7f0;
+  --m-surface: #fffffa;
+  --m-surface-muted: #e9eee0;
+  --m-line: #d9e1cd;
+  --m-line-soft: #e9eee0;
+  --m-line-strong: #bccaa9;
+  --m-ink: #14201a;
+  --m-ink-soft: #1f2e25;
+  --m-ink-2: #3c4f42;
+  --m-ink-muted: #4a5e50;
+  --m-ink-subtle: #5f7363;
+  --m-brand: #2f6b3a;
+  --m-brand-hover: #24552d;
+  --m-brand-ink: #2a6234;
+  --m-brand-ink-strong: #1d4a26;
+  --m-brand-soft: #e6f1e4;
+  --m-brand-muted: #d3e7cf;
+  --m-brand-line: #a9cfa3;
+  --m-on-brand: #ffffff;
+  --m-focus: #2f7d3d;
+  --m-warn-soft: #fffbeb;
+  --m-warn-muted: #fef3c7;
+  --m-warn-line: #fde68a;
+  --m-warn-ink: #78350f;
+  --m-ok-soft: #f0fdf4;
+  --m-ok-line: #bbf7d0;
+  --m-ok-ink: #166534;
+}
+[data-theme="mountroyal"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #0d1410;
+  --m-surface: #152019;
+  --m-surface-muted: #1e2b22;
+  --m-line: #27372c;
+  --m-line-soft: #1c281f;
+  --m-line-strong: #3f5546;
+  --m-ink: #eef3ec;
+  --m-ink-soft: #e0e8dd;
+  --m-ink-2: #c6d3c4;
+  --m-ink-muted: #a6b7a5;
+  --m-ink-subtle: #8a9c8a;
+  --m-brand: #2f7a3c;
+  --m-brand-hover: #276b33;
+  --m-brand-ink: #8fdc9c;
+  --m-brand-ink-strong: #b6efbf;
+  --m-brand-soft: #13281a;
+  --m-brand-muted: #1b3623;
+  --m-brand-line: #2f5e3a;
+  --m-on-brand: #ffffff;
+  --m-focus: #8fdc9c;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+[data-theme="contrast"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #ffffff;
+  --m-surface: #ffffff;
+  --m-surface-muted: #f0f0f0;
+  --m-line: #595959;
+  --m-line-soft: #8a8a8a;
+  --m-line-strong: #000000;
+  --m-ink: #000000;
+  --m-ink-soft: #000000;
+  --m-ink-2: #1a1a1a;
+  --m-ink-muted: #2b2b2b;
+  --m-ink-subtle: #3d3d3d;
+  --m-brand: #8b0000;
+  --m-brand-hover: #600000;
+  --m-brand-ink: #8b0000;
+  --m-brand-ink-strong: #600000;
+  --m-brand-soft: #fff0f0;
+  --m-brand-muted: #ffdede;
+  --m-brand-line: #8b0000;
+  --m-on-brand: #ffffff;
+  --m-focus: #0040ff;
+  --m-warn-soft: #fff8db;
+  --m-warn-muted: #fff0b3;
+  --m-warn-line: #000000;
+  --m-warn-ink: #4a3000;
+  --m-ok-soft: #eaffea;
+  --m-ok-line: #000000;
+  --m-ok-ink: #003d14;
+}
+[data-theme="contrast"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #000000;
+  --m-surface: #000000;
+  --m-surface-muted: #141414;
+  --m-line: #a6a6a6;
+  --m-line-soft: #6b6b6b;
+  --m-line-strong: #ffffff;
+  --m-ink: #ffffff;
+  --m-ink-soft: #ffffff;
+  --m-ink-2: #f0f0f0;
+  --m-ink-muted: #e0e0e0;
+  --m-ink-subtle: #cccccc;
+  --m-brand: #c40000;
+  --m-brand-hover: #e00000;
+  --m-brand-ink: #ff8a8a;
+  --m-brand-ink-strong: #ffb3b3;
+  --m-brand-soft: #2a0000;
+  --m-brand-muted: #3d0000;
+  --m-brand-line: #ff8a8a;
+  --m-on-brand: #ffffff;
+  --m-focus: #ffff00;
+  --m-warn-soft: #1f1800;
+  --m-warn-muted: #2e2400;
+  --m-warn-line: #ffe066;
+  --m-warn-ink: #ffe066;
+  --m-ok-soft: #001f0a;
+  --m-ok-line: #7dff9e;
+  --m-ok-ink: #7dff9e;
+}
+
 /* MapLibre controls follow dark mode (they're plain DOM, not part of the map style). */
 [data-mode="dark"] .maplibregl-ctrl-group {
   background: var(--m-surface-muted);

@@ -20,10 +20,10 @@ const KIND_META: Record<NotificationKind, {
   chip: string;
   edge: string;
 }> = {
-  meetup_new: { label: "New meetup", icon: CalendarPlus, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200", edge: "border-l-sky-400" },
-  meetup_reminder: { label: "Reminder", icon: BellRing, chip: "bg-amber-100 text-amber-950 ring-1 ring-amber-200", edge: "border-l-amber-400" },
-  meetup_updated: { label: "Meetup updated", icon: CalendarClock, chip: "bg-emerald-100 text-emerald-950 ring-1 ring-emerald-200 dark:bg-emerald-400/15 dark:text-emerald-200 dark:ring-emerald-800", edge: "border-l-emerald-400" },
-  trend_like: { label: "Trend like", icon: Heart, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200", edge: "border-l-violet-400" },
+  meetup_new: { label: "New meetup", icon: CalendarPlus, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200 dark:bg-sky-400/15 dark:text-sky-200 dark:ring-sky-800", edge: "border-l-sky-400" },
+  meetup_reminder: { label: "Reminder", icon: BellRing, chip: "bg-warn-muted text-warn-ink ring-1 ring-warn-line", edge: "border-l-amber-400" },
+  meetup_updated: { label: "Meetup updated", icon: CalendarClock, chip: "bg-ok-soft text-ok-ink ring-1 ring-ok-line", edge: "border-l-emerald-400" },
+  trend_like: { label: "Trend like", icon: Heart, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200 dark:bg-violet-400/15 dark:text-violet-200 dark:ring-violet-800", edge: "border-l-violet-400" },
 };
 
 function timeAgo(iso: string): string {
