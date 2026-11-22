@@ -12,6 +12,7 @@ import { towerSvg, towerTier } from "./landmark-tower";
 import { POPUP_MAX_WIDTH } from "./popup-content";
 import { landmarkZoom } from "./landmark-style";
 import { CAMPUS_MAP_FRAME, createCampusMap } from "./map-config";
+import { useMapColorMode } from "./map-mode";
 
 const PIXEL = 2.25; // tower pixel size: a bit larger than the Explore map's 1.75px
 const SELECTED_GLOW = "drop-shadow(0 0 3px #991b1b) drop-shadow(0 0 2px #991b1b)";
@@ -27,6 +28,7 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
 export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  useMapColorMode(mapRef);
   const markers = useRef(new globalThis.Map<string, Marker>());
   const items = useRef(new globalThis.Map<string, HTMLLIElement>());
   const router = useRouter();
@@ -100,29 +102,29 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
         className={`${CAMPUS_MAP_FRAME} scroll-mt-4`}
       />
 
-      <aside aria-labelledby="landmark-list-heading" className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white lg:h-[65vh] lg:min-h-96">
-        <div className="border-b border-stone-200 px-4 py-3">
-          <h2 id="landmark-list-heading" className="font-bold text-stone-900">Landmarks</h2>
-          <p className="text-xs text-stone-600">{landmarks.length} to discover · {unlockedCount} unlocked</p>
+      <aside aria-labelledby="landmark-list-heading" className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface lg:h-[65vh] lg:min-h-96">
+        <div className="border-b border-line px-4 py-3">
+          <h2 id="landmark-list-heading" className="font-bold text-ink-soft">Landmarks</h2>
+          <p className="text-xs text-ink-muted">{landmarks.length} to discover · {unlockedCount} unlocked</p>
         </div>
         {/* Scrolls inside: beside the map on desktop, capped below the map on phones. */}
-        <ul className="max-h-[60vh] min-h-0 flex-1 divide-y divide-stone-100 overflow-y-auto overscroll-contain lg:max-h-none">
+        <ul className="max-h-[60vh] min-h-0 flex-1 divide-y divide-line-soft overflow-y-auto overscroll-contain lg:max-h-none">
           {landmarks.map((landmark) => {
             const active = landmark.id === selected;
             return (
               <li
                 key={landmark.id}
                 ref={(el) => { if (el) items.current.set(landmark.id, el); else items.current.delete(landmark.id); }}
-                className={active ? "bg-red-50/70" : undefined}
+                className={active ? "bg-brand-soft/70" : undefined}
               >
                 <button
                   type="button"
                   onClick={() => focusLandmark(landmark)}
                   aria-pressed={active}
-                  className="block w-full px-4 pt-3 pb-2 text-left hover:bg-stone-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-red-700"
+                  className="block w-full px-4 pt-3 pb-2 text-left hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
                 >
                   <span className="flex items-start justify-between gap-2">
-                    <span className="flex items-center gap-2 font-semibold text-stone-900">
+                    <span className="flex items-center gap-2 font-semibold text-ink-soft">
                       {/* Static markup: towerSvg only emits constant colours and numbers. */}
                       <span
                         aria-hidden="true"
@@ -131,19 +133,19 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
                       />
                       {landmark.name}
                     </span>
-                    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${landmark.unlocked ? "bg-emerald-100 text-emerald-900" : "bg-stone-100 text-stone-700"}`}>
+                    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${landmark.unlocked ? "bg-ok-soft text-ok-ink" : "bg-surface-muted text-ink-2"}`}>
                       {landmark.unlocked ? <CheckCircle2 aria-hidden="true" size={12} /> : <LockKeyhole aria-hidden="true" size={12} />}
                       {landmark.unlocked ? "Unlocked" : "Locked"}
                     </span>
                   </span>
-                  <span className="mt-1 line-clamp-2 block text-sm text-stone-600">{landmark.challenge_prompt}</span>
-                  <span className="mt-1 inline-flex items-center gap-1 text-xs text-stone-500">
+                  <span className="mt-1 line-clamp-2 block text-sm text-ink-muted">{landmark.challenge_prompt}</span>
+                  <span className="mt-1 inline-flex items-center gap-1 text-xs text-ink-subtle">
                     <UsersRound aria-hidden="true" size={13} /> {landmark.unlock_count} unlocked
                   </span>
                 </button>
                 <Link
                   href={`/landmarks/${encodeURIComponent(landmark.id)}`}
-                  className="mx-4 mb-3 inline-flex min-h-9 items-center gap-1 text-sm font-bold text-red-800 hover:underline focus-visible:outline-2 focus-visible:outline-red-700"
+                  className="mx-4 mb-3 inline-flex min-h-9 items-center gap-1 text-sm font-bold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus"
                 >
                   {landmark.unlocked ? "View photos" : "View challenge"} <ArrowUpRight aria-hidden="true" size={15} />
                 </Link>
@@ -151,7 +153,7 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
             );
           })}
         </ul>
-        {landmarks.length === 0 && <p className="p-4 text-sm text-stone-600">No landmarks yet.</p>}
+        {landmarks.length === 0 && <p className="p-4 text-sm text-ink-muted">No landmarks yet.</p>}
       </aside>
     </div>
   );

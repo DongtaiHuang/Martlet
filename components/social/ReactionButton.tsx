@@ -54,13 +54,13 @@ export function ReactionButton({ meetupId, active, count, disabled, label, activ
         aria-busy={pending}
         disabled={disabled || pending}
         onClick={toggle}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-800 hover:border-red-700 hover:text-red-800 focus-visible:outline-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60 aria-pressed:border-red-700 aria-pressed:bg-red-700 aria-pressed:text-white"
+        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-strong bg-surface px-4 text-sm font-semibold text-ink-soft hover:border-brand hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-60 aria-pressed:border-brand aria-pressed:bg-brand aria-pressed:text-on-brand"
       >
         <Icon aria-hidden size={16} className={pending ? "animate-pulse" : undefined} />
         {state.active ? activeLabel : label}
         <span className="tabular-nums">· {state.count} {noun(state.count)}</span>
       </button>
-      {error && <span role="alert" className="text-xs text-red-800">{error}</span>}
+      {error && <span role="alert" className="text-xs text-brand-ink">{error}</span>}
     </span>
   );
 }

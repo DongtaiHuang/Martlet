@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { signIn, signUp, type AuthFormState } from "@/app/auth/actions";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus-visible:outline-2 focus-visible:outline-red-700";
+  "mt-1 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-ink-soft focus-visible:outline-2 focus-visible:outline-focus";
 
 export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: string }) {
   const isSignup = mode === "signup";
@@ -19,19 +19,19 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
       {next && <input type="hidden" name="next" value={next} />}
 
       {isSignup && (
-        <label className="block text-sm font-medium text-neutral-800">
+        <label className="block text-sm font-medium text-ink-soft">
           Display name
           <input name="display_name" required minLength={2} maxLength={30} autoComplete="nickname" className={inputClass} />
-          <span className="mt-1 block text-xs text-neutral-500">Shown to other students on meetups you host.</span>
+          <span className="mt-1 block text-xs text-ink-subtle">Shown to other students on meetups you host.</span>
         </label>
       )}
 
-      <label className="block text-sm font-medium text-neutral-800">
+      <label className="block text-sm font-medium text-ink-soft">
         Email
         <input name="email" type="email" required autoComplete="email" className={inputClass} />
       </label>
 
-      <label className="block text-sm font-medium text-neutral-800">
+      <label className="block text-sm font-medium text-ink-soft">
         Password
         <input
           name="password" type="password" required minLength={8} maxLength={72}
@@ -40,24 +40,24 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
       </label>
 
       {state.error && (
-        <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{state.error}</p>
+        <p role="alert" className="rounded-lg border border-brand-line bg-brand-soft p-3 text-sm text-brand-ink">{state.error}</p>
       )}
       {state.message && (
-        <p role="status" className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{state.message}</p>
+        <p role="status" className="rounded-lg border border-ok-line bg-ok-soft p-3 text-sm text-ok-ink">{state.message}</p>
       )}
 
       <button
         type="submit" disabled={pending}
-        className="w-full rounded-xl bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+        className="w-full rounded-xl bg-brand px-5 py-3 font-semibold text-on-brand hover:bg-brand disabled:opacity-60"
       >
         {pending ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
       </button>
 
-      <p className="text-center text-sm text-neutral-600">
+      <p className="text-center text-sm text-ink-muted">
         {isSignup ? "Already have an account? " : "New to Martlet? "}
         <Link
           href={`${isSignup ? "/login" : "/signup"}${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-          className="font-semibold text-red-700 underline"
+          className="font-semibold text-brand-ink underline"
         >
           {isSignup ? "Sign in" : "Create an account"}
         </Link>

@@ -84,7 +84,7 @@ export function AchievementToaster() {
               type="button"
               aria-label="Dismiss"
               onClick={() => setToasts((list) => list.filter((t) => t.key !== toast.key))}
-              className="-m-1 grid size-8 shrink-0 place-items-center rounded-lg text-stone-400 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-amber-300"
+              className="-m-1 grid size-8 shrink-0 place-items-center rounded-lg text-stone-400 hover:bg-surface/10 hover:text-white focus-visible:outline-2 focus-visible:outline-amber-300"
             >
               <X aria-hidden="true" size={16} />
             </button>

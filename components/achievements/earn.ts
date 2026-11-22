@@ -1,4 +1,4 @@
-// Browser-side achievement triggers (ADR 0014). Call earn(id) when something happens;
+// Browser-side achievement triggers (ADR 0015). Call earn(id) when something happens;
 // it saves to the account (server action, user from the session) or, for guests, to this
 // browser, then announces it so <AchievementToaster> can show the bar.
 import { earnAchievement } from "@/app/achievements/actions";

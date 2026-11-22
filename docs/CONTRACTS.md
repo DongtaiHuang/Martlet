@@ -28,7 +28,7 @@ unflap(meetupId: string): Promise<void>
 
 Use the authenticated Supabase user ID internally; **never accept a `userId` argument from the browser**.
 
-## Achievements (ADR 0014)
+## Achievements (ADR 0015)
 
 Server (`lib/achievements.ts`; the user always comes from the session):
 

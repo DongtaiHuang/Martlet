@@ -1,4 +1,4 @@
--- ADR 0014: achievements for niche and hidden features.
+-- ADR 0015: achievements for niche and hidden features.
 -- Run after 001-007 in the Supabase SQL Editor. Safe to re-run.
 --
 -- Rules enforced here (not just in the UI):

@@ -26,14 +26,14 @@ export default async function AchievementsPage() {
   const mock = getDataMode() === "mock";
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-950">
+    <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-8 sm:py-12">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Achievements</h1>
-        <p className="mt-2 text-stone-600">Some are obvious. Most are hidden. The martlets know things.</p>
+        <p className="mt-2 text-ink-muted">Some are obvious. Most are hidden. The martlets know things.</p>
 
         {state.kind === "guest" && (
-          <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="mt-4 rounded-xl border border-warn-line bg-warn-soft px-4 py-3 text-sm text-warn-ink">
             {mock
               ? "Demo mode: achievements are saved in this browser only."
               : <>You’re signed out, so achievements are saved in this browser only. <Link href="/login?next=/achievements" className="font-bold underline">Sign in</Link> to keep new ones on your profile.</>}
@@ -42,7 +42,7 @@ export default async function AchievementsPage() {
 
         <div className="mt-6">
           {state.kind === "error" ? (
-            <p role="alert" className="text-sm text-stone-600">Couldn’t load your achievements. Refresh the page to try again.</p>
+            <p role="alert" className="text-sm text-ink-muted">Couldn’t load your achievements. Refresh the page to try again.</p>
           ) : (
             <AchievementGrid earned={state.kind === "account" ? state.earned : null} />
           )}

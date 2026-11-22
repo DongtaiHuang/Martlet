@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./theme.css";
 
 /* Pixel-art progress tree (components/progress/GrowthTree.tsx).
    Inside the SVG, 1px = 1 grid "pixel", so movement stays on the pixel grid. */
@@ -153,7 +154,7 @@
   .martlet-popup__quote { transition: none; }
 }
 
-/* Achievement toast: slides in from the right, stays, then fades out (ADR 0014).
+/* Achievement toast: slides in from the right, stays, then fades out (ADR 0015).
    The duration is set inline to match how long the toast is shown. */
 @keyframes martlet-toast {
   0% { opacity: 0; transform: translateX(1.5rem); }

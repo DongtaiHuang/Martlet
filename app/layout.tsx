@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AchievementToaster } from "@/components/achievements/AchievementToaster";
+import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,8 +11,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-CA">
-      <body>
+    // data-theme / data-mode are set before paint by themeInitScript (ADR 0014), so the server
+    // markup and the client attributes can differ: suppress that one hydration warning.
+    <html lang="en-CA" data-theme="classic" data-mode="light" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="bg-canvas text-ink">
         {children}
         <AchievementToaster />
       </body>

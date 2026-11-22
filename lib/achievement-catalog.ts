@@ -1,4 +1,4 @@
-// The list of achievements (ADR 0014). Client-safe: no server imports.
+// The list of achievements (ADR 0015). Client-safe: no server imports.
 // Hidden achievements show as "???" until earned. Adding one is a code change only;
 // ids must match the shape checked in supabase/migrations/008_achievements.sql.
 

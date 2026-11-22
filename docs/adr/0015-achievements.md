@@ -1,4 +1,4 @@
-# 0014. Achievements for niche and hidden features
+# 0015. Achievements for niche and hidden features
 
 - **Status:** Proposed
 - **Date:** 2026-11-21

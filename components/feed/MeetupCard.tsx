@@ -34,35 +34,35 @@ export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
   const flapLabel = meetup.flap_count === 1 ? "flap" : "flaps";
 
   return (
-    <article className={`flex min-w-0 flex-col overflow-hidden rounded-2xl border border-t-4 bg-white p-5 shadow-sm ${accent} ${joined ? "border-red-300 ring-2 ring-red-100" : "border-stone-200"}`}>
+    <article className={`flex min-w-0 flex-col overflow-hidden rounded-2xl border border-t-4 bg-surface p-5 shadow-sm ${accent} ${joined ? "border-brand-line ring-2 ring-brand-soft" : "border-line"}`}>
       <div className="flex flex-wrap items-center gap-2">
         <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${color}`}>
           <CategoryIcon aria-hidden="true" size={15} />
           {label}
         </span>
-        {isHost && <span className="rounded-full bg-stone-900 px-2.5 py-1 text-xs font-semibold text-white">Hosting</span>}
-        {joined && <span className="rounded-full bg-red-800 px-2.5 py-1 text-xs font-semibold text-white">You’re going</span>}
+        {isHost && <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-canvas">Hosting</span>}
+        {joined && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-on-brand">You’re going</span>}
       </div>
-      <h3 className="mt-4 text-xl font-bold leading-tight tracking-tight text-stone-950 [overflow-wrap:anywhere]">{meetup.title}</h3>
-      <p className="mt-1 text-sm text-stone-600 [overflow-wrap:anywhere]">Hosted by {meetup.host_display_name}</p>
-      <p className="mt-3 line-clamp-2 text-sm leading-6 text-stone-700 [overflow-wrap:anywhere]">{meetup.description}</p>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 pb-4 text-sm text-stone-700">
-        <span className="inline-flex items-center gap-2"><CalendarDays aria-hidden="true" size={16} className="shrink-0 text-stone-500" /><time dateTime={meetup.starts_at}>{starts}</time></span>
-        <span className="inline-flex min-w-0 items-center gap-2 [overflow-wrap:anywhere]"><MapPin aria-hidden="true" size={16} className="shrink-0 text-stone-500" />{meetup.location_name}</span>
+      <h3 className="mt-4 text-xl font-bold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]">{meetup.title}</h3>
+      <p className="mt-1 text-sm text-ink-muted [overflow-wrap:anywhere]">Hosted by {meetup.host_display_name}</p>
+      <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink-2 [overflow-wrap:anywhere]">{meetup.description}</p>
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 pb-4 text-sm text-ink-2">
+        <span className="inline-flex items-center gap-2"><CalendarDays aria-hidden="true" size={16} className="shrink-0 text-ink-subtle" /><time dateTime={meetup.starts_at}>{starts}</time></span>
+        <span className="inline-flex min-w-0 items-center gap-2 [overflow-wrap:anywhere]"><MapPin aria-hidden="true" size={16} className="shrink-0 text-ink-subtle" />{meetup.location_name}</span>
       </div>
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-stone-100 pt-3">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-line-soft pt-3">
         {viewerId ? (
           <div className="flex flex-wrap gap-2">
             <PeckButton meetupId={meetup.id} active={meetup.has_pecked} count={meetup.attendee_count} disabled={isHost} />
             <FlapButton meetupId={meetup.id} active={meetup.has_flapped} count={meetup.flap_count} />
           </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-x-3 text-xs font-medium text-stone-600">
+          <div className="flex flex-wrap items-center gap-x-3 text-xs font-medium text-ink-muted">
             <span className="inline-flex items-center gap-1"><UsersRound aria-hidden="true" size={15} />{meetup.attendee_count} going</span>
             <span className="inline-flex items-center gap-1"><Heart aria-hidden="true" size={15} />{meetup.flap_count} {flapLabel}</span>
           </div>
         )}
-        <Link href={`/meetups/${encodeURIComponent(meetup.id)}`} aria-label={`View meetup: ${meetup.title}`} className="inline-flex min-h-11 items-center gap-1 rounded-md text-sm font-bold text-red-800 hover:underline focus-visible:outline-2 focus-visible:outline-red-700">
+        <Link href={`/meetups/${encodeURIComponent(meetup.id)}`} aria-label={`View meetup: ${meetup.title}`} className="inline-flex min-h-11 items-center gap-1 rounded-md text-sm font-bold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus">
           View meetup <ArrowUpRight aria-hidden="true" size={15} />
         </Link>
       </div>
