@@ -1,4 +1,4 @@
-# 0015. Like-ranked trends side panel
+# 0017. Like-ranked trends side panel
 
 - **Status:** Proposed
 
