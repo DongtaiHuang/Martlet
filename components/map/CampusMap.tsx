@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { LngLatBounds, Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
+import { filterMeetupsByCategory } from "@/lib/meetup-categories";
 import type { LandmarkSummary } from "@/types/landmark";
 import { PUBLIC_VENUES } from "@/lib/public-venues";
 import { categories, categoryValues } from "@/components/feed/categories";
@@ -22,7 +23,7 @@ const FOCUS_ZOOM = 17;
 function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {
   return buildPopup({
     seed: `meetup:${meetup.id}`,
-    tag: categories[meetup.category].label,
+    tag: meetup.categories.map((category) => categories[category].label).join(" · "),
     title: meetup.title,
     body: meetup.location_name,
     meta: [
@@ -55,7 +56,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
 
   const visible = useMemo(() => {
     if (layer === "landmarks") return [];
-    return active === "all" ? meetups : meetups.filter((m) => m.category === active);
+    return filterMeetupsByCategory(meetups, active);
   }, [meetups, active, layer]);
   const shownLandmarks = useMemo(() => (layer === "meetups" ? NO_LANDMARKS : landmarks), [landmarks, layer]);
   const mapped = useMemo(() => visible.filter(hasMeetupCoordinates), [visible]);
@@ -75,7 +76,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       },
     })),
   ] : [], [mapped, shownLandmarks, landmarks.length, router]);
-  const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
+  const present = useMemo(() => new Set(meetups.flatMap((m) => m.categories)), [meetups]);
   // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
   const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
 

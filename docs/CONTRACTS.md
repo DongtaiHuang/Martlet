@@ -54,6 +54,8 @@ Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-val
 - Errors: `TrendError`; `AuthRequiredError` and `MockModeError` are reused from `lib/meetups.ts`. Mutations run through the RPCs in `supabase/migrations/010_trends.sql`.
 
 ## Data interpretation
+
+- Meetups store one to three unique categories in selection order. Other stands alone. The legacy `category` is the first value and controls the card accent and map marker. Study can be anywhere in the list for course selection and filtering.
 - A meetup's host is automatically participating without a `meetup_pecks` row.
 - `attendee_count = 1 + pecks count`.
 - `has_pecked` true only when the *current user* has a peck row.

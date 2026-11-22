@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, CheckCircle2, GraduationCap, MapPin, Pencil, UserRound } from "lucide-react";
-import { categories } from "@/components/feed/categories";
+import { MeetupCategoryBadge } from "@/components/feed/MeetupCategoryBadge";
 import { CancelMeetupForm } from "@/components/forms/CancelMeetupForm";
 import { LocationPreview } from "@/components/forms/LocationPreview";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
@@ -33,7 +33,6 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
   const { updated } = await searchParams;
   const { id } = await params;
   const { meetup, cancelled, expired, upcoming, isHost, canCancel, canReact } = await loadMeetup(id);
-  const { icon: CategoryIcon, label, color } = categories[meetup.category];
   // Campus locations show their photo next to the map, like the create/edit form.
   const campusLocation = findCampusLocationForMeetup(meetup);
 
@@ -49,7 +48,7 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
         )}
         <article className="mt-3 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap gap-2">
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${color}`}><CategoryIcon aria-hidden="true" size={15} /> {label}</span>
+            {meetup.categories.map((category) => <MeetupCategoryBadge key={category} category={category} />)}
             {meetup.course_code && <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={15} /> {meetup.course_code}</span>}
             {cancelled && <span className="rounded-full bg-brand-muted px-3 py-1 text-xs font-semibold text-brand-ink-strong">Cancelled</span>}
             {!cancelled && expired && <span className="rounded-full bg-line px-3 py-1 text-xs font-semibold text-ink-soft">Past meetup</span>}

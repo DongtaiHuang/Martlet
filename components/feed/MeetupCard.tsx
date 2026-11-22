@@ -7,6 +7,7 @@ import { FlapButton } from "@/components/social/FlapButton";
 import { PeckButton } from "@/components/social/PeckButton";
 import type { MeetupSummary } from "@/types/meetup";
 import { categories } from "./categories";
+import { MeetupCategoryBadge } from "./MeetupCategoryBadge";
 
 export type MeetupCardProps = {
   meetup: MeetupSummary;
@@ -19,8 +20,7 @@ const browserTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 const serverTimeZone = () => "America/Toronto";
 
 export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
-  const { label, icon: CategoryIcon, color, accent } = categories[meetup.category];
-  const labelColor = color.split(" ").filter((c) => c.startsWith("text-") || c.startsWith("dark:text-")).join(" ");
+  const { accent } = categories[meetup.category];
   const timeZone = useSyncExternalStore(subscribe, browserTimeZone, serverTimeZone);
   const starts = new Intl.DateTimeFormat("en-CA", {
     weekday: "short",
@@ -36,10 +36,10 @@ export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
 
   return (
     <article className={`flex min-w-0 flex-col overflow-hidden rounded-2xl border border-t-4 bg-surface p-5 shadow-sm ${accent} ${joined ? "border-brand-line ring-2 ring-brand-soft" : "border-line"}`}>
-      <p className={`eyebrow flex items-center gap-1.5 ${labelColor}`}>
-        <CategoryIcon aria-hidden="true" size={14} />
-        {label}
-        <span aria-hidden="true" className="text-ink-subtle">·</span>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {meetup.categories.map((category) => <MeetupCategoryBadge key={category} category={category} />)}
+      </div>
+      <p className="eyebrow mt-2">
         <time dateTime={meetup.starts_at} className="text-ink-muted">{starts}</time>
       </p>
       <h3 className="mt-2 text-2xl leading-tight font-semibold text-ink [overflow-wrap:anywhere]">{meetup.title}</h3>

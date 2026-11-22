@@ -5,7 +5,8 @@ import { ArrowRight } from "lucide-react";
 import { submitMeetup, type CreateState } from "@/app/meetups/new/actions";
 import { submitMeetupEdit } from "@/app/meetups/[id]/edit/actions";
 import { MeetupCoursePicker } from "@/components/courses/MeetupCoursePicker";
-import { categories, categoryValues } from "@/components/feed/categories";
+import { MeetupCategoryPicker } from "./MeetupCategoryPicker";
+import type { MeetupCategory } from "@/types/meetup";
 import type { Course } from "@/lib/course-codes";
 import { formatLocalMinute, futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
@@ -27,7 +28,7 @@ function FieldError({ name, fields }: { name: keyof NonNullable<CreateState["fie
 export interface MeetupFormInitial {
   title: string;
   description: string;
-  category: string;
+  categories: MeetupCategory[];
   locationId: string;
   customLocation: string;
   startsAt: string; // ISO; shown in the visitor's local time
@@ -38,7 +39,8 @@ export function MeetupForm({ myCourses = [], edit }: { myCourses?: Course[]; edi
   const action = useMemo(() => (edit ? submitMeetupEdit.bind(null, edit.meetupId) : submitMeetup), [edit]);
   const [state, dispatch, pending] = useActionState(action, {});
   const initial = edit?.initial;
-  const [category, setCategory] = useState(initial?.category ?? "");
+  const [categories, setCategories] = useState<MeetupCategory[]>(initial?.categories ?? []);
+  const [initialCourse, setInitialCourse] = useState(initial?.course ?? null);
   const startsAtRef = useRef<HTMLInputElement>(null);
   // Show the saved start time in the visitor's own time zone (only known in the browser).
   useEffect(() => {
@@ -87,24 +89,18 @@ export function MeetupForm({ myCourses = [], edit }: { myCourses?: Course[]; edi
           <textarea id="description" name="description" rows={4} maxLength={500} defaultValue={initial?.description} placeholder="What are you planning? How can people find you?" className={fieldStyle} {...fieldErrorProps("description")} />
           <FieldError name="description" fields={state.fields} />
         </div>
-        <div className="grid min-w-0 gap-5 sm:grid-cols-2">
-          <div className="min-w-0">
-            <label htmlFor="category" className="font-semibold">Category</label>
-            <select id="category" name="category" required value={category} onChange={(event) => setCategory(event.target.value)} className={fieldStyle} {...fieldErrorProps("category")}>
-              <option value="" disabled>Choose a category</option>
-              {categoryValues.map((category) => <option key={category} value={category}>{categories[category].label}</option>)}
-            </select>
-            <FieldError name="category" fields={state.fields} />
-          </div>
-          <div className="min-w-0">
-            <label htmlFor="location" className="font-semibold">Meetup location</label>
-            <select id="location" name="location" required value={locationId} onChange={(event) => setLocationId(event.target.value)} className={fieldStyle} {...fieldErrorProps("location")}>
-              <option value="" disabled>Choose a location</option>
-              {CAMPUS_LOCATIONS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
-              <option value={OTHER_LOCATION}>Other — Outside McGill Campus</option>
-            </select>
-            <FieldError name="location" fields={state.fields} />
-          </div>
+        <MeetupCategoryPicker value={categories} onChange={(next) => {
+          setCategories(next);
+          if (!next.includes("study")) setInitialCourse(null);
+        }} error={state.fields?.categories?.[0]} />
+        <div className="min-w-0">
+          <label htmlFor="location" className="font-semibold">Meetup location</label>
+          <select id="location" name="location" required value={locationId} onChange={(event) => setLocationId(event.target.value)} className={fieldStyle} {...fieldErrorProps("location")}>
+            <option value="" disabled>Choose a location</option>
+            {CAMPUS_LOCATIONS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+            <option value={OTHER_LOCATION}>Other — Outside McGill Campus</option>
+          </select>
+          <FieldError name="location" fields={state.fields} />
         </div>
         {offCampus && (
           <div className="min-w-0">
@@ -132,8 +128,8 @@ export function MeetupForm({ myCourses = [], edit }: { myCourses?: Course[]; edi
             )}
           </div>
         )}
-        {location && <LocationPreview location={location} />}
-        {category === "study" && <MeetupCoursePicker myCourses={myCourses} initialCourse={initial?.course ?? null} error={state.fields?.course_code?.[0]} />}
+        {location && <LocationPreview location={location} category={categories[0]} />}
+        {categories.includes("study") && <MeetupCoursePicker myCourses={myCourses} initialCourse={initialCourse} error={state.fields?.course_code?.[0]} />}
         <div>
           <label htmlFor="startsAt" className="font-semibold">Start date and time</label>
           <input ref={startsAtRef} id="startsAt" name="startsAt" type="datetime-local" min={minimum} step={60} required className={fieldStyle} onChange={() => setTimeError(false)} aria-invalid={timeError || Boolean(state.fields?.startsAt)} aria-describedby={timeError || state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />

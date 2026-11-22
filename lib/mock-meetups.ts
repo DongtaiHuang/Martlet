@@ -17,7 +17,7 @@ function sample(
 ): MeetupSummary {
   const place = CAMPUS_LOCATIONS[locationIndex];
   return {
-    id, title, category,
+    id, title, category, categories: [category],
     host_id: "demo-host",
     host_display_name: host,
     description: "Open to anyone at McGill. Come say hi!",
@@ -37,7 +37,7 @@ function sample(
 // Mock-only data. Replace with Supabase service before final demo.
 export function getMockMeetups(): MeetupSummary[] {
   return [
-    sample("demo-coffee", "Coffee & a study break", "coffee", 1, 20, "Alex", 3, 8),
+    { ...sample("demo-coffee", "Coffee & a study break", "coffee", 1, 20, "Alex", 3, 8), categories: ["coffee", "study"] },
     { ...sample("demo-study", "COMP 302 group study", "study", 2, 65, "Jamie", 5, 12), course_code: "COMP 302" },
     sample("demo-sports", "Campus walk before dinner", "sports", 0, 120, "Sam", 2, 4),
     sample("demo-food", "Lunch after class?", "food", 3, 150, "Taylor", 4, 3),

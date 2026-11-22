@@ -1,10 +1,5 @@
-export type MeetupCategory =
-  | "coffee"
-  | "study"
-  | "food"
-  | "sports"
-  | "gaming"
-  | "other";
+import type { MeetupCategory } from "@/lib/meetup-categories";
+export type { MeetupCategory } from "@/lib/meetup-categories";
 
 export type MeetupStatus = "open" | "cancelled";
 
@@ -14,6 +9,7 @@ export interface Meetup {
   title: string;
   description: string;
   category: MeetupCategory;
+  categories: MeetupCategory[];
   location_name: string;
   latitude: number | null;
   longitude: number | null;
@@ -26,7 +22,7 @@ export interface Meetup {
 
 export type CreateMeetupInput = Pick<
   Meetup,
-  "title" | "description" | "category" | "location_name" |
+  "title" | "description" | "categories" | "location_name" |
   "latitude" | "longitude" | "starts_at" | "course_code"
 > & { public_venue_id?: string; location_type?: "catalog" | "custom" };
 

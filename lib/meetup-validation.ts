@@ -4,14 +4,13 @@ import { CAMPUS_LOCATIONS, type CampusLocation } from "@/lib/locations";
 import { CUSTOM_LOCATION_ERROR, isCustomLocationText } from "@/lib/meetup-location";
 import { getPublicVenue } from "@/lib/public-venues";
 import type { CreateMeetupInput, MeetupCategory } from "@/types/meetup";
+import { meetupCategoriesSchema } from "@/lib/meetup-categories";
 
 // Pure validation shared by the server (lib/meetups.ts) and, optionally, client forms.
 // The database re-enforces the same rules (see supabase/migrations), so client-side
 // use is only for friendlier error messages.
 
-export const MEETUP_CATEGORIES = [
-  "coffee", "study", "food", "sports", "gaming", "other",
-] as const satisfies readonly MeetupCategory[];
+export { MEETUP_CATEGORIES } from "@/lib/meetup-categories";
 
 export const TITLE_MIN = 3;
 export const TITLE_MAX = 80;
@@ -24,7 +23,7 @@ const COORDINATE_TOLERANCE = 1e-6;
 export type MeetupFieldErrors = Partial<Record<keyof CreateMeetupInput | "form", string>>;
 
 export type MeetupValidationResult =
-  | { ok: true; value: CreateMeetupInput }
+  | { ok: true; value: CreateMeetupInput & { category: MeetupCategory } }
   | { ok: false; errors: MeetupFieldErrors };
 
 export function findApprovedLocation(
@@ -48,7 +47,7 @@ const createMeetupSchema = z.object({
   description: z.string().trim()
     .max(DESCRIPTION_MAX, `Description must be at most ${DESCRIPTION_MAX} characters.`)
     .default(""),
-  category: z.enum(MEETUP_CATEGORIES, "Choose a valid category."),
+  categories: meetupCategoriesSchema,
   location_name: z.string("Choose a meetup location.").trim().min(1, "Choose a meetup location."),
   latitude: z.number("Choose a meetup location.").nullable(),
   longitude: z.number("Choose a meetup location.").nullable(),
@@ -100,7 +99,7 @@ export function validateCreateMeetupInput(
   }
 
   // The database also enforces this (meetups_course_only_for_study) and that the course exists.
-  if (data.course_code && data.category !== "study") errors.course_code = "Only study meetups can have a course.";
+  if (data.course_code && !data.categories.includes("study")) errors.course_code = "Only study meetups can have a course.";
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
@@ -111,7 +110,8 @@ export function validateCreateMeetupInput(
       ...(venue ? { public_venue_id: venue.id } : {}),
       title: data.title,
       description: data.description,
-      category: data.category,
+      category: data.categories[0],
+      categories: data.categories,
       location_name: location?.name ?? data.location_name,
       latitude: location?.latitude ?? null,
       longitude: location?.longitude ?? null,

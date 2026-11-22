@@ -40,7 +40,7 @@ export class MeetupNotFoundError extends Error {
 }
 
 const MEETUP_COLUMNS =
-  "id, host_id, title, description, category, location_name, latitude, longitude, starts_at, status, created_at, course_code";
+  "id, host_id, title, description, category, categories, location_name, latitude, longitude, starts_at, status, created_at, course_code";
 
 // `profiles!host_id` disambiguates the host relation from the many-to-many paths
 // through meetup_pecks / meetup_flaps. `(count)` returns an aggregate, not rows.

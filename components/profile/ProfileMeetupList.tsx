@@ -36,7 +36,7 @@ export function ProfileMeetupList({ title, icon: Icon, meetups, empty, historyRo
                   <span className="block font-semibold">{meetup.title}</span>
                   {historyRole && (
                     <span className="my-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-ink-2">
-                      <span>{categories[meetup.category].label}</span>
+                      <span>{meetup.categories.map((category) => categories[category].label).join(" · ")}</span>
                       <span>{historyRole}</span>
                       <span className={`rounded-full px-2 py-0.5 ${meetup.status === "cancelled" ? "bg-brand-muted text-brand-ink-strong" : "bg-surface-muted"}`}>
                         {meetup.status === "cancelled" ? "Cancelled" : "Past"}

@@ -39,6 +39,7 @@ In **SQL Editor**, paste and run each file once:
 12. `supabase/migrations/011_notifications.sql` (account notifications). Apply after the meetup course and Trends migrations. Safe to re-run.
 13. `supabase/migrations/012_expo_67_landmark.sql` (Expo 67 Biosphère landmark and photo requirement for the 67 badge). Apply after the landmarks and achievements migrations. Safe to re-run.
 14. `supabase/migrations/013_meetup_editing.sql` (hosts edit their upcoming meetups via `update_my_meetup`; adds the `meetup_updated` notification). Apply after 011 and 012. Safe to re-run.
+15. `supabase/migrations/014_meetup_categories.sql` (ordered meetup categories). Apply once after 013 and before deploying the multi-category app. It backfills existing meetups, retains `category` as the first category, and updates the existing host-only RPC. Direct table UPDATE remains cancellation-only. Older clients can still create single-category meetups and edit via the legacy primary-category field.
 
 `002` adds the original campus-only foreign key. On a project upgrading from 001, resolve any existing locations that fail that constraint before running 002. After applying 008, do not rerun 002 because it reinstates the campus-only foreign key.
 
