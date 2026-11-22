@@ -7,6 +7,7 @@ import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { exploreMeetupHref } from "@/components/map/explore-link";
 import { MeetupLocationMap } from "@/components/map/MeetupLocationMap";
+import { MeetupPoll } from "@/components/polls/MeetupPoll";
 import { FlapButton } from "@/components/social/FlapButton";
 import { PeckButton } from "@/components/social/PeckButton";
 import { getMeetup } from "@/lib/meetups";
@@ -77,6 +78,7 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
               <p className="mt-1 leading-7 whitespace-pre-wrap text-stone-700 [overflow-wrap:anywhere]">{meetup.description}</p>
             </section>
           )}
+          <MeetupPoll meetupId={meetup.id} startsAt={meetup.starts_at} canCreate={canCancel} />
           {/* Developer 4's Peck/Flap controls. The host is already counted as going and RLS rejects host pecks. */}
           <MeetupReactions
             meetup={meetup}

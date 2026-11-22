@@ -29,6 +29,16 @@ export interface LandmarkPhoto {
   is_mine: boolean;
 }
 
+/** One of the current user's unlocks, with their own photo (shown as fruit on the progress tree). */
+export interface MyUnlock {
+  landmark_id: string;
+  landmark_name: string;
+  caption: string;
+  /** Short-lived signed URL, or null if the photo is missing. */
+  photo_url: string | null;
+  created_at: string;
+}
+
 export interface LandmarkDetail extends LandmarkSummary {
   /** The current user's unlock, if any. */
   my_unlock: LandmarkPhoto | null;

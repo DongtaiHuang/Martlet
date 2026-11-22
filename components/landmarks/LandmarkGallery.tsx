@@ -14,7 +14,12 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
       {photos.map((photo) => {
         const edited = Date.parse(photo.updated_at) - Date.parse(photo.created_at) > EDIT_THRESHOLD_MS;
         return (
-          <li key={photo.user_id} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+          <li
+            key={photo.user_id}
+            // The progress tree's fruit links here (/landmarks/<id>#my-photo); highlight it when targeted.
+            id={photo.is_mine ? "my-photo" : undefined}
+            className="scroll-mt-24 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm target:ring-4 target:ring-red-500"
+          >
             {photo.photo_url ? (
               // Short-lived signed Supabase URLs; next/image would need remote config and re-optimize each token.
               // eslint-disable-next-line @next/next/no-img-element

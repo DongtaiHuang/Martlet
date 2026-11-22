@@ -14,6 +14,9 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0008 | [Client-side "show my location" on the map](0008-client-side-locate-me.md) | Proposed |
 | 0009 | [Landmark photo unlocks with visit check-ins](0009-landmark-photo-unlocks.md) | Proposed |
 | 0010 | [Martlet avatar with in-browser expression tracking](0010-martlet-avatar-expression-tracking.md) | Proposed |
+| 0011 | [Advisory meetup polls and single-choice voting](0011-meetup-polls.md) | Proposed |
+| 0012 | [Landmark progress shown as a growing pixel-art tree](0012-progress-growth-tree.md) | Proposed |
+| 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Proposed |
 
 ## Adding a new ADR
 
