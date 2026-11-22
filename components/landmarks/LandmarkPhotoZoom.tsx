@@ -29,6 +29,7 @@ export function LandmarkPhotoZoom({ src, alt, photographer, landmarkName }: Phot
   const [zoom, setZoom] = useState(MIN_ZOOM);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const [pinching, setPinching] = useState(false);
 
   function clampOffset(point: Point, scale: number): Point {
     const image = imageRef.current;
@@ -52,6 +53,7 @@ export function LandmarkPhotoZoom({ src, alt, photographer, landmarkName }: Phot
     setZoom(MIN_ZOOM);
     setOffset({ x: 0, y: 0 });
     setDragging(false);
+    setPinching(false);
     activePointers.current.clear();
     pinchStart.current = null;
   }
@@ -72,6 +74,7 @@ export function LandmarkPhotoZoom({ src, alt, photographer, landmarkName }: Phot
     if (activePointers.current.size === 2) {
       const [a, b] = Array.from(activePointers.current.values());
       pinchStart.current = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom };
+      setPinching(true);
       setDragging(false);
     } else if (zoom > MIN_ZOOM) {
       setDragging(true);
@@ -98,7 +101,10 @@ export function LandmarkPhotoZoom({ src, alt, photographer, landmarkName }: Phot
 
   function onPointerEnd(event: PointerEvent<HTMLDivElement>) {
     activePointers.current.delete(event.pointerId);
-    if (activePointers.current.size < 2) pinchStart.current = null;
+    if (activePointers.current.size < 2) {
+      pinchStart.current = null;
+      setPinching(false);
+    }
     if (activePointers.current.size === 0) setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
@@ -223,7 +229,7 @@ export function LandmarkPhotoZoom({ src, alt, photographer, landmarkName }: Phot
               className="pointer-events-none max-h-full max-w-full select-none object-contain"
               style={{
                 transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(${zoom})`,
-                transition: dragging || pinchStart.current ? "none" : "transform 120ms ease-out",
+                transition: dragging || pinching ? "none" : "transform 120ms ease-out",
               }}
             />
           </div>
