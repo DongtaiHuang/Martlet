@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./theme.css";
+@import "./editorial.css";
 
 /* Marty, the flying martlet (components/martlet/FlyingMartlet.tsx). Everything is sized in
    Marty's pixel grid: --martlet-px is one sprite pixel, and the sprite is 34 pixels wide. */

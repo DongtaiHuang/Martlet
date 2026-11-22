@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { ArrowUpRight, CalendarDays, GraduationCap, Heart, MapPin, UsersRound } from "lucide-react";
+import { ArrowUpRight, GraduationCap, Heart, MapPin, UsersRound } from "lucide-react";
 import { FlapButton } from "@/components/social/FlapButton";
 import { PeckButton } from "@/components/social/PeckButton";
 import type { MeetupSummary } from "@/types/meetup";
@@ -20,6 +20,7 @@ const serverTimeZone = () => "America/Toronto";
 
 export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
   const { label, icon: CategoryIcon, color, accent } = categories[meetup.category];
+  const labelColor = color.split(" ").filter((c) => c.startsWith("text-") || c.startsWith("dark:text-")).join(" ");
   const timeZone = useSyncExternalStore(subscribe, browserTimeZone, serverTimeZone);
   const starts = new Intl.DateTimeFormat("en-CA", {
     weekday: "short",
@@ -35,22 +36,25 @@ export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
 
   return (
     <article className={`flex min-w-0 flex-col overflow-hidden rounded-2xl border border-t-4 bg-surface p-5 shadow-sm ${accent} ${joined ? "border-brand-line ring-2 ring-brand-soft" : "border-line"}`}>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${color}`}>
-          <CategoryIcon aria-hidden="true" size={15} />
-          {label}
-        </span>
-        {meetup.course_code && <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={14} />{meetup.course_code}</span>}
-        {isHost && <span className="rounded-full bg-stone-900 px-2.5 py-1 text-xs font-semibold text-white">Hosting</span>}
-        {joined && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-on-brand">You’re going</span>}
-      </div>
-      <h3 className="mt-4 text-xl font-bold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]">{meetup.title}</h3>
-      <p className="mt-1 text-sm text-ink-muted [overflow-wrap:anywhere]">Hosted by {meetup.host_display_name}</p>
-      <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink-2 [overflow-wrap:anywhere]">{meetup.description}</p>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 pb-4 text-sm text-ink-2">
-        <span className="inline-flex items-center gap-2"><CalendarDays aria-hidden="true" size={16} className="shrink-0 text-ink-subtle" /><time dateTime={meetup.starts_at}>{starts}</time></span>
-        <span className="inline-flex min-w-0 items-center gap-2 [overflow-wrap:anywhere]"><MapPin aria-hidden="true" size={16} className="shrink-0 text-ink-subtle" />{meetup.location_name}</span>
-      </div>
+      <p className={`eyebrow flex items-center gap-1.5 ${labelColor}`}>
+        <CategoryIcon aria-hidden="true" size={14} />
+        {label}
+        <span aria-hidden="true" className="text-ink-subtle">·</span>
+        <time dateTime={meetup.starts_at} className="text-ink-muted">{starts}</time>
+      </p>
+      <h3 className="mt-2 text-2xl leading-tight font-semibold text-ink [overflow-wrap:anywhere]">{meetup.title}</h3>
+      <p className="mt-1.5 flex min-w-0 items-start gap-1.5 text-sm text-ink-muted [overflow-wrap:anywhere]">
+        <MapPin aria-hidden="true" size={15} className="mt-0.5 shrink-0 text-ink-subtle" />
+        <span>{meetup.location_name} <span className="text-ink-subtle">—</span> hosted by {meetup.host_display_name}</span>
+      </p>
+      {(meetup.course_code || isHost || joined) && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {meetup.course_code && <span className="inline-flex items-center gap-1 rounded-md bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-ink-strong ring-1 ring-brand-line"><GraduationCap aria-hidden="true" size={13} />{meetup.course_code}</span>}
+          {isHost && <span className="rounded-md bg-ink px-2 py-0.5 text-xs font-semibold text-canvas">Hosting</span>}
+          {joined && <span className="rounded-md bg-brand px-2 py-0.5 text-xs font-semibold text-on-brand">You’re going</span>}
+        </div>
+      )}
+      <p className="mt-3 line-clamp-2 pb-4 text-[0.95rem] leading-6 text-ink-2 [overflow-wrap:anywhere]">{meetup.description}</p>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-line-soft pt-3">
         {viewerId ? (
           <div className="flex flex-wrap gap-2">
