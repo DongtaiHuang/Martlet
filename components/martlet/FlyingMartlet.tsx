@@ -60,6 +60,7 @@ export function FlyingMartlet() {
   const hops = useRef<Animation[]>([]);
   const dropAlongLane = useRef<((offsetX: number) => void) | null>(null);
   const dragged = useRef(false);
+  const burrowDive = useRef<Animation | null>(null);
   const tooltipId = useId();
 
   // Layout effect: when a drop on the nest also turns the bird around, the glide must start
@@ -274,11 +275,64 @@ export function FlyingMartlet() {
     };
   }, []);
 
+  // Seasonal moves (components/seasons/SeasonalScene.tsx sends these events). Marty stops,
+  // does the move, then carries on hopping. Picking him up cancels it.
+  //  - "martlet:burrow": dive into a mound (or water), pop his head out to peek, hop out.
+  //  - "martlet:peck": two quick pecks at a rubber duck on the water.
+  useEffect(() => {
+    // translateY in % of Marty's height: 92% hides him in the mound (even its rounded corners),
+    // 34% shows just his head.
+    // Eased step by step (not across the whole timeline, which would shift every phase).
+    const dive: Keyframe[] = [
+      { offset: 0, transform: "translateY(0)", easing: "ease-out" }, // little hop up
+      { offset: 0.12, transform: "translateY(-12%)", easing: "ease-in" }, // dive in
+      { offset: 0.28, transform: "translateY(92%)" }, // hidden
+      { offset: 0.5, transform: "translateY(92%)", easing: "ease-out" }, // head pops out
+      { offset: 0.62, transform: "translateY(34%)" }, // peeking
+      { offset: 0.8, transform: "translateY(34%)", easing: "ease-out" }, // hop out
+      { offset: 0.9, transform: "translateY(-28%)", easing: "ease-in" }, // land
+      { offset: 1, transform: "translateY(0)" },
+    ];
+    // Tip forward from his feet: clockwise when facing right, anticlockwise when facing left.
+    const peck = (facing: number): Keyframe[] => [
+      { offset: 0, transform: "rotate(0deg)", transformOrigin: "50% 100%" },
+      { offset: 0.25, transform: `rotate(${facing * 16}deg)`, transformOrigin: "50% 100%" },
+      { offset: 0.45, transform: "rotate(0deg)", transformOrigin: "50% 100%" },
+      { offset: 0.7, transform: `rotate(${facing * 16}deg)`, transformOrigin: "50% 100%" },
+      { offset: 1, transform: "rotate(0deg)", transformOrigin: "50% 100%" },
+    ];
+    function perform(frames: Keyframe[], ms: number) {
+      const button = birdRef.current;
+      if (!button || pointer.current || burrowDive.current) return;
+      hops.current.forEach((animation) => animation.pause());
+      const animation = button.animate(frames, { duration: ms });
+      burrowDive.current = animation;
+      const resume = () => {
+        burrowDive.current = null;
+        if (!pointer.current) hops.current.forEach((hop) => { if (hop.playState === "paused") hop.play(); });
+      };
+      animation.finished.then(resume, () => { burrowDive.current = null; }); // cancelled = picked up
+    }
+    const ms = (event: Event, fallback: number) => (event as CustomEvent<{ ms?: number }>).detail?.ms ?? fallback;
+    const onBurrow = (event: Event) => perform(dive, ms(event, 3200));
+    const onPeck = (event: Event) => {
+      const facing = birdRef.current?.parentElement?.dataset.direction === "left" ? -1 : 1;
+      perform(peck(facing), ms(event, 600));
+    };
+    window.addEventListener("martlet:burrow", onBurrow);
+    window.addEventListener("martlet:peck", onPeck);
+    return () => {
+      window.removeEventListener("martlet:burrow", onBurrow);
+      window.removeEventListener("martlet:peck", onPeck);
+    };
+  }, []);
+
   function grab(event: PointerEvent<HTMLButtonElement>) {
     if (event.button !== 0 || pointer.current) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     pointer.current = { id: event.pointerId, start: { x: event.clientX, y: event.clientY }, offset: null };
     dragged.current = false;
+    burrowDive.current?.cancel(); // picked up mid-burrow: pop straight out
     hops.current.forEach((animation) => animation.pause());
   }
 
@@ -364,6 +418,7 @@ export function FlyingMartlet() {
           <button
             ref={birdRef}
             type="button"
+            data-marty // the seasonal scenes watch where Marty is (components/seasons/SeasonalScene.tsx)
             aria-label={asleep ? "Marty is asleep in the nest. Wake Marty up" : atEdge ? "Marty, turn around" : "Marty the martlet"}
             aria-describedby={visibleTip ? tooltipId : undefined}
             className={`pointer-events-auto block touch-none select-none rounded-lg focus-visible:outline-2 focus-visible:outline-focus active:cursor-grabbing ${atEdge ? "cursor-pointer" : "cursor-grab"}`}

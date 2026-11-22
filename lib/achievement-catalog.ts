@@ -14,6 +14,7 @@ export const ACHIEVEMENTS = [
   { id: "old-school", icon: "🎮", title: "Old school", description: "Entered ↑ ↑ ↓ ↓ ← → ← → B A.", hidden: true },
   { id: "field-trip", icon: "🚌", title: "Field trip", description: "Visit an off-campus landmark on the map.", hidden: false },
   { id: "tourist", icon: "🗺️", title: "Tourist", description: "Explore every landmark on the map.", hidden: false },
+  { id: "red-pocket", icon: "🧧", title: "Lucky red pocket", description: "Opened a pile of red pockets in the Chinese New Year theme.", hidden: true },
   { id: EXPO_67_ID, icon: "67", title: "67", description: "Upload a challenge photo at the Expo 67 Biosphère.", hidden: false },
 
   // Activity ladders (ADR 0020): earned server-side from real activity counts

@@ -5,6 +5,7 @@ import { AchievementToaster } from "@/components/achievements/AchievementToaster
 import { FooterVisibility } from "@/components/layout/FooterVisibility";
 import { MartletFooter } from "@/components/layout/MartletFooter";
 import { FlyingMartlet } from "@/components/martlet/FlyingMartlet";
+import { SeasonalScene } from "@/components/seasons/SeasonalScene";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex min-h-dvh flex-col bg-canvas font-sans text-ink antialiased">
         <div className="martlet-page grid min-w-0 flex-1">{children}</div>
         <FooterVisibility><MartletFooter /></FooterVisibility>
+        <SeasonalScene />
         <FlyingMartlet />
         <AchievementToaster />
       </body>

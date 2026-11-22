@@ -31,6 +31,7 @@ Constraints:
   | Old school | Type ↑ ↑ ↓ ↓ ← → ← → B A | Yes |
   | Field trip | Visit an off-campus landmark (more than 1.5 km from campus) on a map | No |
   | Tourist | Explore every landmark on a map | No |
+  | Lucky red pocket | Click a pile of red pockets in the Chinese New Year theme | Yes |
   | 67 | Successfully upload a challenge photo for Expo 67 Biosphère | No |
 
 ### Saving
