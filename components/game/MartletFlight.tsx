@@ -64,6 +64,9 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const embeddedRef = useRef(embedded);
+  // Embedded: the game owns Space/↑ after you click/tap/focus it, until you interact elsewhere.
+  // (Not document.activeElement: Start/Fly again unmount after a click, dropping focus to <body>.)
+  const engagedRef = useRef(false);
   const mode = useColorMode();
   const [state, setState] = useState<State>("ready");
   const [score, setScore] = useState(0);
@@ -196,16 +199,19 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
 
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-      if (embeddedRef.current && !boxRef.current?.contains(document.activeElement)) return;
+      if (embeddedRef.current && !engagedRef.current) return;
       if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") { e.preventDefault(); if (stateRef.current !== "paused") flapRef.current(); }
       if (e.code === "KeyP") { const s = stateRef.current; if (s === "playing" || s === "paused") { const n = s === "playing" ? "paused" : "playing"; stateRef.current = n; setState(n); } }
     };
     const onHide = () => { if (document.hidden && stateRef.current === "playing") { stateRef.current = "paused"; setState("paused"); } };
     window.addEventListener("keydown", onKey);
+    const engage = (e: Event) => { engagedRef.current = !!boxRef.current?.parentElement?.contains(e.target as Node); };
+    document.addEventListener("pointerdown", engage, true);
+    document.addEventListener("focusin", engage);
     const io = embeddedRef.current ? new IntersectionObserver(([en]) => { if (!en.isIntersecting && stateRef.current === "playing") { stateRef.current = "paused"; setState("paused"); } }) : null;
     if (io && boxRef.current) io.observe(boxRef.current);
     document.addEventListener("visibilitychange", onHide);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); io?.disconnect(); window.removeEventListener("keydown", onKey); document.removeEventListener("visibilitychange", onHide); };
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); io?.disconnect(); window.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", engage, true); document.removeEventListener("focusin", engage); document.removeEventListener("visibilitychange", onHide); };
   }, []);
 
   const btn = "inline-flex min-h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
