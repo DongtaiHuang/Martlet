@@ -1,11 +1,12 @@
 "use client";
 import { LockKeyhole } from "lucide-react";
 import { ACHIEVEMENTS, type Achievement, type EarnedMap } from "@/lib/achievement-catalog";
+import type { ActivityProgress } from "@/lib/activity-achievements";
 import { useEarned } from "./useEarned";
 
 const dateFormat = new Intl.DateTimeFormat("en-CA", { dateStyle: "medium" });
 
-function Card({ achievement: a, at }: { achievement: Achievement; at?: string }) {
+function Card({ achievement: a, at, progress }: { achievement: Achievement; at?: string; progress?: { current: number; target: number } }) {
   const secret = a.hidden && !at;
   return (
     <li className={`flex items-start gap-3 rounded-2xl border p-4 ${at ? "border-amber-300 bg-warn-soft dark:border-amber-300/50" : "border-line bg-surface"}`}>
@@ -18,7 +19,7 @@ function Card({ achievement: a, at }: { achievement: Achievement; at?: string })
       <span className="min-w-0">
         <span className={`block font-bold ${at ? "text-ink-soft" : "text-ink-2"}`}>{secret ? "???" : a.title}</span>
         <span className="block text-sm text-ink-muted">{secret ? "Hidden achievement. Keep poking around." : a.description}</span>
-        <span className="mt-1 block text-xs font-semibold text-ink-subtle">{at ? `Unlocked ${dateFormat.format(new Date(at))}` : "Not yet"}</span>
+        <span className="mt-1 block text-xs font-semibold text-ink-subtle">{at ? `Unlocked ${dateFormat.format(new Date(at))}` : progress ? `${progress.current}/${progress.target}` : "Not yet"}</span>
       </span>
     </li>
   );
@@ -29,7 +30,7 @@ function Card({ achievement: a, at }: { achievement: Achievement; at?: string })
  * unlocked. `earned` comes from the account; null (signed out or demo mode) uses the ones
  * saved in this browser. Updates live when a new one is earned on this page.
  */
-export function AchievementGrid({ earned: account }: { earned: EarnedMap | null }) {
+export function AchievementGrid({ earned: account, progress }: { earned: EarnedMap | null; progress?: ActivityProgress }) {
   const earned = useEarned(account);
   const todo = ACHIEVEMENTS.filter((a) => !earned[a.id]).sort((a, b) => Number(a.hidden) - Number(b.hidden));
   const done = ACHIEVEMENTS.filter((a) => earned[a.id]);
@@ -45,7 +46,7 @@ export function AchievementGrid({ earned: account }: { earned: EarnedMap | null 
         <section aria-labelledby="todo-heading" className="mt-8">
           <h2 id="todo-heading" className="text-lg font-bold">Still to unlock <span className="font-semibold text-ink-subtle">({todo.length})</span></h2>
           <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-            {todo.map((a) => <Card key={a.id} achievement={a} />)}
+            {todo.map((a) => <Card key={a.id} achievement={a} progress={progress?.[a.id]} />)}
           </ul>
         </section>
       )}
