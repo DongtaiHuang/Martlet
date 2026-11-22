@@ -28,6 +28,31 @@ unflap(meetupId: string): Promise<void>
 
 Use the authenticated Supabase user ID internally; **never accept a `userId` argument from the browser**.
 
+## Achievements (ADR 0019)
+
+Server (`lib/achievements.ts`; the user always comes from the session):
+
+```typescript
+listMyAchievements(): Promise<EarnedMap | null>   // null = no account (signed out or mock mode)
+recordAchievement(id: AchievementId): Promise<"new" | "already" | "guest">
+```
+
+Server action `earnAchievement(id: unknown): Promise<EarnResult>` (`app/achievements/actions.ts`). In the browser, call `earn(id)` from `components/achievements/earn.ts`, or mark an element with `data-achievement="<id>"` to earn it on hover/focus. Ids and copy live in `lib/achievement-catalog.ts`.
+
+## Trend service functions — `lib/trends.ts` (issue #43, ADR 0017)
+
+```typescript
+listTrends(type?: TrendType, limit?: number): Promise<TrendEntry[]>
+createTrend(input: CreateTrendInput): Promise<void>
+setTrendLike(id: string, liked: boolean): Promise<void>
+```
+
+Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-validation.ts` (`validateCreateTrendInput`, `TREND_TYPES`).
+
+- Data interpretation: one like per user per entry (composite primary key); rank = like count descending, then newest first. `likedByMe`/`createdByMe` are computed for the current user only.
+- Coffee and study entries may reference an approved `CAMPUS_LOCATIONS` id; recipes and songs are address-free. Links must be empty or start with `https://`.
+- Errors: `TrendError`; `AuthRequiredError` and `MockModeError` are reused from `lib/meetups.ts`. Mutations run through the RPCs in `supabase/migrations/010_trends.sql`.
+
 ## Data interpretation
 - A meetup's host is automatically participating without a `meetup_pecks` row.
 - `attendee_count = 1 + pecks count`.
@@ -36,7 +61,7 @@ Use the authenticated Supabase user ID internally; **never accept a `userId` arg
 - `status='cancelled'` hides meetup from the upcoming feed, but can still render a cancelled detail page.
 - Cancelled/past meetups cannot receive new pecks or flaps.
 - Time is stored in UTC `timestamptz`; display in user's local timezone.
-- Campus locations are chosen from `CAMPUS_LOCATIONS`; frontend must submit name and coordinates from the selected entry, not free-form coordinates. Server should revalidate the approved location rather than trust client-side coordinate values.
+- The creation form submits an approved campus ID or a custom meeting spot. The server resolves campus IDs to canonical coordinates. Custom locations store 3–160 characters of trimmed text and null coordinates. Existing public venue rows retain their verified coordinates. Consumers must check both coordinates before rendering a marker.
 - `auth.users` handles auth; `profiles` contains public-facing display names.
 
 ## UX component API
@@ -64,5 +89,5 @@ Cards render Developer 4's `PeckButton`/`FlapButton` (which call `lib/social.ts`
 - Unauthorized user cannot create, like, join, or cancel.
 - Duplicate peck/flap does not increase count.
 - Past/cancelled meetups cannot be joined.
-- Future timestamp and approved campus place validation prevents bad data.
+- Future timestamp and approved location validation prevents bad data.
 - Mobile screen 375px wide usable without horizontal scroll.

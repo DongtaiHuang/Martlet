@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useState, type FormEvent } from "react";
 import { Camera, Info } from "lucide-react";
 import type { UnlockState } from "@/app/landmarks/[id]/actions";
+import { announceAchievement } from "@/components/achievements/earn";
 import { prepareLandmarkPhoto } from "@/lib/landmark-photo";
 
 const CAPTION_MAX = 200;
@@ -27,6 +28,9 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
 
   // Free the preview object URL when it changes or the form unmounts.
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  useEffect(() => {
+    if (state.achievement) announceAchievement(state.achievement, true);
+  }, [state.achievement]);
 
   // After a successful save, clear the chosen file (adjusting state during render,
   // instead of in an effect; the new key resets the file input).
@@ -76,12 +80,12 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <fieldset disabled={busy} className="min-w-0 space-y-4 disabled:opacity-70">
         <div>
-          <label htmlFor="landmark-photo" className="block text-sm font-bold text-stone-900">
+          <label htmlFor="landmark-photo" className="block text-sm font-bold text-ink-soft">
             {unlocked ? "Replace your photo (optional)" : "Your photo"}
           </label>
           <label
             htmlFor="landmark-photo"
-            className="mt-2 flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 px-4 py-4 text-sm font-semibold text-stone-700 hover:border-red-700 focus-within:outline-2 focus-within:outline-red-700"
+            className="mt-2 flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line-strong bg-canvas px-4 py-4 text-sm font-semibold text-ink-2 hover:border-brand focus-within:outline-2 focus-within:outline-focus"
           >
             <Camera aria-hidden="true" size={18} />
             {file ? file.name : "Take or choose a photo"}
@@ -97,23 +101,23 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
           {preview && (
             // A local object URL preview; next/image doesn't apply to blob: URLs.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="Preview of the photo you chose" className="mt-3 max-h-72 w-full rounded-xl object-contain bg-stone-100" />
+            <img src={preview} alt="Preview of the photo you chose" className="mt-3 max-h-72 w-full rounded-xl object-contain bg-surface-muted" />
           )}
         </div>
 
         <div>
-          <label htmlFor="landmark-caption" className="block text-sm font-bold text-stone-900">Caption (optional)</label>
+          <label htmlFor="landmark-caption" className="block text-sm font-bold text-ink-soft">Caption (optional)</label>
           <input
             id="landmark-caption"
             name="caption"
             defaultValue={currentCaption}
             maxLength={CAPTION_MAX}
             placeholder="Say something about your visit"
-            className="mt-2 block w-full min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700"
+            className="mt-2 block w-full min-w-0 rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-base text-ink focus-visible:outline-2 focus-visible:outline-focus"
           />
         </div>
 
-        <p className="flex gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="flex gap-2 rounded-xl bg-warn-soft p-3 text-sm text-warn-ink">
           <Info aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
           <span>
             Your photo is visible to everyone who has unlocked this landmark. <strong>Unlocks are permanent:</strong> you
@@ -121,10 +125,11 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
           </span>
         </p>
 
-        {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-        {state.success && !error && <p role="status" className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{state.success}</p>}
+        {error && <p role="alert" className="rounded-lg border border-brand-line bg-brand-soft p-3 text-sm text-brand-ink">{error}</p>}
+        {state.success && !error && <p role="status" className="rounded-lg border border-ok-line bg-ok-soft p-3 text-sm text-ok-ink">{state.success}</p>}
+        {state.achievementWarning && !error && <p role="status" className="rounded-lg border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">{state.achievementWarning}</p>}
 
-        <button type="submit" className="w-full rounded-xl bg-red-800 px-5 py-3 font-semibold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 sm:w-auto">
+        <button type="submit" className="w-full rounded-xl bg-brand px-5 py-3 font-semibold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-auto">
           {preparing ? "Preparing photo…" : pending ? "Saving…" : unlocked ? "Save changes" : "Unlock landmark"}
         </button>
       </fieldset>

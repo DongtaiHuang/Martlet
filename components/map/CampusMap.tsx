@@ -1,87 +1,44 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GeolocateControl, Map, Marker, NavigationControl, Popup } from "maplibre-gl";
+import { LngLatBounds, Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import type { LandmarkSummary } from "@/types/landmark";
+import { PUBLIC_VENUES } from "@/lib/public-venues";
 import { categories, categoryValues } from "@/components/feed/categories";
-import { LANDMARK_COLORS } from "./landmark-style";
-import { CAMPUS_CENTER, MARKER_COLORS } from "./map-config";
-import { mapStyleUrl } from "./map-style";
+import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
+import { openedLandmark, watchMapAngle } from "./map-achievements";
+import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
+import { CAMPUS_CENTER, CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
+import { useMapColorMode } from "./map-mode";
+import { hasMeetupCoordinates } from "@/lib/meetup-location";
+import Link from "next/link";
+import { hasGoogleMaps } from "@/lib/google-maps";
+import { GoogleOverviewMap } from "./GoogleOverviewMap";
 
 const FOCUS_ZOOM = 17;
 
 function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {
-  // Build with DOM APIs + textContent: never interpolate user-provided HTML.
-  const root = document.createElement("div");
-  root.style.cssText = "display:grid;gap:4px;max-width:220px;font:14px system-ui,sans-serif";
-  const add = (tag: string, text: string, css = "") => {
-    const el = document.createElement(tag);
-    el.textContent = text;
-    el.style.cssText = css;
-    root.append(el);
-    return el;
-  };
-  add("span", categories[meetup.category].label, "font-size:12px;font-weight:600;color:#57534e");
-  add("strong", meetup.title, "overflow-wrap:anywhere");
-  add("span", meetup.location_name);
-  add("span", new Date(meetup.starts_at).toLocaleString("en-CA", { weekday: "short", hour: "numeric", minute: "2-digit" }));
-  add("span", `${meetup.attendee_count} going · ${meetup.flap_count} flaps`, "font-size:12px;color:#57534e");
-  const href = `/meetups/${encodeURIComponent(meetup.id)}`;
-  const link = add("a", "View meetup →", "font-weight:700;color:#991b1b;text-decoration:underline") as HTMLAnchorElement;
-  link.href = href;
-  link.addEventListener("click", (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // allow open-in-new-tab
-    e.preventDefault();
-    onOpen(href);
+  return buildPopup({
+    seed: `meetup:${meetup.id}`,
+    tag: categories[meetup.category].label,
+    title: meetup.title,
+    body: meetup.location_name,
+    meta: [
+      new Date(meetup.starts_at).toLocaleString("en-CA", { weekday: "short", hour: "numeric", minute: "2-digit" }),
+      `${meetup.attendee_count} going · ${meetup.flap_count} flaps`,
+    ],
+    cta: { label: "View meetup →", href: `/meetups/${encodeURIComponent(meetup.id)}` },
+    onOpen,
   });
-  return root;
 }
 
 const NO_LANDMARKS: LandmarkSummary[] = [];
 
-function landmarkPopupContent(landmark: LandmarkSummary, onOpen: (href: string) => void) {
-  const root = document.createElement("div");
-  root.style.cssText = "display:grid;gap:4px;max-width:220px;font:14px system-ui,sans-serif";
-  const add = (tag: string, text: string, css = "") => {
-    const el = document.createElement(tag);
-    el.textContent = text; // never interpolate HTML
-    el.style.cssText = css;
-    root.append(el);
-    return el;
-  };
-  add("span", `★ Landmark · ${landmark.unlocked ? "Unlocked" : "Locked"}`, "font-size:12px;font-weight:600;color:#57534e");
-  add("strong", landmark.name);
-  add("span", landmark.challenge_prompt, "font-size:13px");
-  add("span", `${landmark.unlock_count} unlocked`, "font-size:12px;color:#57534e");
-  const href = `/landmarks/${encodeURIComponent(landmark.id)}`;
-  const link = add("a", landmark.unlocked ? "View photos →" : "View challenge →", "font-weight:700;color:#991b1b;text-decoration:underline") as HTMLAnchorElement;
-  link.href = href;
-  link.addEventListener("click", (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-    e.preventDefault();
-    onOpen(href);
-  });
-  return root;
-}
-
-function landmarkMarkerElement(landmark: LandmarkSummary) {
-  const el = document.createElement("div");
-  el.textContent = "★";
-  el.style.cssText = [
-    "width:30px", "height:30px", "border-radius:9999px", "display:grid", "place-items:center",
-    `background:${landmark.unlocked ? LANDMARK_COLORS.unlocked : LANDMARK_COLORS.locked}`,
-    "color:#fff", "font-size:17px", "line-height:1", "border:2px solid #fff",
-    "box-shadow:0 1px 4px rgba(0,0,0,.35)", "cursor:pointer",
-  ].join(";");
-  el.setAttribute("aria-label", `Landmark: ${landmark.name} (${landmark.unlocked ? "unlocked" : "locked"})`);
-  return el;
-}
-
 /**
  * `focusId` (from /explore?meetup=<id>) centres the map on that meetup and opens its popup once.
- * `landmarks` (ADR 0009) are always shown as star pins, independent of the category filter.
+ * `landmarks` (ADR 0009) are shown as tower pins, independent of the category filter.
  */
 export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   meetups: MeetupSummary[];
@@ -90,29 +47,42 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  useMapColorMode(mapRef);
   const markersRef = useRef(new globalThis.Map<string, Marker>());
   const router = useRouter();
   const [active, setActive] = useState<MeetupCategory | "all">("all");
+  const [layer, setLayer] = useState<"all" | "meetups" | "landmarks">("all");
 
-  const visible = useMemo(
-    () => (active === "all" ? meetups : meetups.filter((m) => m.category === active)),
-    [meetups, active],
-  );
+  const visible = useMemo(() => {
+    if (layer === "landmarks") return [];
+    return active === "all" ? meetups : meetups.filter((m) => m.category === active);
+  }, [meetups, active, layer]);
+  const shownLandmarks = useMemo(() => (layer === "meetups" ? NO_LANDMARKS : landmarks), [landmarks, layer]);
+  const mapped = useMemo(() => visible.filter(hasMeetupCoordinates), [visible]);
+  const unmapped = visible.filter((meetup) => !hasMeetupCoordinates(meetup));
+  const googlePins = useMemo(() => hasGoogleMaps ? [
+    ...mapped.map((meetup) => ({
+      id: meetup.id, title: meetup.title, latitude: meetup.latitude, longitude: meetup.longitude,
+      color: MARKER_COLORS[meetup.category],
+      content: () => popupContent(meetup, (href) => router.push(href)),
+    })),
+    ...shownLandmarks.map((landmark) => ({
+      id: landmark.id, title: landmark.name, latitude: landmark.latitude, longitude: landmark.longitude,
+      color: landmark.unlocked ? "#166534" : "#57534e",
+      content: () => {
+        openedLandmark(landmark, landmarks.length);
+        return landmarkPopupContent(landmark, (href) => router.push(href));
+      },
+    })),
+  ] : [], [mapped, shownLandmarks, landmarks.length, router]);
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
   // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
   const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
 
   useEffect(() => {
     if (!ref.current) return;
-    const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
-    map.addControl(new NavigationControl(), "top-right");
-    // ADR 0008: opt-in, one-shot "show my location". The position stays in the
-    // browser (MapLibre draws a dot); it is never sent to our server or stored.
-    map.addControl(new GeolocateControl({
-      trackUserLocation: false,
-      positionOptions: { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 },
-      fitBoundsOptions: { maxZoom: 16 },
-    }), "top-right");
+    const map = createCampusMap(ref.current);
+    watchMapAngle(map);
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -121,28 +91,44 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     const map = mapRef.current;
     if (!map) return;
     const byId = markersRef.current;
-    const markers = visible.map((meetup) => {
+    const markers = mapped.map((meetup) => {
       const marker = new Marker({ color: MARKER_COLORS[meetup.category] })
         .setLngLat([meetup.longitude, meetup.latitude])
-        .setPopup(new Popup({ offset: 24 }).setDOMContent(popupContent(meetup, (href) => router.push(href))))
+        .setPopup(new Popup({ offset: 24, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(popupContent(meetup, (href) => router.push(href))))
         .addTo(map);
       marker.getElement().setAttribute("aria-label", `${meetup.title} at ${meetup.location_name}`);
       byId.set(meetup.id, marker);
       return marker;
     });
     return () => { markers.forEach((m) => m.remove()); byId.clear(); };
-  }, [visible, router]);
+  }, [mapped, router]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const markers = landmarks.map((landmark) =>
-      new Marker({ element: landmarkMarkerElement(landmark) })
+    const markers = shownLandmarks.map((landmark) => {
+      const { element, height } = landmarkMarker(landmark, 1.75);
+      const popup = new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH })
+        .setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href)));
+      popup.on("open", () => openedLandmark(landmark, landmarks.length));
+      return new Marker({ element, anchor: "bottom" })
         .setLngLat([landmark.longitude, landmark.latitude])
-        .setPopup(new Popup({ offset: 18 }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
-        .addTo(map));
+        .setPopup(popup)
+        .addTo(map);
+    });
     return () => markers.forEach((m) => m.remove());
-  }, [landmarks, router]);
+  }, [shownLandmarks, landmarks.length, router]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || focusId) return;
+    const hasPublicMeetup = meetups.some((meetup) => PUBLIC_VENUES.some((venue) =>
+      meetup.location_name === venue.name && meetup.latitude === venue.latitude && meetup.longitude === venue.longitude));
+    if (!hasPublicMeetup) return;
+    const bounds = new LngLatBounds(CAMPUS_CENTER, CAMPUS_CENTER);
+    meetups.filter(hasMeetupCoordinates).forEach(({ longitude, latitude }) => bounds.extend([longitude, latitude]));
+    map.fitBounds(bounds, { padding: 40, maxZoom: FOCUS_ZOOM, duration: 0 });
+  }, [meetups, focusId]);
 
   // Runs after the marker effect above, and only when focusId changes, so changing
   // the category filter doesn't keep re-opening the popup.
@@ -154,28 +140,66 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     if (!marker.getPopup()?.isOpen()) marker.togglePopup();
   }, [focusId]);
 
-  const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-red-700";
-  const chipState = (on: boolean) => (on ? "border-red-700 bg-red-700 text-white" : "border-stone-300 bg-white text-stone-800 hover:border-red-700");
+  const chip = "min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-focus";
+  const chipState = (on: boolean) => (on ? "border-brand bg-brand text-on-brand" : "border-line-strong bg-surface text-ink-soft hover:border-brand");
 
   return (
     <div>
       {focusMissing && (
-        <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p role="status" className="mb-4 rounded-xl border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">
           That meetup isn’t on the map anymore. It may have been cancelled or already started.
         </p>
       )}
-      <div role="group" aria-label="Filter map by category" className="mb-4 flex flex-wrap gap-2">
-        <button type="button" aria-pressed={active === "all"} onClick={() => setActive("all")} className={`${chip} ${chipState(active === "all")}`}>
-          All ({meetups.length})
-        </button>
-        {categoryValues.filter((c) => present.has(c)).map((c) => (
-          <button key={c} type="button" aria-pressed={active === c} onClick={() => setActive(c)} className={`${chip} ${chipState(active === c)}`}>
-            {categories[c].label}
+      {landmarks.length > 0 && (
+        <div role="group" aria-label="Show on map" className="mb-3 inline-flex w-full max-w-md rounded-2xl border border-line bg-surface p-1 shadow-sm sm:w-auto">
+          {([
+            ["all", `All (${meetups.length + landmarks.length})`],
+            ["meetups", `Meetups (${meetups.length})`],
+            ["landmarks", `Landmarks (${landmarks.length})`],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={layer === value}
+              onClick={() => setLayer(value)}
+              className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-bold whitespace-nowrap max-[359px]:px-1.5 max-[359px]:text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:flex-none sm:px-4 ${layer === value ? "bg-brand text-on-brand shadow-sm" : "text-ink-muted hover:bg-surface-muted hover:text-ink-soft"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+      {layer !== "landmarks" && (
+        <div role="group" aria-label="Filter meetups by category" className="mb-4 flex flex-wrap gap-2">
+          <button type="button" aria-pressed={active === "all"} onClick={() => setActive("all")} className={`${chip} ${chipState(active === "all")}`}>
+            All categories
           </button>
-        ))}
-      </div>
-      <div ref={ref} aria-label="Map of McGill meetups" className="h-[65vh] min-h-96 w-full overflow-hidden rounded-2xl border border-neutral-200" />
-      {visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
+          {categoryValues.filter((c) => present.has(c)).map((c) => (
+            <button key={c} type="button" aria-pressed={active === c} onClick={() => setActive(c)} className={`${chip} ${chipState(active === c)}`}>
+              {categories[c].label}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Keep this className constant: MapLibre adds its own classes to the container, and
+          React rewriting className would remove them and break the map's positioning. */}
+      {hasGoogleMaps ? <GoogleOverviewMap pins={googlePins} focusId={focusId} className={CAMPUS_MAP_FRAME} /> : (
+        <div ref={ref} aria-label="Map of McGill meetups and landmarks" className={CAMPUS_MAP_FRAME} />
+      )}
+      {unmapped.length > 0 && (
+        <section aria-labelledby="unmapped-meetups" className="mt-5">
+          <h2 id="unmapped-meetups" className="text-lg font-bold">Meetups without a map pin</h2>
+          <ul className="mt-2 grid gap-2">
+            {unmapped.map((meetup) => (
+              <li key={meetup.id} className={`rounded-xl border border-line bg-surface px-4 py-2 [overflow-wrap:anywhere] ${focusId === meetup.id ? "ring-2 ring-brand" : ""}`}>
+                <Link href={`/meetups/${encodeURIComponent(meetup.id)}`} className="inline-flex min-h-11 items-center font-semibold text-brand-ink underline">{meetup.title}</Link>
+                <p className="text-sm text-ink-muted">{meetup.location_name}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {layer !== "landmarks" && visible.length === 0 && <p className="mt-3 text-sm text-ink-muted">No upcoming meetups in this category.</p>}
     </div>
   );
 }

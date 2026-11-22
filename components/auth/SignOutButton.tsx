@@ -5,7 +5,7 @@ export function SignOutButton({ className }: { className?: string }) {
     <form action={signOut}>
       <button
         type="submit"
-        className={className ?? "rounded-lg px-3 py-2 text-sm font-medium hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700"}
+        className={className ?? "rounded-lg px-3 py-2 text-sm font-medium hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-focus"}
       >
         Sign out
       </button>

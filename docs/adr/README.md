@@ -7,13 +7,25 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0001 | [Record architecture decisions](0001-record-architecture-decisions.md) | Accepted |
 | 0002 | [Next.js + Supabase foundation](0002-nextjs-supabase-foundation.md) | Accepted |
 | 0003 | [Row-level security as the authorization boundary](0003-rls-authorization-boundary.md) | Accepted |
-| 0004 | [Approved campus locations only, no live geolocation](0004-approved-campus-locations.md) | Accepted (amended by 0008) |
+| 0004 | [Approved campus locations only, no live geolocation](0004-approved-campus-locations.md) | Superseded for meetup locations by 0015 (geolocation amended by 0008) |
 | 0005 | [Peck/Flap participation and reaction model](0005-peck-flap-model.md) | Accepted |
 | 0006 | [MapLibre with a configurable style](0006-maplibre-configurable-style.md) | Accepted |
 | 0007 | [Frozen MVP scope and mock-first service contracts](0007-frozen-mvp-and-service-contracts.md) | Accepted |
 | 0008 | [Client-side "show my location" on the map](0008-client-side-locate-me.md) | Proposed |
 | 0009 | [Landmark photo unlocks with visit check-ins](0009-landmark-photo-unlocks.md) | Proposed |
 | 0010 | [Martlet avatar with in-browser expression tracking](0010-martlet-avatar-expression-tracking.md) | Proposed |
+| 0011 | [Advisory meetup polls and single-choice voting](0011-meetup-polls.md) | Superseded by 0022 |
+| 0012 | [Landmark progress shown as a growing pixel-art tree](0012-progress-growth-tree.md) | Proposed |
+| 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Proposed |
+| 0014 | [Colour tokens, themes and dark mode](0014-theme-tokens-and-dark-mode.md) | Proposed |
+| 0015 | [Approved public venues for off-campus meetups](0015-public-meetup-venues.md) | Proposed |
+| 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Proposed |
+| 0017 | [Like-ranked trends side panel](0017-trends-side-panel.md) | Proposed |
+| 0018 | [Open the Landmarks map with all pins in 3D](0018-landmarks-overview.md) | Proposed |
+| 0019 | [Achievements for niche and hidden features](0019-achievements.md) | Proposed |
+| 0020 | [Activity achievements computed on read](0020-activity-achievements.md) | Proposed |
+| 0021 | [Persistent, color-coded notifications](0021-notifications.md) | Proposed |
+| 0022 | [Custom meeting spots and polling retirement](0022-custom-meeting-spots.md) | Proposed |
 
 ## Adding a new ADR
 
