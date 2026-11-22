@@ -130,14 +130,28 @@ export default async function MeetupsPage({
     <div className="min-h-screen bg-stone-50 text-stone-950">
       <MartletNav />
       <main className="mx-auto max-w-6xl px-4 pt-5 pb-12 sm:px-8 sm:pt-8">
-        <section aria-labelledby="campus-heading" className="relative isolate overflow-hidden rounded-3xl bg-stone-900 px-5 py-9 text-white sm:px-10 sm:py-14">
-          <Image src={campusBanner} alt="" fill preload sizes="(min-width: 1152px) 1088px, 95vw" className="-z-20 object-cover object-[65%_55%]" />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-stone-950/95 via-stone-950/80 to-stone-950/25 sm:via-stone-950/55" />
-          <h1 id="campus-heading" className="max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">Meet up at McGill</h1>
-          <p className="mt-3 max-w-sm text-base leading-6 text-stone-100 sm:text-lg">Find a study group, grab coffee, or make plans with people on campus.</p>
-          <div className="mt-6 flex flex-wrap gap-2.5">
-            <Link href="/meetups/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus aria-hidden="true" size={18} /> Create meetup</Link>
-            <Link href="/explore" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/50 bg-stone-950/55 px-4 text-sm font-bold text-white hover:bg-stone-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Compass aria-hidden="true" size={18} /> Explore map</Link>
+        <section aria-labelledby="campus-heading" className="relative isolate overflow-hidden rounded-3xl bg-stone-900 text-white">
+          <div className="relative h-52 sm:absolute sm:inset-y-0 sm:right-0 sm:h-auto sm:w-2/3">
+            <Image
+              src={campusBanner}
+              alt="Students outside McGill’s Arts Building on the downtown campus"
+              fill
+              preload
+              sizes="(min-width: 1152px) 726px, (min-width: 640px) 64vw, calc(100vw - 32px)"
+              className="object-cover object-[50%_20%]"
+            />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-stone-900 via-stone-900/75 via-25% to-transparent to-55% sm:block" />
+            <a href="https://commons.wikimedia.org/wiki/File:Arts_Building,_McGill_University,_Aug_31_2022.jpg" className="absolute right-2 bottom-2 z-10 rounded-md bg-stone-950/80 px-2 py-1 text-xs text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-3 sm:bottom-3">
+              Photo by D. Benjamin Miller · CC0
+            </a>
+          </div>
+          <div className="relative px-5 pt-6 pb-8 sm:w-1/2 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
+            <h1 id="campus-heading" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">Meet up at McGill</h1>
+            <p className="mt-3 max-w-[33ch] text-base leading-7 text-stone-100 sm:text-lg">Find your people on campus. Join spontaneous meetups, discover new places, and make every day at McGill more social.</p>
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              <Link href="/meetups/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus aria-hidden="true" size={18} /> Create meetup</Link>
+              <Link href="/explore" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/50 bg-stone-950/55 px-4 text-sm font-bold text-white hover:bg-stone-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Compass aria-hidden="true" size={18} /> Explore map</Link>
+            </div>
           </div>
         </section>
         <section aria-labelledby="feed-heading" className="mt-8 sm:mt-10">
