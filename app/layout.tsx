@@ -13,6 +13,8 @@ import "./globals.css";
 const heading = Fraunces({ subsets: ["latin"], variable: "--font-heading", display: "swap", axes: ["opsz", "SOFT"] });
 const body = Source_Sans_3({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
+export const viewport = { viewportFit: "cover" as const };
+
 export const metadata: Metadata = {
   title: "McGill Martlet",
   description: "Discover spontaneous meetups around McGill.",
@@ -26,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="flex min-h-dvh flex-col bg-canvas font-sans text-ink antialiased">
+      <body className="flex min-h-dvh flex-col bg-canvas pb-[calc(3.75rem+env(safe-area-inset-bottom))] font-sans text-ink antialiased sm:pb-0">
         <div className="martlet-page grid min-w-0 flex-1">{children}</div>
         <FooterVisibility><MartletFooter /></FooterVisibility>
         <SeasonalScene />

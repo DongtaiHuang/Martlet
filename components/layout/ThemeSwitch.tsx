@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import { useColorMode, useModePreference, useThemePreference } from "@/lib/useColorMode";
 import { THEMES, THEME_INFO, type ModePreference } from "@/lib/theme";
@@ -12,7 +12,8 @@ const OPTIONS: { value: ModePreference; label: string; icon: typeof Sun }[] = [
 ];
 
 /** Nav control: Light / Dark / System, plus a palette menu to switch theme from any page (ADR 0014). */
-export function ThemeSwitch() {
+/** `account`: sign in/out controls, shown inside the menu on phones where the header has no room. */
+export function ThemeSwitch({ account }: { account?: ReactNode }) {
   const [pref, setPref] = useModePreference();
   const [theme, setTheme] = useThemePreference();
   const mode = useColorMode();
@@ -28,10 +29,10 @@ export function ThemeSwitch() {
     return () => { document.removeEventListener("pointerdown", onDown); document.removeEventListener("keydown", onKey); };
   }, [open]);
 
-  const btn = "inline-flex size-9 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-focus";
+  const btn = "inline-flex size-10 sm:size-9 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-focus";
   return (
     <div ref={wrap} className="relative inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-surface-muted p-0.5">
-      <div role="radiogroup" aria-label="Colour mode" className="inline-flex">
+      <div role="radiogroup" aria-label="Colour mode" className="hidden sm:inline-flex">
         {OPTIONS.map(({ value, label, icon: Icon }) => {
           const on = pref === value;
           return (
@@ -43,14 +44,23 @@ export function ThemeSwitch() {
           );
         })}
       </div>
-      <span aria-hidden="true" className="h-5 w-px bg-line" />
+      <span aria-hidden="true" className="hidden h-5 w-px bg-line sm:block" />
       <button type="button" aria-haspopup="true" aria-expanded={open} title="Theme" onClick={() => setOpen((v) => !v)}
         className={`${btn} ${open ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}>
         <Palette aria-hidden="true" size={16} />
         <span className="sr-only">Choose theme ({THEME_INFO[theme].label})</span>
       </button>
       {open && (
-        <div role="radiogroup" aria-label="Theme" className="absolute top-full right-0 z-50 mt-2 w-60 rounded-xl border border-line bg-surface p-1.5 shadow-xl">
+        <div className="absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-1.5 shadow-xl">
+          <div role="radiogroup" aria-label="Colour mode" className="mb-1.5 grid grid-cols-3 gap-1 rounded-lg bg-surface-muted p-1 sm:hidden">
+            {OPTIONS.map(({ value, label, icon: Icon }) => (
+              <button key={value} type="button" role="radio" aria-checked={pref === value} onClick={() => setPref(value)}
+                className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md text-xs font-semibold focus-visible:outline-2 focus-visible:outline-focus ${pref === value ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted"}`}>
+                <Icon aria-hidden="true" size={16} />{label}
+              </button>
+            ))}
+          </div>
+          <div role="radiogroup" aria-label="Theme">
           {THEMES.map((id) => {
             const on = theme === id;
             return (
@@ -68,6 +78,8 @@ export function ThemeSwitch() {
               </button>
             );
           })}
+          </div>
+          {account && <div className="mt-1.5 flex justify-end border-t border-line pt-2 sm:hidden">{account}</div>}
         </div>
       )}
     </div>

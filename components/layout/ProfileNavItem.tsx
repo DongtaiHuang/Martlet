@@ -29,12 +29,12 @@ export function ProfileNavItem({ className, current, name }: { className: string
   return (
     <div className="group relative" onMouseEnter={load} onFocus={load}>
       <Link href="/profile" aria-current={current} className={className}>
-        <UserRound aria-hidden="true" size={16} className="shrink-0" />
+        <UserRound aria-hidden="true" size={20} className="shrink-0 sm:size-4" />
         {name ? (
           // Signed in: show the user's name, still announced as their profile.
           // Phones have narrow nav cells, so they get the first name; larger screens get the full name.
           <span title={name} className="max-w-full min-w-0 truncate sm:max-w-40">
-            <span className="sm:hidden">{name.trim().split(/\s+/)[0]}</span>
+            <span className="sm:hidden">Profile</span>
             <span className="hidden sm:inline">{name}</span>
             <span className="sr-only">, your profile</span>
           </span>
