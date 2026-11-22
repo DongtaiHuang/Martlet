@@ -1,5 +1,6 @@
 import { ImageOff } from "lucide-react";
 import type { LandmarkPhoto } from "@/types/landmark";
+import { LandmarkPhotoZoom } from "./LandmarkPhotoZoom";
 
 const EDIT_THRESHOLD_MS = 60_000;
 
@@ -21,13 +22,11 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
             className="scroll-mt-24 overflow-hidden rounded-2xl border border-line bg-surface shadow-sm target:ring-4 target:ring-red-500"
           >
             {photo.photo_url ? (
-              // Short-lived signed Supabase URLs; next/image would need remote config and re-optimize each token.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <LandmarkPhotoZoom
                 src={photo.photo_url}
                 alt={`${photo.display_name} at ${landmarkName}`}
-                loading="lazy"
-                className="aspect-[4/3] w-full bg-surface-muted object-cover"
+                photographer={photo.display_name}
+                landmarkName={landmarkName}
               />
             ) : (
               <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 bg-surface-muted text-sm text-ink-subtle">
