@@ -182,6 +182,44 @@ export async function createMeetup(input: CreateMeetupInput): Promise<Meetup> {
   return data;
 }
 
+/** The meetup can't be edited any more (cancelled or already started). */
+export class MeetupLockedError extends Error {
+  constructor(message = "This meetup can’t be edited any more.") {
+    super(message);
+    this.name = "MeetupLockedError";
+  }
+}
+
+/**
+ * Edits a meetup the signed-in user hosts (issue #73, ADR 0023). Same validation as create;
+ * the database function checks host, open + upcoming status, future time and location rules,
+ * and notifies attendees when the time or place changes.
+ * Throws AuthRequiredError, MeetupValidationError, MeetupNotFoundError, MeetupLockedError, or MockModeError.
+ */
+export async function updateMeetup(id: string, input: CreateMeetupInput): Promise<void> {
+  if (getDataMode() === "mock") throw new MockModeError("edit a meetup");
+  if (!UUID_PATTERN.test(id)) throw new MeetupNotFoundError();
+
+  const result = validateCreateMeetupInput(input);
+  if (!result.ok) throw new MeetupValidationError(result.errors);
+
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_my_meetup", { p_meetup_id: id, p_meetup: result.value });
+  if (!error) return;
+
+  if (error.code === "42501") throw new AuthRequiredError("Sign in to edit this meetup.");
+  if (error.code === "P0002") throw new MeetupNotFoundError("Meetup not found, or you are not its host.");
+  if (error.code === "55000") throw new MeetupLockedError(error.message);
+  if (error.code === "23503" && error.message.includes("course_code")) {
+    throw new MeetupValidationError({ course_code: `${result.value.course_code} isn’t a McGill course.` });
+  }
+  if (error.code === "23514" || error.code === "23503") {
+    throw new MeetupValidationError({ form: "The meetup did not pass server validation." });
+  }
+  throw new Error(`Failed to update meetup: ${error.message}`);
+}
+
 /**
  * Cancels a meetup. Only its host may cancel; cancelling twice is a no-op.
  * Throws AuthRequiredError, MeetupNotFoundError (also when the caller is not the host), or MockModeError.

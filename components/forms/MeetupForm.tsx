@@ -1,12 +1,13 @@
 "use client";
 
-import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ArrowRight } from "lucide-react";
 import { submitMeetup, type CreateState } from "@/app/meetups/new/actions";
+import { submitMeetupEdit } from "@/app/meetups/[id]/edit/actions";
 import { MeetupCoursePicker } from "@/components/courses/MeetupCoursePicker";
 import { categories, categoryValues } from "@/components/feed/categories";
 import type { Course } from "@/lib/course-codes";
-import { futureLocalTimeToUtc } from "@/lib/local-date-time";
+import { formatLocalMinute, futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
 import { CAMPUS_LOCATIONS, getCampusLocation } from "@/lib/locations";
 import { CUSTOM_LOCATION_MAX, UNMAPPED_LOCATION_NOTE } from "@/lib/meetup-location";
@@ -22,14 +23,32 @@ function FieldError({ name, fields }: { name: keyof NonNullable<CreateState["fie
   return message ? <p id={`${name}-error`} className="mt-1 text-sm text-brand-ink">{message}</p> : null;
 }
 
-export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
-  const [state, dispatch, pending] = useActionState(submitMeetup, {});
-  const [category, setCategory] = useState("");
+/** Values for editing an existing meetup (issue #73). */
+export interface MeetupFormInitial {
+  title: string;
+  description: string;
+  category: string;
+  locationId: string;
+  customLocation: string;
+  startsAt: string; // ISO; shown in the visitor's local time
+  course: Course | null;
+}
+
+export function MeetupForm({ myCourses = [], edit }: { myCourses?: Course[]; edit?: { meetupId: string; initial: MeetupFormInitial } }) {
+  const action = useMemo(() => (edit ? submitMeetupEdit.bind(null, edit.meetupId) : submitMeetup), [edit]);
+  const [state, dispatch, pending] = useActionState(action, {});
+  const initial = edit?.initial;
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const startsAtRef = useRef<HTMLInputElement>(null);
+  // Show the saved start time in the visitor's own time zone (only known in the browser).
+  useEffect(() => {
+    if (initial?.startsAt && startsAtRef.current) startsAtRef.current.value = formatLocalMinute(Date.parse(initial.startsAt));
+  }, [initial?.startsAt]);
 
   const { minimum, refreshMinimum } = useFutureLocalTime();
   const [timeError, setTimeError] = useState(false);
-  const [locationId, setLocationId] = useState("");
-  const [customLocation, setCustomLocation] = useState("");
+  const [locationId, setLocationId] = useState(initial?.locationId ?? "");
+  const [customLocation, setCustomLocation] = useState(initial?.customLocation ?? "");
   const [showPlaceSearch, setShowPlaceSearch] = useState(false);
   const offCampus = locationId === OTHER_LOCATION;
   const location = getCampusLocation(locationId);
@@ -60,12 +79,12 @@ export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
       <fieldset disabled={pending} className="min-w-0 space-y-5 disabled:opacity-70">
         <div>
           <label htmlFor="title" className="font-semibold">Title</label>
-          <input id="title" name="title" required maxLength={80} placeholder="Coffee between classes" className={fieldStyle} {...fieldErrorProps("title")} />
+          <input id="title" name="title" required maxLength={80} defaultValue={initial?.title} placeholder="Coffee between classes" className={fieldStyle} {...fieldErrorProps("title")} />
           <FieldError name="title" fields={state.fields} />
         </div>
         <div>
           <label htmlFor="description" className="font-semibold">Description <span className="text-sm font-normal text-ink-subtle">(optional)</span></label>
-          <textarea id="description" name="description" rows={4} maxLength={500} placeholder="What are you planning? How can people find you?" className={fieldStyle} {...fieldErrorProps("description")} />
+          <textarea id="description" name="description" rows={4} maxLength={500} defaultValue={initial?.description} placeholder="What are you planning? How can people find you?" className={fieldStyle} {...fieldErrorProps("description")} />
           <FieldError name="description" fields={state.fields} />
         </div>
         <div className="grid min-w-0 gap-5 sm:grid-cols-2">
@@ -114,16 +133,16 @@ export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
           </div>
         )}
         {location && <LocationPreview location={location} />}
-        {category === "study" && <MeetupCoursePicker myCourses={myCourses} error={state.fields?.course_code?.[0]} />}
+        {category === "study" && <MeetupCoursePicker myCourses={myCourses} initialCourse={initial?.course ?? null} error={state.fields?.course_code?.[0]} />}
         <div>
           <label htmlFor="startsAt" className="font-semibold">Start date and time</label>
-          <input id="startsAt" name="startsAt" type="datetime-local" min={minimum} step={60} required className={fieldStyle} onChange={() => setTimeError(false)} aria-invalid={timeError || Boolean(state.fields?.startsAt)} aria-describedby={timeError || state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />
+          <input ref={startsAtRef} id="startsAt" name="startsAt" type="datetime-local" min={minimum} step={60} required className={fieldStyle} onChange={() => setTimeError(false)} aria-invalid={timeError || Boolean(state.fields?.startsAt)} aria-describedby={timeError || state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />
           <p id="startsAt-hint" className="mt-1 text-sm text-ink-muted">Use the local time shown on your device.</p>
           {timeError ? <p id="startsAt-error" role="alert" className="mt-1 text-sm text-brand-ink">Please select a future date and time.</p> : <FieldError name="startsAt" fields={state.fields} />}
         </div>
         {state.message && <p role="alert" className="rounded-xl bg-brand-soft px-4 py-3 text-sm text-brand-ink-strong">{state.message}</p>}
         <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-auto">
-          {pending ? "Creating meetup…" : "Create meetup"} <ArrowRight aria-hidden="true" size={17} />
+          {edit ? (pending ? "Saving changes…" : "Save changes") : (pending ? "Creating meetup…" : "Create meetup")} <ArrowRight aria-hidden="true" size={17} />
         </button>
       </fieldset>
     </form>
