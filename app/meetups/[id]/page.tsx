@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, CheckCircle2, GraduationCap, MapPin, Pencil, UserRound } from "lucide-react";
 import { categories } from "@/components/feed/categories";
 import { CancelMeetupForm } from "@/components/forms/CancelMeetupForm";
+import { LocationPreview } from "@/components/forms/LocationPreview";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { exploreMeetupHref } from "@/components/map/explore-link";
 import { MeetupLocationMap } from "@/components/map/MeetupLocationMap";
 import { FlapButton } from "@/components/social/FlapButton";
 import { PeckButton } from "@/components/social/PeckButton";
+import { findCampusLocationForMeetup } from "@/lib/locations";
 import { hasMeetupCoordinates, UNMAPPED_LOCATION_NOTE } from "@/lib/meetup-location";
 import { getMeetup } from "@/lib/meetups";
 import { MeetupReactions } from "./MeetupReactions";
@@ -32,6 +34,8 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
   const { id } = await params;
   const { meetup, cancelled, expired, upcoming, isHost, canCancel, canReact } = await loadMeetup(id);
   const { icon: CategoryIcon, label, color } = categories[meetup.category];
+  // Campus locations show their photo next to the map, like the create/edit form.
+  const campusLocation = findCampusLocationForMeetup(meetup);
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -66,12 +70,16 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
             </dd></div>
           </dl>
           {hasMeetupCoordinates(meetup) ? <section aria-label="Meetup map" className="mt-4">
-            <MeetupLocationMap
-              category={meetup.category}
-              locationName={meetup.location_name}
-              latitude={meetup.latitude}
-              longitude={meetup.longitude}
-            />
+            {campusLocation ? (
+              <LocationPreview location={campusLocation} category={meetup.category} />
+            ) : (
+              <MeetupLocationMap
+                category={meetup.category}
+                locationName={meetup.location_name}
+                latitude={meetup.latitude}
+                longitude={meetup.longitude}
+              />
+            )}
             {upcoming && (
               <Link href={exploreMeetupHref(meetup.id)} className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus">
                 <MapPin aria-hidden="true" size={15} /> See nearby meetups on the meetup map

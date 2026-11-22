@@ -168,7 +168,7 @@ function MapLibreLocationMap({ category, color, locationName, latitude, longitud
   return (
     <div className="min-w-0">
       <div role="region" aria-label={`Map showing ${locationName}`} className={`relative min-w-0 overflow-hidden rounded-xl border border-line bg-surface-muted transition-[height] duration-500 ${threeD ? "h-[26rem] sm:h-[32rem]" : "h-56 sm:h-72"}`}>
-        <div ref={container} className="h-full w-full [&_.maplibregl-ctrl-group_button]:size-11! [&_.maplibregl-ctrl-attrib-button]:size-11!" />
+        <div ref={container} className="h-full w-full [&_.maplibregl-ctrl-group_button]:size-11! [&_.maplibregl-ctrl-attrib-button]:size-11! [&_.maplibregl-ctrl-attrib-button]:bg-center! [&_.maplibregl-ctrl-attrib-button]:bg-no-repeat!" />
         {status === "ready" && (
           <button
             type="button" aria-pressed={threeD} onClick={() => setThreeD((v) => !v)}
