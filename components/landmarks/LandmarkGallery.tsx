@@ -4,9 +4,10 @@
 // and an immersive viewer that the tapped photo "flies" into (View Transitions where supported).
 import { useCallback, useState, type PointerEvent } from "react";
 import { flushSync } from "react-dom";
-import { Expand, ImageOff, RefreshCw } from "lucide-react";
+import { Expand, ImageOff, RefreshCw, Smartphone, Sparkles } from "lucide-react";
 import type { LandmarkPhoto } from "@/types/landmark";
 import { LandmarkPhotoViewer, VIEWER_TRANSITION_NAME } from "./LandmarkPhotoViewer";
+import { useShakeReveal } from "./useShakeReveal";
 
 const EDIT_THRESHOLD_MS = 60_000;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -26,7 +27,10 @@ function untilt(event: PointerEvent<HTMLElement>) {
 }
 
 /** Photos from everyone who unlocked a landmark. Only rendered once the viewer has unlocked it. */
-export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhoto[]; landmarkName: string }) {
+export function LandmarkGallery({ photos, landmarkName, landmarkId }: { photos: LandmarkPhoto[]; landmarkName: string; landmarkId: string }) {
+  const othersCount = photos.filter((p) => !p.is_mine && p.photo_url).length;
+  const shake = useShakeReveal(landmarkId, othersCount > 0);
+  const hidden = othersCount > 0 && !shake.revealed;
   const [open, setOpen] = useState<number | null>(null);
   const [morph, setMorph] = useState<number | null>(null);
   const onIndex = useCallback((i: number) => { setMorph(null); setOpen(i); }, []);
@@ -51,7 +55,8 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
   return (
     <>
       <p className="mb-3 text-sm text-ink-muted">{photos.length} {photos.length === 1 ? "photo" : "photos"} · tap one to step through them full screen</p>
-      <ul className="grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="relative" onPointerMove={shake.onPointerMove}>
+      <ul className={`grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 ${shake.revealing ? "motion-safe:animate-[martlet-shake_520ms_ease-in-out]" : ""}`}>
         {photos.map((photo, i) => {
           const edited = Date.parse(photo.updated_at) - Date.parse(photo.created_at) > EDIT_THRESHOLD_MS;
           const hero = i === 0 && photos.length > 2;
@@ -65,7 +70,10 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
               style={{ animationDelay: `${Math.min(i, 12) * 60}ms` }}
               className={`group relative scroll-mt-24 [perspective:900px] motion-safe:animate-[martlet-tile-in_520ms_cubic-bezier(.2,.8,.2,1)_both] target:[&>div]:ring-4 target:[&>div]:ring-brand ${hero ? "col-span-2 row-span-2" : ""}`}
             >
-              <div className="relative aspect-square overflow-hidden rounded-2xl bg-surface-muted shadow-sm ring-1 ring-line transition-[transform,box-shadow] duration-300 ease-out [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] [transform-style:preserve-3d] group-hover:shadow-2xl group-hover:shadow-black/25">
+              <div
+                aria-hidden={hidden && !photo.is_mine ? true : undefined}
+                style={{ transitionDelay: shake.revealing ? `${150 + i * 90}ms` : undefined }}
+                className={`relative aspect-square overflow-hidden rounded-2xl bg-surface-muted shadow-sm ring-1 ring-line [transition:transform_300ms_ease-out,box-shadow_300ms_ease-out,filter_700ms_ease-out] ${hidden && !photo.is_mine ? "pointer-events-none [filter:blur(18px)_saturate(1.3)]" : "[filter:none]"} [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] [transform-style:preserve-3d] group-hover:shadow-2xl group-hover:shadow-black/25`}>
                 {photo.photo_url ? (
                   <button
                     type="button"
@@ -108,6 +116,35 @@ export function LandmarkGallery({ photos, landmarkName }: { photos: LandmarkPhot
           );
         })}
       </ul>
+      {hidden && (
+        <div className="absolute inset-0 z-10 grid place-items-center p-4">
+          <div className="max-w-xs rounded-2xl bg-surface/90 p-5 text-center shadow-xl ring-1 ring-line backdrop-blur-md motion-safe:animate-[martlet-fade-in_400ms_ease-out]">
+            <Smartphone aria-hidden="true" size={30} className="mx-auto text-brand-ink motion-safe:animate-[martlet-wiggle_1.4s_ease-in-out_infinite]" />
+            <p className="mt-2 font-bold text-ink">{othersCount} {othersCount === 1 ? "photo" : "photos"} unlocked!</p>
+            <p className="mt-1 text-sm text-ink-muted">Shake your phone, or wiggle your mouse over the photos, to reveal what other students shared here.</p>
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {shake.needsMotionPermission && (
+                <button type="button" onClick={() => void shake.enableMotion()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4 text-sm font-bold text-ink focus-visible:outline-2 focus-visible:outline-focus">
+                  <Smartphone aria-hidden="true" size={16} /> Enable shake
+                </button>
+              )}
+              <button type="button" onClick={shake.reveal} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
+                <Sparkles aria-hidden="true" size={16} /> Reveal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {shake.revealing && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 overflow-visible motion-reduce:hidden">
+          {Array.from({ length: 18 }, (_, k) => (
+            <span key={k} className="absolute top-1/2 left-1/2 size-2 rounded-full"
+              style={{ background: ["#f2c14e", "var(--m-brand)", "#ffffff", "#8fdc9c"][k % 4], ["--a" as string]: `${(k / 18) * 360}deg`, ["--d" as string]: `${90 + (k % 3) * 45}px`, animation: `martlet-sparkle 900ms cubic-bezier(.2,.8,.2,1) ${k * 12}ms both` }} />
+          ))}
+        </div>
+      )}
+      <p role="status" className="sr-only">{shake.revealing ? `${othersCount} photos revealed.` : ""}</p>
+      </div>
       <LandmarkPhotoViewer photos={photos} index={open} onIndex={onIndex} onClose={onClose} landmarkName={landmarkName} morphIndex={morph} />
     </>
   );
