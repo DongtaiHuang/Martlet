@@ -19,8 +19,8 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Proposed |
 | 0014 | [Colour tokens, themes and dark mode](0014-theme-tokens-and-dark-mode.md) | Proposed |
 | 0015 | [Approved public venues for off-campus meetups](0015-public-meetup-venues.md) | Proposed |
-
 | 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Proposed |
+| 0017 | [Like-ranked trends side panel](0017-trends-side-panel.md) | Proposed |
 
 ## Adding a new ADR
 

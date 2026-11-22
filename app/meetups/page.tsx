@@ -8,11 +8,14 @@ import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import { HeroCarousel } from "@/components/feed/HeroCarousel";
 import { LandmarkPreviewCard } from "@/components/landmarks/LandmarkPreviewCard";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
 import { listMyCourses } from "@/lib/courses";
 import { listLandmarks } from "@/lib/landmarks";
 import { listMeetups } from "@/lib/meetups";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
+import { isValidTrendType } from "@/lib/trend-validation";
+import type { TrendType } from "@/types/trend";
 
 export const dynamic = "force-dynamic";
 
@@ -127,22 +130,33 @@ function FeedLoading({ subject }: { subject: FeedView }) {
 export default async function MeetupsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string | string[] }>;
+  searchParams: Promise<{ view?: string | string[]; trend?: string | string[] }>;
 }) {
-  const view: FeedView = (await searchParams).view === "landmarks" ? "landmarks" : "meetups";
+  const params = await searchParams;
+  const view: FeedView = params.view === "landmarks" ? "landmarks" : "meetups";
+  const trendParam = Array.isArray(params.trend) ? params.trend[0] : params.trend;
+  const trend: TrendType | null = isValidTrendType(trendParam) ? trendParam : null;
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-6xl px-4 pt-5 pb-12 sm:px-8 sm:pt-8">
         <HeroCarousel />
-        <section aria-labelledby="feed-heading" className="mt-8 sm:mt-10">
-          <h2 id="feed-heading" className="sr-only">{view === "landmarks" ? "Landmarks" : "Upcoming meetups"}</h2>
-          <FeedViewToggle view={view} />
-          {/* key: show the loading state again when switching views */}
-          <Suspense key={view} fallback={<FeedLoading subject={view} />}>
-            {view === "landmarks" ? <FeedLandmarks /> : <UpcomingMeetups />}
-          </Suspense>
-        </section>
+        <div className="mt-8 gap-10 sm:mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_340px]">
+          <section aria-labelledby="feed-heading">
+            <h2 id="feed-heading" className="sr-only">{view === "landmarks" ? "Landmarks" : "Upcoming meetups"}</h2>
+            <FeedViewToggle view={view} />
+            {/* key: show the loading state again when switching views */}
+            <Suspense key={view} fallback={<FeedLoading subject={view} />}>
+              {view === "landmarks" ? <FeedLandmarks /> : <UpcomingMeetups />}
+            </Suspense>
+          </section>
+          <aside aria-labelledby="trend-heading" className="mt-10 lg:mt-0">
+            {/* key: show the loading state again when switching trend tabs */}
+            <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
+              <TrendPanel view={view} activeType={trend} />
+            </Suspense>
+          </aside>
+        </div>
       </main>
     </div>
   );
