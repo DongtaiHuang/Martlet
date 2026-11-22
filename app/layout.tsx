@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { FlyingMartlet } from "@/components/martlet/FlyingMartlet";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-CA">
-      <body>{children}</body>
+      <body>
+        {children}
+        <FlyingMartlet />
+      </body>
     </html>
   );
 }

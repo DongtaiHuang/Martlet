@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Flying martlet (components/martlet/FlyingMartlet.tsx) */
+@keyframes martlet-fly {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100vw); }
+}
+@keyframes martlet-flap {
+  50% { transform: translateY(-6px) rotate(-8deg); }
+}
+.martlet-flight { animation: martlet-fly 18s linear infinite; }
+.martlet-flap { animation: martlet-flap 0.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .martlet-flight,
+  .martlet-flap { animation: none; }
+  .martlet-flight { transform: none; margin-left: 1rem; }
+}
