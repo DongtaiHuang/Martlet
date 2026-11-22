@@ -20,30 +20,30 @@ type ProfileMeetupListProps = {
 
 export function ProfileMeetupList({ title, icon: Icon, meetups, empty, historyRole }: ProfileMeetupListProps) {
   return (
-    <section className="min-w-0 rounded-2xl border border-stone-200 bg-white p-5">
+    <section className="min-w-0 rounded-2xl border border-line bg-surface p-5">
       <h3 className="flex items-center gap-2 font-semibold">
-        <Icon aria-hidden="true" size={17} className="text-red-800" />
-        {title} <span className="text-sm font-normal text-stone-500">({meetups.length})</span>
+        <Icon aria-hidden="true" size={17} className="text-brand-ink" />
+        {title} <span className="text-sm font-normal text-ink-subtle">({meetups.length})</span>
       </h3>
       {meetups.length === 0 ? (
-        <div className="mt-2 text-sm text-stone-600">{empty}</div>
+        <div className="mt-2 text-sm text-ink-muted">{empty}</div>
       ) : (
-        <ul className="mt-3 divide-y divide-stone-100">
+        <ul className="mt-3 divide-y divide-line-soft">
           {meetups.map((meetup) => (
             <li key={meetup.id}>
-              <Link href={`/meetups/${encodeURIComponent(meetup.id)}`} className="flex min-h-11 items-center justify-between gap-3 rounded-lg py-2 hover:text-red-800 focus-visible:outline-2 focus-visible:outline-red-700">
+              <Link href={`/meetups/${encodeURIComponent(meetup.id)}`} className="flex min-h-11 items-center justify-between gap-3 rounded-lg py-2 hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-focus">
                 <span className="min-w-0 [overflow-wrap:anywhere]">
                   <span className="block font-semibold">{meetup.title}</span>
                   {historyRole && (
-                    <span className="my-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-stone-700">
+                    <span className="my-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-ink-2">
                       <span>{categories[meetup.category].label}</span>
                       <span>{historyRole}</span>
-                      <span className={`rounded-full px-2 py-0.5 ${meetup.status === "cancelled" ? "bg-red-100 text-red-900" : "bg-stone-100"}`}>
+                      <span className={`rounded-full px-2 py-0.5 ${meetup.status === "cancelled" ? "bg-brand-muted text-brand-ink-strong" : "bg-surface-muted"}`}>
                         {meetup.status === "cancelled" ? "Cancelled" : "Past"}
                       </span>
                     </span>
                   )}
-                  <span className="block text-xs text-stone-600">
+                  <span className="block text-xs text-ink-muted">
                     <time dateTime={meetup.starts_at}>{dateFormat.format(new Date(meetup.starts_at))}</time> · {meetup.location_name}
                     {!historyRole && meetup.attendee_count !== undefined && ` · ${meetup.attendee_count} going`}
                   </span>

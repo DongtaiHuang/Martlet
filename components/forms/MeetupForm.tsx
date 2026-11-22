@@ -8,11 +8,11 @@ import { futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
 import { CAMPUS_LOCATIONS } from "@/lib/locations";
 
-const fieldStyle = "mt-2 block w-full min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700 aria-invalid:border-red-700";
+const fieldStyle = "mt-2 block w-full min-w-0 rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-base text-ink focus-visible:outline-2 focus-visible:outline-focus aria-invalid:border-brand";
 
 function FieldError({ name, fields }: { name: keyof NonNullable<CreateState["fields"]>; fields: CreateState["fields"] }) {
   const message = fields?.[name]?.[0];
-  return message ? <p id={`${name}-error`} className="mt-1 text-sm text-red-800">{message}</p> : null;
+  return message ? <p id={`${name}-error`} className="mt-1 text-sm text-brand-ink">{message}</p> : null;
 }
 
 export function MeetupForm() {
@@ -43,7 +43,7 @@ export function MeetupForm() {
   }
 
   return (
-    <form action={dispatch} onSubmit={handleSubmit} onFocus={refreshMinimum} noValidate className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
+    <form action={dispatch} onSubmit={handleSubmit} onFocus={refreshMinimum} noValidate className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-8">
       <fieldset disabled={pending} className="min-w-0 space-y-5 disabled:opacity-70">
         <div>
           <label htmlFor="title" className="font-semibold">Title</label>
@@ -51,7 +51,7 @@ export function MeetupForm() {
           <FieldError name="title" fields={state.fields} />
         </div>
         <div>
-          <label htmlFor="description" className="font-semibold">Description <span className="text-sm font-normal text-stone-500">(optional)</span></label>
+          <label htmlFor="description" className="font-semibold">Description <span className="text-sm font-normal text-ink-subtle">(optional)</span></label>
           <textarea id="description" name="description" rows={4} maxLength={500} placeholder="What are you planning? How can people find you?" className={fieldStyle} {...fieldErrorProps("description")} />
           <FieldError name="description" fields={state.fields} />
         </div>
@@ -76,11 +76,11 @@ export function MeetupForm() {
         <div>
           <label htmlFor="startsAt" className="font-semibold">Start date and time</label>
           <input id="startsAt" name="startsAt" type="datetime-local" min={minimum} step={60} required className={fieldStyle} onChange={() => setTimeError(false)} aria-invalid={timeError || Boolean(state.fields?.startsAt)} aria-describedby={timeError || state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />
-          <p id="startsAt-hint" className="mt-1 text-sm text-stone-600">Use the local time shown on your device.</p>
-          {timeError ? <p id="startsAt-error" role="alert" className="mt-1 text-sm text-red-800">Please select a future date and time.</p> : <FieldError name="startsAt" fields={state.fields} />}
+          <p id="startsAt-hint" className="mt-1 text-sm text-ink-muted">Use the local time shown on your device.</p>
+          {timeError ? <p id="startsAt-error" role="alert" className="mt-1 text-sm text-brand-ink">Please select a future date and time.</p> : <FieldError name="startsAt" fields={state.fields} />}
         </div>
-        {state.message && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-900">{state.message}</p>}
-        <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-red-800 px-5 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 sm:w-auto">
+        {state.message && <p role="alert" className="rounded-xl bg-brand-soft px-4 py-3 text-sm text-brand-ink-strong">{state.message}</p>}
+        <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-auto">
           {pending ? "Creating meetup…" : "Create meetup"} <ArrowRight aria-hidden="true" size={17} />
         </button>
       </fieldset>
