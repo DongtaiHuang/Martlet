@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { ImageOff } from "lucide-react";
 import { TREE_STAGES, type TreeStage } from "@/lib/progress";
-import { GRID_H, GRID_W, PALETTES, pixelScene, type PixelPalette, type PixelPath } from "./pixel-tree";
+import { CLOUD_LAYERS, GRID_H, GRID_W, PALETTES, SKY_PATHS, pixelScene, type PixelPalette, type PixelPath } from "./pixel-tree";
 
 // Pixel-art progress tree: a tiny seedling alone in a wide open field that grows (7 stages)
 // into a tree filling the sky. Each of the user's landmark photos hangs on it as a fruit:
@@ -46,14 +46,27 @@ export function GrowthTree({ stage, unlocked, total, preview = false, palette = 
         aria-label={preview
           ? `Preview of the ${TREE_STAGES[stage]} stage`
           : `Your tree: ${TREE_STAGES[stage]} (${unlocked} of ${total} landmarks unlocked)`}
-        className="martlet-tree block h-auto w-full rounded-xl"
+        className="martlet-tree block h-auto w-full overflow-hidden rounded-xl"
       >
-        {paths(scene.background)}
+        {paths(SKY_PATHS)}
+        <rect className="martlet-sky-light" width={GRID_W} height={GRID_H} fill={colors.sky4} />
+        {CLOUD_LAYERS.map((clouds, index) => (
+          <g key={index} className={`martlet-clouds ${index === 0 ? "martlet-clouds-distant" : ""}`}>
+            {paths(clouds)}
+            <g transform={`translate(${-GRID_W} 0)`}>{paths(clouds)}</g>
+          </g>
+        ))}
+        {paths(scene.landscape)}
+        <path
+          className="martlet-breeze"
+          fill={colors.cloud}
+          d="M0 47h8v1H0z M9 46h9v1H9z M15 51h13v1H15z M29 50h5v1h-5z"
+        />
         {paths(scene.wood)}
         <g className={stage >= 3 ? "martlet-tree-sway" : undefined}>
           {paths(scene.foliage)}
-          {paths(scene.fruit)}
         </g>
+        {paths(scene.fruit)}
         {scene.falling.map((leaf) => (
           <rect
             key={`${leaf.x}-${leaf.y}-${leaf.delay}`}
