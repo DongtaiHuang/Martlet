@@ -108,13 +108,21 @@ function toSummary(
   };
 }
 
-/** Upcoming open meetups, soonest first. Empty when signed out (RLS allows reads only to signed-in users). */
+/** Guests read through a narrow RPC: counts not attendees, no private meeting instructions (ADR 0025). */
+async function guestMeetups(supabase: SupabaseServerClient, id: string | null): Promise<MeetupSummary[]> {
+  const { data, error } = await supabase.rpc("guest_meetups", { p_id: id });
+  if (error) throw new Error(`Failed to load meetups: ${error.message}`);
+  const none = { pecked: new Set<string>(), flapped: new Set<string>() };
+  return ((data ?? []) as SummaryRow[]).map((row) => toSummary(row, none));
+}
+
+/** Upcoming open meetups, soonest first. Signed-out visitors get the read-only guest view. */
 export async function listMeetups(): Promise<MeetupSummary[]> {
   if (getDataMode() === "mock") return getMockMeetups();
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
-  if (!userId) return [];
+  if (!userId) return guestMeetups(supabase, null);
 
   const { data, error } = await supabase
     .from("meetups")
@@ -137,7 +145,7 @@ export async function getMeetup(id: string): Promise<MeetupSummary | null> {
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
-  if (!userId) return null;
+  if (!userId) return (await guestMeetups(supabase, id))[0] ?? null;
 
   const { data, error } = await supabase
     .from("meetups")

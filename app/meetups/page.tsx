@@ -35,25 +35,21 @@ async function loadUpcomingMeetups() {
   }
 }
 
-function SignInPrompt({ subject, next }: { subject: "meetups" | "landmarks"; next: string }) {
-  const title = subject === "meetups" ? "Meetups" : "Landmarks";
+/** Guests can browse; joining, liking and posting need an account (ADR 0025). */
+function GuestBanner() {
   return (
-    <div className="mt-5 rounded-2xl border border-line bg-surface px-5 py-8 text-center">
-      <LogIn aria-hidden="true" className="mx-auto mb-3 text-brand-ink" />
-      <h3 className="text-lg font-bold text-ink-soft">Sign in to see {subject}</h3>
-      <p className="mt-1 text-sm text-ink-muted">{title} are visible to signed-in McGill students.</p>
-      <div className="mt-4 flex flex-wrap justify-center gap-2">
-        <Link href={`/login?next=${encodeURIComponent(next)}`} className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Sign in</Link>
-        <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl border border-line-strong px-4 text-sm font-bold text-ink-soft hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">Create account</Link>
+    <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-line bg-brand-soft px-4 py-3">
+      <LogIn aria-hidden="true" size={18} className="shrink-0 text-brand-ink" />
+      <p className="min-w-0 flex-1 text-sm text-ink-2"><strong className="text-ink">You’re browsing as a guest.</strong> Sign in with your McGill email to join meetups, like them and unlock landmarks.</p>
+      <div className="flex flex-wrap gap-2">
+        <Link href="/login?next=%2Fmeetups" className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Sign in</Link>
+        <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl border border-line-strong bg-surface px-4 text-sm font-bold text-ink-soft hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">Create account</Link>
       </div>
     </div>
   );
 }
 
 async function FeedLandmarks() {
-  const live = getDataMode() === "live";
-  const viewer = live ? await getCurrentUser().catch(() => null) : null;
-  if (live && !viewer) return <SignInPrompt subject="landmarks" next="/meetups?view=landmarks" />;
 
   let landmarks: LandmarkSummary[];
   try {
@@ -69,8 +65,6 @@ async function UpcomingMeetups() {
   const live = getDataMode() === "live";
   const viewer = live ? await getCurrentUser().catch(() => null) : null;
 
-  // Live mode: meetups are only readable when signed in (RLS), so don't show an empty feed.
-  if (live && !viewer) return <SignInPrompt subject="meetups" next="/meetups" />;
 
   const [upcoming, myCourses] = await Promise.all([
     loadUpcomingMeetups(),
@@ -87,6 +81,7 @@ async function UpcomingMeetups() {
           <span><strong>Preview:</strong> sample meetups, not real events. Joining and liking need Supabase. See <code>docs/SUPABASE_SETUP.md</code>.</span>
         </p>
       )}
+      {live && !viewer && <GuestBanner />}
       <MeetupFeed meetups={upcoming} viewerId={viewer?.id ?? null} myCourses={myCourses} />
     </>
   );
