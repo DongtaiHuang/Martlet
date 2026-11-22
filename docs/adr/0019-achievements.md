@@ -22,7 +22,7 @@ Constraints:
 
   | Achievement | Trigger | Hidden |
   |---|---|---|
-  | Bird whisperer | Hover or focus a talking martlet in a map popup | Yes |
+  | Bird whisperer | Move the pointer onto a talking martlet in a map popup, or activate its button with the keyboard or by tapping | Yes |
   | Chatterbox | Hear 10 different martlet quotes | Yes |
   | Fruit inspector | Hover or focus a photo on your tree | Yes |
   | Time traveller | Preview another tree stage (`/progress?stage=N`) | Yes |
