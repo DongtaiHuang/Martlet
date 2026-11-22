@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AchievementToaster } from "@/components/achievements/AchievementToaster";
+import { FooterVisibility } from "@/components/layout/FooterVisibility";
+import { MartletFooter } from "@/components/layout/MartletFooter";
 import { FlyingMartlet } from "@/components/martlet/FlyingMartlet";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
@@ -18,8 +20,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="bg-canvas text-ink">
-        {children}
+      <body className="flex min-h-dvh flex-col bg-canvas text-ink">
+        <div className="martlet-page grid min-w-0 flex-1">{children}</div>
+        <FooterVisibility><MartletFooter /></FooterVisibility>
         <FlyingMartlet />
         <AchievementToaster />
       </body>

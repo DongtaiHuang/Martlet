@@ -376,3 +376,7 @@ button.martlet-popup__bird:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+/* Standard page shells and the footer share the viewport on short routes. */
+body:has(> .martlet-footer) > .martlet-page > .min-h-screen {
+  min-height: 0;
+}
