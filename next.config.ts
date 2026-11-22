@@ -7,6 +7,8 @@ if (process.env.VERCEL_ENV === "production" && process.env.NEXT_PUBLIC_MAP_STYLE
 }
 
 const nextConfig: NextConfig = {
+  // Docker builds a self-contained server (Dockerfile sets NEXT_OUTPUT=standalone); Vercel ignores this.
+  ...(process.env.NEXT_OUTPUT === "standalone" ? { output: "standalone" as const } : {}),
   experimental: {
     serverActions: {
       // Landmark photos (ADR 0009) are resized in the browser to well under 1 MB; this is

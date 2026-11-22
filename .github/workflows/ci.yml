@@ -39,3 +39,28 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  docker:
+    name: Docker image (build + smoke test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: martlet:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test (demo mode, no secrets)
+        run: |
+          docker run -d --name martlet -p 3000:3000 martlet:ci
+          for i in $(seq 1 30); do curl -fsS http://localhost:3000/meetups -o /dev/null && break; sleep 2; done
+          curl -fsS http://localhost:3000/meetups | grep -q "McGill Martlet"
+          echo "Image size: $(docker image inspect martlet:ci --format '{{.Size}}' | numfmt --to=iec)"
+      - name: Logs on failure
+        if: failure()
+        run: docker logs martlet || true
