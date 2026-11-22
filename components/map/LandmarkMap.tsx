@@ -98,7 +98,8 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
           <h2 id="landmark-list-heading" className="font-bold text-stone-900">Landmarks</h2>
           <p className="text-xs text-stone-600">{landmarks.length} to discover · {unlockedCount} unlocked</p>
         </div>
-        <ul className="min-h-0 flex-1 divide-y divide-stone-100 lg:overflow-y-auto">
+        {/* Scrolls inside: beside the map on desktop, capped below the map on phones. */}
+        <ul className="max-h-[60vh] min-h-0 flex-1 divide-y divide-stone-100 overflow-y-auto overscroll-contain lg:max-h-none">
           {landmarks.map((landmark) => {
             const active = landmark.id === selected;
             return (

@@ -123,23 +123,33 @@ export default async function ProgressPage({
           </ol>
         </section>
 
-        <section aria-labelledby="landmarks-heading" className="mt-8">
-          <h2 id="landmarks-heading" className="text-xl font-bold">Your landmarks</h2>
-          <ul className="mt-3 divide-y divide-stone-200 overflow-hidden rounded-2xl border border-stone-200 bg-white">
-            {landmarks.map((landmark) => (
-              <li key={landmark.id}>
-                <Link href={`/landmarks/${encodeURIComponent(landmark.id)}`} className="flex min-h-14 items-center gap-3 px-4 py-3 hover:bg-stone-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-red-700">
-                  {landmark.unlocked
-                    ? <CheckCircle2 aria-hidden="true" size={20} className="shrink-0 text-emerald-600" />
-                    : <LockKeyhole aria-hidden="true" size={20} className="shrink-0 text-stone-400" />}
-                  <span className="flex-1 font-semibold text-stone-900">{landmark.name}</span>
-                  <span className="text-xs font-medium text-stone-500">{landmark.unlocked ? "Unlocked" : "Locked"}</span>
-                  <ArrowUpRight aria-hidden="true" size={16} className="text-red-800" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {landmarks.length === 0 && <p className="mt-3 text-stone-600">No landmarks yet.</p>}
+        <section aria-labelledby="landmarks-heading" className="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white">
+          <div className="flex items-baseline justify-between gap-2 border-b border-stone-200 px-4 py-3">
+            <h2 id="landmarks-heading" className="text-lg font-bold">Your landmarks</h2>
+            <p className="text-xs font-medium text-stone-500">{total} · {unlocked} unlocked</p>
+          </div>
+          {/* Fixed height that scrolls inside, so a long list doesn't stretch the page. */}
+          <div className="relative">
+            <ul className="grid max-h-80 gap-px overflow-y-auto overscroll-contain bg-stone-200 sm:grid-cols-2">
+              {landmarks.map((landmark) => (
+                <li key={landmark.id} className="bg-white sm:last:odd:col-span-2">
+                  <Link href={`/landmarks/${encodeURIComponent(landmark.id)}`} className="flex min-h-12 items-center gap-3 px-4 py-2.5 hover:bg-stone-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-red-700">
+                    {landmark.unlocked
+                      ? <CheckCircle2 aria-hidden="true" size={18} className="shrink-0 text-emerald-600" />
+                      : <LockKeyhole aria-hidden="true" size={18} className="shrink-0 text-stone-400" />}
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900">{landmark.name}</span>
+                    <span className="text-xs font-medium text-stone-500">{landmark.unlocked ? "Unlocked" : "Locked"}</span>
+                    <ArrowUpRight aria-hidden="true" size={15} className="shrink-0 text-red-800" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {/* Hint that there's more to scroll when the list is longer than the box. */}
+            {landmarks.length > 6 && (
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
+            )}
+          </div>
+          {landmarks.length === 0 && <p className="px-4 py-3 text-sm text-stone-600">No landmarks yet.</p>}
         </section>
       </main>
     </div>
