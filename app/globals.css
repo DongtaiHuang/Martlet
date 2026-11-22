@@ -264,3 +264,16 @@ button.martlet-popup__bird:focus-visible {
 
 .martlet-popup__cta:hover { background: #7f1d1d; }
 .martlet-popup__cta:focus-visible { outline: 2px solid #b91c1c; outline-offset: 2px; }
+
+/* Landmark photo wall + viewer (components/landmarks/LandmarkGallery.tsx, LandmarkPhotoViewer.tsx). */
+@keyframes martlet-tile-in { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes martlet-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes martlet-viewer-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes martlet-slide-from-right { from { opacity: 0; transform: translateX(48px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes martlet-slide-from-left { from { opacity: 0; transform: translateX(-48px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes martlet-kenburns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.07) translate(-1%, -1%); } }
+@keyframes martlet-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+::view-transition-group(landmark-photo) { animation-duration: 420ms; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
