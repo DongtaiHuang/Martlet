@@ -1,4 +1,4 @@
-# 0010. Landmark progress shown as a growing pixel-art tree
+# 0012. Landmark progress shown as a growing pixel-art tree
 
 - **Status:** Proposed
 - **Date:** 2026-11-21
