@@ -11,8 +11,9 @@ import { openedLandmark, watchMapAngle } from "./map-achievements";
 import { towerSvg, towerTier } from "./landmark-tower";
 import { POPUP_MAX_WIDTH } from "./popup-content";
 import { landmarkZoom } from "./landmark-style";
-import { CAMPUS_MAP_FRAME, createCampusMap } from "./map-config";
+import { CAMPUS_MAP_FRAME, CAMPUS_ZOOM, createCampusMap } from "./map-config";
 import { useMapColorMode } from "./map-mode";
+import { addOverviewBuildings, fitLandmarkOverview, spaceOverviewPins } from "./landmark-overview";
 
 const PIXEL = 2.25; // tower pixel size: a bit larger than the Explore map's 1.75px
 const SELECTED_GLOW = "drop-shadow(0 0 3px #991b1b) drop-shadow(0 0 2px #991b1b)";
@@ -28,7 +29,7 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
 export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
-  useMapColorMode(mapRef);
+  useMapColorMode(mapRef, { diff: false });
   const markers = useRef(new globalThis.Map<string, Marker>());
   const items = useRef(new globalThis.Map<string, HTMLLIElement>());
   const router = useRouter();
@@ -36,10 +37,8 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
 
   useEffect(() => {
     if (!mapEl.current) return;
-    // Exactly the Explore map, opening on campus in 3D. (Zooming out to fit the off-campus
-    // landmarks would drop below zoom 13, where the map has no 3D buildings; the list flies
-    // to those instead.)
     const map = createCampusMap(mapEl.current);
+    map.on("style.load", () => addOverviewBuildings(map));
     watchMapAngle(map);
 
     const byId = markers.current;
@@ -59,6 +58,10 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
         .addTo(map);
       byId.set(landmark.id, marker);
     }
+    if (byId.size > 0) fitLandmarkOverview(map, byId.values(), CAMPUS_ZOOM);
+    const spacePins = () => spaceOverviewPins(map, byId.values());
+    spacePins();
+    map.on("moveend", spacePins);
     mapRef.current = map;
     return () => { map.remove(); byId.clear(); mapRef.current = null; };
   }, [landmarks, router]);

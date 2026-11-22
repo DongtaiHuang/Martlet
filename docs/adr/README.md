@@ -19,6 +19,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Proposed |
 | 0014 | [Colour tokens, themes and dark mode](0014-theme-tokens-and-dark-mode.md) | Proposed |
 | 0015 | [Achievements for niche and hidden features](0015-achievements.md) | Proposed |
+| 0016 | [Open the Landmarks map with all pins in 3D](0016-landmarks-overview.md) | Proposed |
 
 ## Adding a new ADR
 
