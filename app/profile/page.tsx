@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, Bird, LogIn, Trophy, UserRound } from "lucide-react";
+import { ArrowRight, Bird, LogIn, MessagesSquare, ShieldCheck, Trophy, UserRound } from "lucide-react";
 import { CourseCodesForm } from "@/components/courses/CourseCodesForm";
 import { AppearancePicker } from "@/components/settings/AppearancePicker";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
 import { ProfileActivity } from "@/components/profile/ProfileActivity";
 import type { Course } from "@/lib/course-codes";
+import { isModerator } from "@/lib/board";
 import { listMyCourses } from "@/lib/courses";
 import { getCurrentUser, type CurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
@@ -37,6 +38,7 @@ async function loadProfile(): Promise<ProfileState> {
 
 export default async function ProfilePage() {
   const state = await loadProfile();
+  const moderator = state.kind === "ready" ? await isModerator().catch(() => false) : false;
   const linkClass = "font-bold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus";
 
   return (
@@ -82,6 +84,26 @@ export default async function ProfilePage() {
               </span>
               <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
             </Link>
+          </>)}
+          {state.kind === "ready" && (<>
+            <Link href="/board" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
+              <MessagesSquare aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />
+              <span className="min-w-0">
+                <span className="block text-sm font-bold">Campus board</span>
+                <span className="block text-xs text-ink-muted">Memes, tips, questions and skillshare from other students.</span>
+              </span>
+              <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
+            </Link>
+            {moderator && (
+              <Link href="/moderation" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
+                <ShieldCheck aria-hidden="true" size={22} className="shrink-0 text-ok-ink" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold">Moderation</span>
+                  <span className="block text-xs text-ink-muted">Review reported posts and comments.</span>
+                </span>
+                <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
+              </Link>
+            )}
           </>)}
           {/* Everyone can open achievements; guests' are kept in the browser. */}
           <Link href="/achievements" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
