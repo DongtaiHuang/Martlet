@@ -16,6 +16,7 @@ export type CommunityReport = {
   reasons: string[];
   notes: string[];
   preview: string;
+  photo_url: string | null;
   status: string;
   first_at: string;
 };
@@ -27,6 +28,7 @@ export type ReviewItem = {
   reasons: string[];
   notes: string[];
   preview: string;
+  photoUrl: string | null;
   status: string;
   firstAt: string;
 };
@@ -58,7 +60,7 @@ export async function listCommunityReports(): Promise<CommunityReport[]> {
     const key = [type, report.target_id, report.landmark_id].join(":");
     const item = map.get(key) ?? {
       target_type: type, target_id: report.target_id, landmark_id: report.landmark_id,
-      count: 0, reasons: [], notes: [], preview: "", status: "", first_at: report.created_at,
+      count: 0, reasons: [], notes: [], preview: "", photo_url: null, status: "", first_at: report.created_at,
     };
     item.count += 1;
     if (!item.reasons.includes(report.reason)) item.reasons.push(report.reason);
@@ -69,12 +71,15 @@ export async function listCommunityReports(): Promise<CommunityReport[]> {
   const meetupIds = groups.filter((g) => g.target_type === "meetup").map((g) => g.target_id);
   const photoGroups = groups.filter((g) => g.target_type === "landmark_photo");
   const photoUserIds = [...new Set(photoGroups.map((g) => g.target_id))];
-  const [meetups, photos] = await Promise.all([
+  const imagePaths = photoGroups.map((g) => `${g.target_id}/${g.landmark_id}.jpg`);
+  const [meetups, photos, images] = await Promise.all([
     meetupIds.length ? supabase.from("meetups").select("id,title,description,moderation_status").in("id", meetupIds) : Promise.resolve({ data: [], error: null }),
     photoUserIds.length ? supabase.from("landmark_unlocks").select("user_id,landmark_id,caption,moderation_status").in("user_id", photoUserIds) : Promise.resolve({ data: [], error: null }),
+    imagePaths.length ? supabase.storage.from("landmark-photos").createSignedUrls(imagePaths, 300) : Promise.resolve({ data: [], error: null }),
   ]);
   if (meetups.error || photos.error) throw new Error("Unable to load reported content.");
-  const previews = new Map<string, { preview: string; status: string }>();
+  const previewPhotos = new Map((images.data ?? []).filter((item) => item.signedUrl).map((item) => [item.path, item.signedUrl]));
+  const previews = new Map<string, { preview: string; status: string; photo_url?: string | null }>();
   for (const m of meetups.data ?? []) {
     previews.set(`meetup:${m.id}:`, { preview: `${m.title} — ${m.description}`.slice(0, 240), status: m.moderation_status });
   }
@@ -82,6 +87,7 @@ export async function listCommunityReports(): Promise<CommunityReport[]> {
     previews.set(`landmark_photo:${p.user_id}:${p.landmark_id}`, {
       preview: `Photo at ${p.landmark_id} — ${p.caption || "(no caption)"}`.slice(0, 240),
       status: p.moderation_status,
+      photo_url: previewPhotos.get(`${p.user_id}/${p.landmark_id}.jpg`) ?? null,
     });
   }
   return groups.map((g) => ({ ...g, ...(previews.get([g.target_type,g.target_id,g.landmark_id].join(":")) ?? { preview: "(unavailable)", status: "removed" }) }))
@@ -94,11 +100,11 @@ export async function listReviewQueue(): Promise<ReviewItem[]> {
   const items: ReviewItem[] = [
     ...board.map((r: OpenReport) => ({
       type: r.target_type, id: r.target_id, landmarkId: "", count: r.count,
-      reasons: r.reasons, notes: r.notes, preview: r.preview, status: r.status, firstAt: r.first_at,
+      reasons: r.reasons, notes: r.notes, preview: r.preview, photoUrl: null, status: r.status, firstAt: r.first_at,
     })),
     ...community.map((r) => ({
       type: r.target_type, id: r.target_id, landmarkId: r.landmark_id, count: r.count,
-      reasons: r.reasons, notes: r.notes, preview: r.preview, status: r.status, firstAt: r.first_at,
+      reasons: r.reasons, notes: r.notes, preview: r.preview, photoUrl: r.photo_url, status: r.status, firstAt: r.first_at,
     })),
   ];
   return items.sort((a,b) => b.count - a.count || a.firstAt.localeCompare(b.firstAt));
