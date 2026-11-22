@@ -6,8 +6,9 @@ import { z } from "zod";
 import { categoryValues } from "@/components/feed/categories";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { getPublicVenue, OTHER_LOCATION } from "@/lib/public-venues";
+import { COURSE_CODE_PATTERN } from "@/lib/course-codes";
 import { getCampusLocation } from "@/lib/locations";
-import { createMeetup } from "@/lib/meetups";
+import { createMeetup, MeetupValidationError } from "@/lib/meetups";
 
 const meetupInput = z.object({
   title: z.string().trim().min(3, "Enter at least 3 characters.").max(80, "Use 80 characters or fewer."),
@@ -20,6 +21,11 @@ const meetupInput = z.object({
   publicVenue: z.string(),
   startsAt: z.iso.datetime({ error: "Enter a valid date and time." })
     .refine((value) => Date.parse(value) > Date.now(), "Choose a start time in the future."),
+  // Optional McGill course; checked below and by the database.
+  course_code: z.string().regex(COURSE_CODE_PATTERN, "Choose a course from the list.").nullable(),
+}).refine((input) => !input.course_code || input.category === "study", {
+  path: ["course_code"],
+  message: "Only study meetups can have a course.",
 }).refine(({ location, publicVenue }) => location !== OTHER_LOCATION || Boolean(getPublicVenue(publicVenue)), {
   path: ["publicVenue"],
   message: "Choose a public venue.",
@@ -38,13 +44,14 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
     location: formData.get("location") ?? "",
     publicVenue: formData.get("publicVenue") ?? "",
     startsAt: formData.get("startsAt"),
+    course_code: formData.get("course_code") || null,
   });
 
   if (!input.success) {
     return { message: "Check the highlighted fields.", fields: z.flattenError(input.error).fieldErrors };
   }
 
-  const { title, description, category, location, publicVenue, startsAt } = input.data;
+  const { title, description, category, location, publicVenue, startsAt, course_code } = input.data;
   const venue = location === OTHER_LOCATION ? getPublicVenue(publicVenue) : undefined;
   const place = location === OTHER_LOCATION ? venue : getCampusLocation(location);
   if (!place) return { message: "Choose an approved meetup location." };
@@ -63,9 +70,13 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
       latitude: place.latitude,
       longitude: place.longitude,
       starts_at: startsAt,
+      course_code,
     });
     id = meetup.id;
   } catch (error) {
+    if (error instanceof MeetupValidationError && error.fieldErrors.course_code) {
+      return { message: "Check the highlighted fields.", fields: { course_code: [error.fieldErrors.course_code] } };
+    }
     console.error("Meetup creation failed", error);
     return { message: "Couldn’t create the meetup. Try again when the meetup service is available." };
   }

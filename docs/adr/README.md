@@ -20,6 +20,8 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0014 | [Colour tokens, themes and dark mode](0014-theme-tokens-and-dark-mode.md) | Proposed |
 | 0015 | [Approved public venues for off-campus meetups](0015-public-meetup-venues.md) | Proposed |
 
+| 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Proposed |
+
 ## Adding a new ADR
 
 1. Copy [`template.md`](template.md) to `NNNN-short-title.md` using the next number.
