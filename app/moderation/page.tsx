@@ -55,6 +55,11 @@ export default async function ModerationPage({ searchParams }: { searchParams: P
               return <li key={`${r.type}:${r.id}:${r.landmarkId}`} className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
                 <p className="eyebrow text-ink-muted">{r.type.replace("_"," ")} · {r.count} {r.count===1?"report":"reports"} · {r.status}</p>
                 <p className="mt-2 whitespace-pre-wrap text-ink [overflow-wrap:anywhere]">{r.preview}</p>
+                {r.type === "landmark_photo" && r.photoUrl && (
+                  // Moderator-only preview of a private photo using a short-lived signed URL.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={r.photoUrl} alt={`Reported photo at ${r.landmarkId}`} className="mt-3 max-h-64 w-full rounded-xl bg-surface-muted object-contain" />
+                )}
                 <p className="mt-2 text-sm text-ink-2"><strong>Reasons:</strong> {r.reasons.map(x=>REPORT_REASONS[x as ReportReason]??x).join(", ")}</p>
                 {r.notes.length > 0 && <div className="mt-2 rounded-xl bg-surface-muted p-3"><p className="text-xs font-semibold">Private report notes</p><ul className="mt-1 list-disc pl-4 text-sm text-ink-muted">{r.notes.map((note,i)=><li key={i}>{note}</li>)}</ul></div>}
                 <div className="mt-2 flex flex-wrap gap-2">{url && <Link href={url} className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-ink underline">View context</Link>}</div>
