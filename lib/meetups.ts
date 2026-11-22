@@ -40,7 +40,7 @@ export class MeetupNotFoundError extends Error {
 }
 
 const MEETUP_COLUMNS =
-  "id, host_id, title, description, category, location_name, latitude, longitude, starts_at, status, created_at";
+  "id, host_id, title, description, category, location_name, latitude, longitude, starts_at, status, created_at, course_code";
 
 // `profiles!host_id` disambiguates the host relation from the many-to-many paths
 // through meetup_pecks / meetup_flaps. `(count)` returns an aggregate, not rows.
@@ -171,6 +171,9 @@ export async function createMeetup(input: CreateMeetupInput): Promise<Meetup> {
 
   if (error) {
     if (error.code === "42501") throw new AuthRequiredError("You are not allowed to create this meetup.");
+    if (error.code === "23503" && error.message.includes("course_code")) {
+      throw new MeetupValidationError({ course_code: `${result.value.course_code} isn’t a McGill course.` });
+    }
     if (error.code === "23514" || error.code === "23503") {
       throw new MeetupValidationError({ form: "The meetup did not pass server validation." });
     }

@@ -8,6 +8,7 @@ import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import { HeroCarousel } from "@/components/feed/HeroCarousel";
 import { LandmarkPreviewCard } from "@/components/landmarks/LandmarkPreviewCard";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { listMyCourses } from "@/lib/courses";
 import { listLandmarks } from "@/lib/landmarks";
 import { listMeetups } from "@/lib/meetups";
 import { getCurrentUser } from "@/lib/supabase/auth";
@@ -85,7 +86,11 @@ async function UpcomingMeetups() {
   // Live mode: meetups are only readable when signed in (RLS), so don't show an empty feed.
   if (live && !viewer) return <SignInPrompt subject="meetups" next="/meetups" />;
 
-  const upcoming = await loadUpcomingMeetups();
+  const [upcoming, myCourses] = await Promise.all([
+    loadUpcomingMeetups(),
+    // Used by the Study filter; an empty list just hides "My courses".
+    viewer ? listMyCourses().then((courses) => courses.map((course) => course.code)).catch(() => []) : [],
+  ]);
   if (!upcoming) return <FeedUnavailable />;
 
   return (
@@ -96,7 +101,7 @@ async function UpcomingMeetups() {
           <span><strong>Preview:</strong> sample meetups, not real events. Joining and liking need Supabase. See <code>docs/SUPABASE_SETUP.md</code>.</span>
         </p>
       )}
-      <MeetupFeed meetups={upcoming} viewerId={viewer?.id ?? null} />
+      <MeetupFeed meetups={upcoming} viewerId={viewer?.id ?? null} myCourses={myCourses} />
     </>
   );
 }
