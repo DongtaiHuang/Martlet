@@ -1,12 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowUpRight, Compass, FlaskConical, LogIn, Plus } from "lucide-react";
+import { ArrowUpRight, FlaskConical, LogIn } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { FeedUnavailable } from "@/components/feed/FeedUnavailable";
 import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle";
 import { MeetupFeed } from "@/components/feed/MeetupFeed";
-import campusBanner from "@/components/feed/campus-banner.webp";
+import { HeroCarousel } from "@/components/feed/HeroCarousel";
 import { LandmarkPreviewCard } from "@/components/landmarks/LandmarkPreviewCard";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { listLandmarks } from "@/lib/landmarks";
@@ -130,16 +129,7 @@ export default async function MeetupsPage({
     <div className="min-h-screen bg-stone-50 text-stone-950">
       <MartletNav />
       <main className="mx-auto max-w-6xl px-4 pt-5 pb-12 sm:px-8 sm:pt-8">
-        <section aria-labelledby="campus-heading" className="relative isolate overflow-hidden rounded-3xl bg-stone-900 px-5 py-9 text-white sm:px-10 sm:py-14">
-          <Image src={campusBanner} alt="" fill preload sizes="(min-width: 1152px) 1088px, 95vw" className="-z-20 object-cover object-[65%_55%]" />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-stone-950/95 via-stone-950/80 to-stone-950/25 sm:via-stone-950/55" />
-          <h1 id="campus-heading" className="max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">Meet up at McGill</h1>
-          <p className="mt-3 max-w-sm text-base leading-6 text-stone-100 sm:text-lg">Find a study group, grab coffee, or make plans with people on campus.</p>
-          <div className="mt-6 flex flex-wrap gap-2.5">
-            <Link href="/meetups/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus aria-hidden="true" size={18} /> Create meetup</Link>
-            <Link href="/explore" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/50 bg-stone-950/55 px-4 text-sm font-bold text-white hover:bg-stone-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Compass aria-hidden="true" size={18} /> Explore map</Link>
-          </div>
-        </section>
+        <HeroCarousel />
         <section aria-labelledby="feed-heading" className="mt-8 sm:mt-10">
           <h2 id="feed-heading" className="sr-only">{view === "landmarks" ? "Landmarks" : "Upcoming meetups"}</h2>
           <FeedViewToggle view={view} />
