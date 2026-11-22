@@ -28,3 +28,11 @@ In dark mode the maps use OpenFreeMap's `dark` style (`https://tiles.openfreemap
 3. Node.js version: 22.x (Settings → General).
 4. Supabase → Authentication → URL Configuration: add the Vercel URL to **Site URL** and **Redirect URLs**.
 5. Before you share the URL, confirm RLS is applied (`supabase/migrations/001_mvp.sql`) and run the two-account test from `docs/CONTRACTS.md`.
+
+## Google Maps
+
+Enable billing, Maps JavaScript API and Places API (New) in the Google Cloud project. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and NEXT_PUBLIC_GOOGLE_MAP_ID in .env for local development and in Vercel before rebuilding. Restrict the browser key to those APIs and approved localhost and Vercel HTTP referrers, including preview domains only when needed. Use an owned Map ID for production. Configure API quotas and budget alerts and monitor billable map loads and places requests. Budget alerts are notifications.
+
+GOOGLE_MAPS_SERVER_API_KEY is reserved for server-side Place Details verification. Set it only when that path is deployed. Restrict it to Places API (New) and the supported server IP restriction for the deployment's egress. Keep it out of the browser bundle. Without a browser key, independently sourced maps continue to use MapLibre and Google search is unavailable.
+
+See [Google Maps API security best practices](https://developers.google.com/maps/api-security-best-practices) and [Places API policies](https://developers.google.com/maps/documentation/places/web-service/policies).

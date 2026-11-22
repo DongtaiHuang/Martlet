@@ -2,7 +2,7 @@ import { isAchievementId, type AchievementId, type EarnedMap } from "@/lib/achie
 import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
-// Server-only achievements service (ADR 0015). The user always comes from the Supabase
+// Server-only achievements service (ADR 0017). The user always comes from the Supabase
 // session, never from the browser; RLS in supabase/migrations/010_achievements.sql is the
 // real enforcement. Mock mode and signed-out users have no account to save to ("guest"),
 // so the browser keeps their achievements locally.

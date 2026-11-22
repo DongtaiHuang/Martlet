@@ -1,4 +1,4 @@
-# 0015. Achievements for niche and hidden features
+# 0017. Achievements for niche and hidden features
 
 - **Status:** Proposed
 - **Date:** 2026-11-21
@@ -33,6 +33,7 @@ Constraints:
   | Tourist | Explore every landmark on a map | No |
 
 ### Saving
+- Migration `010_achievements.sql` was written when this decision was numbered 0015.
 - New table `user_achievements (user_id, achievement_id, earned_at)` (`supabase/migrations/010_achievements.sql`), one row per user per achievement.
   - RLS: users can **read and insert only their own rows**. No update or delete, so achievements are permanent.
   - `achievement_id` is checked for shape in SQL; the server action only accepts ids from the catalogue.
