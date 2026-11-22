@@ -4,7 +4,7 @@ import { getSupabaseConfig } from "@/lib/supabase/env";
 
 // Pages reachable without a session. Guests can browse meetups, landmarks, the map and the game
 // read-only (ADR 0025); every action still needs a session (server actions + RLS check it).
-const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/landmarks", "/explore", "/play", "/achievements"];
+const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/landmarks", "/explore", "/play", "/achievements", "/guide", "/news"];
 // Meetup pages guests may read; /meetups/new and /meetups/<id>/edit still need sign-in.
 const PUBLIC_EXACT = /^\/(?:meetups(?:\/[0-9a-f-]{36})?)?$/i;
 

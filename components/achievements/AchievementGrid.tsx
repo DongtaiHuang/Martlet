@@ -5,7 +5,7 @@ import type { ActivityProgress } from "@/lib/activity-achievements";
 import { useEarned } from "./useEarned";
 import { AchievementIcon } from "./AchievementIcon";
 
-const dateFormat = new Intl.DateTimeFormat("en-CA", { dateStyle: "medium" });
+const dateFormat = new Intl.DateTimeFormat("en-CA", { dateStyle: "medium", timeZone: "America/Toronto" });
 
 function Card({ achievement: a, at, progress }: { achievement: Achievement; at?: string; progress?: { current: number; target: number } }) {
   const secret = a.hidden && !at;

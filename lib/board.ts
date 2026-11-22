@@ -21,7 +21,8 @@ export type OpenReport = { target_type: "post" | "comment"; target_id: string; r
 export class BoardError extends Error {}
 
 const BUCKET = "board-images";
-const POST_SELECT = "id, kind, title, body, link, tags, status, created_at, author_id, has_image, accepted_comment_id, author:profiles!author_id(display_name), votes:board_votes(count), comments:board_comments(count)";
+// board_comments links to board_posts twice (post_id and accepted_comment_id): name the FK.
+const POST_SELECT = "id, kind, title, body, link, tags, status, created_at, author_id, has_image, accepted_comment_id, author:profiles!author_id(display_name), votes:board_votes(count), comments:board_comments!board_comments_post_id_fkey(count)";
 type Row = Omit<BoardPost, "author_name" | "votes" | "comments" | "has_voted" | "is_mine" | "image_url"> & {
   has_image: boolean;
   author: { display_name: string } | { display_name: string }[] | null;
