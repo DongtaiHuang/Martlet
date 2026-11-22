@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { FlaskConical, LogIn } from "lucide-react";
+import { ArrowRight, FlaskConical, Gamepad2, LogIn } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { FeedUnavailable } from "@/components/feed/FeedUnavailable";
 import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle";
@@ -135,6 +135,14 @@ export default async function MeetupsPage({
             <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
               <TrendPanel view={view} activeType={trend} />
             </Suspense>
+            <Link href="/play" className="mt-4 flex min-h-11 items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 shadow-sm hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
+              <Gamepad2 aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />
+              <span className="min-w-0">
+                <span className="block text-sm font-bold text-ink">Martlet Flight</span>
+                <span className="block text-xs text-ink-muted">Fly your martlet between campus columns. Beat your best score.</span>
+              </span>
+              <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
+            </Link>
           </aside>
         </div>
       </main>
