@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐦 McGill Martlet
+# 🐦 Martlet
 
 ### Find your flock. Make campus yours.
 
