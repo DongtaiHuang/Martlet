@@ -22,7 +22,7 @@
 
 College life happens *between* classes: an impromptu coffee, a study session before an exam, a pickup game, or discovering a place on campus you've never visited.
 
-**McGill Martlet** turns those small opportunities into ways to meet people. Discover nearby activities, host your own meetup, explore Montréal through landmark photo challenges, and take part in a student community—all from one web app.
+**Martlet** turns those small opportunities into ways to meet people. Discover nearby activities, host your own meetup, explore Montréal through landmark photo challenges, and take part in a student community—all from one web app.
 
 Martlet is an **independent student project**, not an official McGill University service.
 
@@ -236,6 +236,6 @@ Martlet is an actively developed student project. Features requiring authenticat
 
 [**Visit Martlet**](https://martlet-brown.vercel.app/) · [**Browse the source**](https://github.com/DongtaiHuang/Martlet) · [**Share feedback**](https://github.com/DongtaiHuang/Martlet/issues)
 
-<sub>McGill Martlet is an independent student project and is not affiliated with or endorsed by McGill University.</sub>
+<sub>Martlet is an independent student project and is not affiliated with or endorsed by McGill University.</sub>
 
 </div>
