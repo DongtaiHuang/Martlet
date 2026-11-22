@@ -15,6 +15,14 @@ export const ACHIEVEMENTS = [
   { id: "field-trip", icon: "🚌", title: "Field trip", description: "Visit an off-campus landmark on the map.", hidden: false },
   { id: "tourist", icon: "🗺️", title: "Tourist", description: "Explore every landmark on the map.", hidden: false },
   { id: "red-pocket", icon: "🧧", title: "Lucky red pocket", description: "Opened a pile of red pockets in the Chinese New Year theme.", hidden: true },
+  { id: "shake-it-off", icon: "📳", title: "Shake it off", description: "Shook loose the photos other students shared at a landmark.", hidden: true },
+  { id: "enhance", icon: "🔍", title: "Enhance!", description: "Zoomed all the way into a landmark photo.", hidden: true },
+  { id: "high-flyer", icon: "🪽", title: "High flyer", description: "Scored 10 in Martlet Flight.", hidden: true },
+  { id: "chameleon", icon: "🎨", title: "Chameleon", description: "Tried three different themes.", hidden: true },
+  { id: "lights-out", icon: "🌙", title: "Lights out", description: "Switched Martlet to dark mode.", hidden: true },
+  { id: "leaf-blower", icon: "🍂", title: "Leaf blower", description: "Swept away a leaf pile in the Fall theme.", hidden: true },
+  { id: "snow-day", icon: "⛄", title: "Snow day", description: "Melted a snowman in the Winter theme.", hidden: true },
+  { id: "rubber-ducky", icon: "🦆", title: "Rubber ducky", description: "Popped a rubber duck in the Summer theme.", hidden: true },
   { id: EXPO_67_ID, icon: "67", title: "67", description: "Upload a challenge photo at the Expo 67 Biosphère.", hidden: false },
 
   // Activity ladders (ADR 0020): earned server-side from real activity counts

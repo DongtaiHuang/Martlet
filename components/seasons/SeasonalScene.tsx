@@ -231,6 +231,7 @@ function FallScene() {
   }
 
   function sweep(index: number) {
+    void earn("leaf-blower");
     setPiles((current) => ({ ...current, [index]: { ...current[index], clearing: true } }));
     setTimeout(() => setPiles((current) => ({ ...current, [index]: { leaves: [], clearing: false } })), DISSOLVE_MS);
   }
@@ -398,6 +399,7 @@ function WinterScene() {
   }, []);
 
   function melt(index: number) {
+    void earn("snow-day");
     setSnowmen((current) => ({ ...current, [index]: { ...current[index], melting: true } }));
     setTimeout(() => setSnowmen((current) => ({ ...current, [index]: EMPTY })), MELT_MS);
   }
@@ -541,6 +543,7 @@ function SummerScene() {
   }
 
   function pop(id: number) {
+    void earn("rubber-ducky");
     setFloating((current) => current.map((d) => d.id === id ? { ...d, popping: true } : d));
     setTimeout(() => setFloating((current) => current.filter((d) => d.id !== id)), POP_MS);
   }

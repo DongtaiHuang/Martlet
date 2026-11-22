@@ -4,6 +4,7 @@
 // <html data-mode>, set before paint by themeInitScript; this hook observes it so maps and
 // 3D scenes can follow, and lets the nav switch change it.
 import { useCallback, useSyncExternalStore } from "react";
+import { earn } from "@/components/achievements/earn";
 import { DEFAULT_MODE, MODE_KEY, MODES, THEME_KEY, THEMES, type ModePreference, type ThemeId } from "@/lib/theme";
 
 type Mode = "light" | "dark";
@@ -51,6 +52,7 @@ export function useColorMode(): Mode {
 export function useModePreference(): [ModePreference, (pref: ModePreference) => void] {
   const pref = useSyncExternalStore(subscribe, readPreference, () => DEFAULT_MODE);
   const set = useCallback((next: ModePreference) => {
+    if (next === "dark") void earn("lights-out");
     try { localStorage.setItem(MODE_KEY, next); } catch {}
     document.documentElement.dataset.mode = resolve(next);
     emit();
@@ -62,6 +64,11 @@ export function useModePreference(): [ModePreference, (pref: ModePreference) => 
 export function useThemePreference(): [ThemeId, (theme: ThemeId) => void] {
   const theme = useSyncExternalStore(subscribe, readTheme, () => "classic" as ThemeId);
   const set = useCallback((next: ThemeId) => {
+    try { // Chameleon: three different themes tried on this device.
+      const tried = new Set<string>(JSON.parse(localStorage.getItem("martlet.themes-tried") ?? "[]")); tried.add(next);
+      localStorage.setItem("martlet.themes-tried", JSON.stringify([...tried]));
+      if (tried.size >= 3) void earn("chameleon");
+    } catch {}
     try { localStorage.setItem(THEME_KEY, next); } catch {}
     document.documentElement.dataset.theme = next;
     emit();

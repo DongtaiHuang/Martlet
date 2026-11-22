@@ -1,5 +1,7 @@
 "use client";
 
+import { earn } from "@/components/achievements/earn";
+
 // Martlet Flight (issue #75): an original tap-to-fly mini-game. Fly the martlet between campus
 // columns, collect landmark pins. Canvas-rendered; day scene in light mode, night in dark mode.
 import { useEffect, useRef, useState } from "react";
@@ -116,6 +118,7 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
 
     const die = () => {
       stateRef.current = "over"; setState("over");
+      if (points >= 10) void earn("high-flyer");
       setBest((b) => { const nb = Math.max(b, points); if (nb > b) saveBest(nb); return nb; });
     };
 
