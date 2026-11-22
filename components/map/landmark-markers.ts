@@ -2,6 +2,7 @@
 // Landmarks map. Built with DOM APIs + textContent: never interpolate HTML.
 import type { LandmarkSummary } from "@/types/landmark";
 import { LANDMARK_COLORS } from "./landmark-style";
+import { buildPopup } from "./popup-content";
 
 /** Star pin: gold while still to discover, green once completed. `size` in CSS px. */
 export function landmarkMarkerElement(landmark: LandmarkSummary, size = 30) {
@@ -19,26 +20,14 @@ export function landmarkMarkerElement(landmark: LandmarkSummary, size = 30) {
 
 /** Popup with the challenge and a link to the landmark page (client-side navigation via onOpen). */
 export function landmarkPopupContent(landmark: LandmarkSummary, onOpen: (href: string) => void) {
-  const root = document.createElement("div");
-  root.style.cssText = "display:grid;gap:4px;max-width:220px;font:14px system-ui,sans-serif";
-  const add = (tag: string, text: string, css = "") => {
-    const el = document.createElement(tag);
-    el.textContent = text;
-    el.style.cssText = css;
-    root.append(el);
-    return el;
-  };
-  add("span", `★ Landmark · ${landmark.unlocked ? "Unlocked" : "Locked"}`, "font-size:12px;font-weight:600;color:#57534e");
-  add("strong", landmark.name);
-  add("span", landmark.challenge_prompt, "font-size:13px");
-  add("span", `${landmark.unlock_count} unlocked`, "font-size:12px;color:#57534e");
-  const href = `/landmarks/${encodeURIComponent(landmark.id)}`;
-  const link = add("a", landmark.unlocked ? "View photos →" : "View challenge →", "font-weight:700;color:#991b1b;text-decoration:underline") as HTMLAnchorElement;
-  link.href = href;
-  link.addEventListener("click", (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // allow open-in-new-tab
-    e.preventDefault();
-    onOpen(href);
+  return buildPopup({
+    seed: `landmark:${landmark.id}`,
+    tag: `Landmark · ${landmark.unlocked ? "Completed" : "To discover"}`,
+    tagTone: landmark.unlocked ? "green" : "gold",
+    title: landmark.name,
+    body: landmark.challenge_prompt,
+    meta: [`${landmark.unlock_count} ${landmark.unlock_count === 1 ? "student has" : "students have"} unlocked it`],
+    cta: { label: landmark.unlocked ? "View photos →" : "View challenge →", href: `/landmarks/${encodeURIComponent(landmark.id)}` },
+    onOpen,
   });
-  return root;
 }

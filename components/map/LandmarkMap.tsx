@@ -7,6 +7,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { ArrowUpRight, CheckCircle2, LockKeyhole, UsersRound } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
+import { POPUP_MAX_WIDTH } from "./popup-content";
 import { landmarkZoom } from "./landmark-style";
 import { CAMPUS_MAP_FRAME, createCampusMap } from "./map-config";
 
@@ -42,7 +43,7 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
 
     const byId = markers.current;
     for (const landmark of landmarks) {
-      const popup = new Popup({ offset: PIN_SIZE / 2 + 4 })
+      const popup = new Popup({ offset: PIN_SIZE / 2 + 4, maxWidth: POPUP_MAX_WIDTH })
         .setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href)));
       popup.on("open", () => {
         // One popup at a time, and keep the list in sync.

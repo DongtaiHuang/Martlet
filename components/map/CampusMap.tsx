@@ -7,35 +7,24 @@ import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import type { LandmarkSummary } from "@/types/landmark";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
+import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 
 const FOCUS_ZOOM = 17;
 
 function popupContent(meetup: MeetupSummary, onOpen: (href: string) => void) {
-  // Build with DOM APIs + textContent: never interpolate user-provided HTML.
-  const root = document.createElement("div");
-  root.style.cssText = "display:grid;gap:4px;max-width:220px;font:14px system-ui,sans-serif";
-  const add = (tag: string, text: string, css = "") => {
-    const el = document.createElement(tag);
-    el.textContent = text;
-    el.style.cssText = css;
-    root.append(el);
-    return el;
-  };
-  add("span", categories[meetup.category].label, "font-size:12px;font-weight:600;color:#57534e");
-  add("strong", meetup.title, "overflow-wrap:anywhere");
-  add("span", meetup.location_name);
-  add("span", new Date(meetup.starts_at).toLocaleString("en-CA", { weekday: "short", hour: "numeric", minute: "2-digit" }));
-  add("span", `${meetup.attendee_count} going · ${meetup.flap_count} flaps`, "font-size:12px;color:#57534e");
-  const href = `/meetups/${encodeURIComponent(meetup.id)}`;
-  const link = add("a", "View meetup →", "font-weight:700;color:#991b1b;text-decoration:underline") as HTMLAnchorElement;
-  link.href = href;
-  link.addEventListener("click", (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // allow open-in-new-tab
-    e.preventDefault();
-    onOpen(href);
+  return buildPopup({
+    seed: `meetup:${meetup.id}`,
+    tag: categories[meetup.category].label,
+    title: meetup.title,
+    body: meetup.location_name,
+    meta: [
+      new Date(meetup.starts_at).toLocaleString("en-CA", { weekday: "short", hour: "numeric", minute: "2-digit" }),
+      `${meetup.attendee_count} going · ${meetup.flap_count} flaps`,
+    ],
+    cta: { label: "View meetup →", href: `/meetups/${encodeURIComponent(meetup.id)}` },
+    onOpen,
   });
-  return root;
 }
 
 const NO_LANDMARKS: LandmarkSummary[] = [];
@@ -79,7 +68,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     const markers = visible.map((meetup) => {
       const marker = new Marker({ color: MARKER_COLORS[meetup.category] })
         .setLngLat([meetup.longitude, meetup.latitude])
-        .setPopup(new Popup({ offset: 24 }).setDOMContent(popupContent(meetup, (href) => router.push(href))))
+        .setPopup(new Popup({ offset: 24, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(popupContent(meetup, (href) => router.push(href))))
         .addTo(map);
       marker.getElement().setAttribute("aria-label", `${meetup.title} at ${meetup.location_name}`);
       byId.set(meetup.id, marker);
@@ -94,7 +83,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     const markers = shownLandmarks.map((landmark) =>
       new Marker({ element: landmarkMarkerElement(landmark) })
         .setLngLat([landmark.longitude, landmark.latitude])
-        .setPopup(new Popup({ offset: 18 }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
+        .setPopup(new Popup({ offset: 18, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
         .addTo(map));
     return () => markers.forEach((m) => m.remove());
   }, [shownLandmarks, router]);
