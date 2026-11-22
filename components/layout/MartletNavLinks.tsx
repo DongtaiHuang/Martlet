@@ -16,7 +16,7 @@ const links = [
 export function MartletNavLinks() {
   const pathname = usePathname();
   const activePath = pathname.startsWith("/meetups/") && pathname !== "/meetups/new" ? "/meetups"
-    : pathname.startsWith("/landmarks/") ? "/landmarks" : pathname;
+    : pathname.startsWith("/landmarks/") ? "/landmarks" : pathname === "/avatar" ? "/profile" : pathname;
 
   return (
     <nav aria-label="Martlet navigation" className="grid grid-cols-6 gap-0.5 pb-2 sm:flex sm:pb-0">

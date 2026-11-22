@@ -10,6 +10,10 @@
 
 The style URL ends up in the browser, so only use **domain-restricted** public keys. Never put a secret key here.
 
+## Martlet avatar models (ADR 0010)
+
+`npm run dev` and `npm run build` run `scripts/copy-mediapipe-wasm.mjs`. It copies MediaPipe's WebAssembly runtime and downloads the face model (about 3.8 MB) and the pose model (about 5.8 MB) into `public/mediapipe/` (git-ignored), so the build needs network access the first time. If the download fails, the build still passes and `/avatar` shows a tracking error. No environment variables are needed.
+
 ## Vercel setup
 
 1. Import `DongtaiHuang/Martlet` in Vercel. The framework (Next.js) is auto-detected and no `vercel.json` is needed.

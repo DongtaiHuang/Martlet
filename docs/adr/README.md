@@ -12,6 +12,9 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0006 | [MapLibre with a configurable style](0006-maplibre-configurable-style.md) | Accepted |
 | 0007 | [Frozen MVP scope and mock-first service contracts](0007-frozen-mvp-and-service-contracts.md) | Accepted |
 | 0008 | [Client-side "show my location" on the map](0008-client-side-locate-me.md) | Proposed |
+| 0009 | [Landmark photo unlocks with visit check-ins](0009-landmark-photo-unlocks.md) | Proposed |
+| 0010 | [Martlet avatar with in-browser expression tracking](0010-martlet-avatar-expression-tracking.md) | Proposed |
+| 0011 | [Advisory meetup polls and single-choice voting](0011-meetup-polls.md) | Proposed |
 
 ## Adding a new ADR
 
