@@ -28,6 +28,20 @@ unflap(meetupId: string): Promise<void>
 
 Use the authenticated Supabase user ID internally; **never accept a `userId` argument from the browser**.
 
+## Trend service functions — `lib/trends.ts` (issue #43, ADR 0015)
+
+```typescript
+listTrends(type?: TrendType, limit?: number): Promise<TrendEntry[]>
+createTrend(input: CreateTrendInput): Promise<void>
+setTrendLike(id: string, liked: boolean): Promise<void>
+```
+
+Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-validation.ts` (`validateCreateTrendInput`, `TREND_TYPES`).
+
+- Data interpretation: one like per user per entry (composite primary key); rank = like count descending, then newest first. `likedByMe`/`createdByMe` are computed for the current user only.
+- Coffee and study entries may reference an approved `CAMPUS_LOCATIONS` id; recipes and songs are address-free. Links must be empty or start with `https://`.
+- Errors: `TrendError`; `AuthRequiredError` and `MockModeError` are reused from `lib/meetups.ts`. Mutations run through the RPCs in `supabase/migrations/010_trends.sql`.
+
 ## Data interpretation
 - A meetup's host is automatically participating without a `meetup_pecks` row.
 - `attendee_count = 1 + pecks count`.
