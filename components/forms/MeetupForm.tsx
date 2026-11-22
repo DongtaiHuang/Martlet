@@ -5,12 +5,9 @@ import { ArrowRight } from "lucide-react";
 import { submitMeetup, type CreateState } from "@/app/meetups/new/actions";
 import { MeetupCoursePicker } from "@/components/courses/MeetupCoursePicker";
 import { categories, categoryValues } from "@/components/feed/categories";
-<<<<<<< HEAD
 import type { Course } from "@/lib/course-codes";
-=======
 import { futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
->>>>>>> 92548f74d7e66575cfad1bc00ace5e5f918bde29
 import { CAMPUS_LOCATIONS } from "@/lib/locations";
 
 const fieldStyle = "mt-2 block w-full min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700 aria-invalid:border-red-700";
