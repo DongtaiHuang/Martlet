@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowUpRight, FlaskConical, LogIn } from "lucide-react";
+import { FlaskConical, LogIn } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { FeedUnavailable } from "@/components/feed/FeedUnavailable";
 import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle";
 import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import { HeroCarousel } from "@/components/feed/HeroCarousel";
-import { LandmarkPreviewCard } from "@/components/landmarks/LandmarkPreviewCard";
+import { LandmarkFeedList } from "@/components/landmarks/LandmarkFeedList";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
 import { listMyCourses } from "@/lib/courses";
@@ -59,27 +59,7 @@ async function FeedLandmarks() {
     console.error("Failed to load landmarks for the feed", error);
     return <FeedUnavailable subject="landmarks" />;
   }
-  const unlocked = landmarks.filter((l) => l.unlocked).length;
-
-  return (
-    <>
-      <div className="mt-4 mb-5 flex flex-wrap items-center justify-between gap-2">
-        <p role="status" className="text-sm font-medium text-ink-muted">
-          {landmarks.length} {landmarks.length === 1 ? "landmark" : "landmarks"} · {unlocked} unlocked
-        </p>
-        <Link href="/landmarks" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-brand-ink hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-focus">
-          All landmarks <ArrowUpRight aria-hidden="true" size={16} />
-        </Link>
-      </div>
-      {landmarks.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {landmarks.map((landmark) => <LandmarkPreviewCard key={landmark.id} landmark={landmark} />)}
-        </div>
-      ) : (
-        <p className="rounded-2xl border border-dashed border-line-strong bg-surface px-5 py-10 text-center text-ink-muted">No landmarks yet.</p>
-      )}
-    </>
-  );
+  return <LandmarkFeedList landmarks={landmarks} />;
 }
 
 async function UpcomingMeetups() {
