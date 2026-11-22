@@ -10,8 +10,8 @@ export function LandmarkPreviewCard({ landmark }: { landmark: LandmarkSummary })
       <div
         aria-hidden="true"
         className={`flex h-24 items-center justify-center ${unlocked
-          ? "bg-gradient-to-br from-amber-200 via-amber-300 to-orange-300 text-amber-950 dark:from-amber-900/70 dark:via-amber-800/60 dark:to-orange-900/70 dark:text-amber-100"
-          : "bg-gradient-to-br from-stone-200 via-stone-300 to-stone-400 text-stone-600 dark:from-stone-800 dark:via-stone-700 dark:to-stone-600 dark:text-stone-300"}`}
+          ? "bg-gradient-to-br from-amber-200 via-amber-300 to-orange-300 text-warn-ink dark:from-amber-900/70 dark:via-amber-800/60 dark:to-orange-900/70 dark:text-amber-100"
+          : "bg-gradient-to-br from-stone-200 via-stone-300 to-stone-400 text-ink-muted dark:from-stone-800 dark:via-stone-700 dark:to-stone-600 dark:text-stone-300"}`}
       >
         {unlocked ? <Star size={36} fill="currentColor" /> : <LockKeyhole size={36} />}
       </div>
