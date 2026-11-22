@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, LogIn, UserRound } from "lucide-react";
+import { ArrowRight, Bird, LogIn, UserRound } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
 import { ProfileActivity } from "@/components/profile/ProfileActivity";
@@ -63,6 +63,16 @@ export default async function ProfilePage() {
             </div>
           </div>
           {state.kind === "ready" && <DisplayNameForm current={state.user.display_name} />}
+          {state.kind === "ready" && (
+            <Link href="/avatar" className="mt-4 flex min-h-11 items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 hover:border-red-300 focus-visible:outline-2 focus-visible:outline-red-700">
+              <Bird aria-hidden="true" size={22} className="shrink-0 text-red-800" />
+              <span className="min-w-0">
+                <span className="block text-sm font-bold">Your martlet</span>
+                <span className="block text-xs text-stone-600">Customize your 3D avatar and make it copy your expressions.</span>
+              </span>
+              <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-red-800" />
+            </Link>
+          )}
           {state.kind === "signed-out" ? (
             <Link href="/login?next=/profile" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"><LogIn aria-hidden="true" size={16} /> Sign in</Link>
           ) : (
