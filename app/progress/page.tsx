@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, CheckCircle2, Eye, LockKeyhole } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { EarnOnMount } from "@/components/achievements/EarnOnMount";
 import { GrowthTree, type TreeFruit } from "@/components/progress/GrowthTree";
 import { listLandmarks, listMyUnlocks } from "@/lib/landmarks";
 import { TREE_STAGES, treeStage, unlocksToNextStage, type TreeStage } from "@/lib/progress";
@@ -61,6 +62,7 @@ export default async function ProgressPage({
           </div>
         </section>
 
+        {previewing && <EarnOnMount id="time-traveller" />}
         {previewing && (
           <p role="status" className="mt-4 flex items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
             <Eye aria-hidden="true" size={16} className="shrink-0" />

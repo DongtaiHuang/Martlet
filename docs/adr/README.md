@@ -21,6 +21,8 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0015 | [Approved public venues for off-campus meetups](0015-public-meetup-venues.md) | Proposed |
 | 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Proposed |
 | 0017 | [Like-ranked trends side panel](0017-trends-side-panel.md) | Proposed |
+| 0018 | [Open the Landmarks map with all pins in 3D](0018-landmarks-overview.md) | Proposed |
+| 0019 | [Achievements for niche and hidden features](0019-achievements.md) | Proposed |
 
 ## Adding a new ADR
 

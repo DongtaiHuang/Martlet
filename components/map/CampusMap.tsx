@@ -8,6 +8,7 @@ import type { LandmarkSummary } from "@/types/landmark";
 import { PUBLIC_VENUES } from "@/lib/public-venues";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
+import { openedLandmark, watchMapAngle } from "./map-achievements";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_CENTER, CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 import { useMapColorMode } from "./map-mode";
@@ -64,9 +65,12 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     ...shownLandmarks.map((landmark) => ({
       id: landmark.id, title: landmark.name, latitude: landmark.latitude, longitude: landmark.longitude,
       color: landmark.unlocked ? "#166534" : "#57534e",
-      content: () => landmarkPopupContent(landmark, (href) => router.push(href)),
+      content: () => {
+        openedLandmark(landmark, landmarks.length);
+        return landmarkPopupContent(landmark, (href) => router.push(href));
+      },
     })),
-  ] : [], [visible, shownLandmarks, router]);
+  ] : [], [visible, shownLandmarks, landmarks.length, router]);
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
   // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
   const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
@@ -74,6 +78,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   useEffect(() => {
     if (!ref.current) return;
     const map = createCampusMap(ref.current);
+    watchMapAngle(map);
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -99,13 +104,16 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     if (!map) return;
     const markers = shownLandmarks.map((landmark) => {
       const { element, height } = landmarkMarker(landmark, 1.75);
+      const popup = new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH })
+        .setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href)));
+      popup.on("open", () => openedLandmark(landmark, landmarks.length));
       return new Marker({ element, anchor: "bottom" })
         .setLngLat([landmark.longitude, landmark.latitude])
-        .setPopup(new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
+        .setPopup(popup)
         .addTo(map);
     });
     return () => markers.forEach((m) => m.remove());
-  }, [shownLandmarks, router]);
+  }, [shownLandmarks, landmarks.length, router]);
 
   useEffect(() => {
     const map = mapRef.current;

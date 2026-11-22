@@ -85,7 +85,7 @@ export interface PixelLeaf { x: number; y: number; fall: number; drift: number; 
 /** Where a photo fruit hangs: top-left grid cell and size (3x3 apples on big trees, 2x2 on young ones, 1 px berries on small plants). */
 export interface FruitSpot { x: number; y: number; size: number }
 export interface PixelScene {
-  background: PixelPath[];
+  landscape: PixelPath[];
   wood: PixelPath[];
   foliage: PixelPath[];
   fruit: PixelPath[];
@@ -140,7 +140,7 @@ const CLOUDS: { x: number; y: number; r: number }[][] = [
   [{ x: 70, y: 33, r: 2 }, { x: 74, y: 32, r: 2.5 }, { x: 78, y: 33, r: 2 }],
 ];
 
-function paintBackground(crown: number): Grid {
+function paintSky(): Grid {
   const g = newGrid();
   // Sky: darker at the top, lighter toward the horizon, dithered between bands.
   for (let y = 0; y < HORIZON; y++) {
@@ -149,8 +149,13 @@ function paintBackground(crown: number): Grid {
       set(g, x, y, (["sky1", "sky2", "sky3", "sky4"] as const)[ditherLevel(t, x, y, 4, 0.3)]);
     }
   }
+  return g;
+}
+
+function paintClouds(clouds: typeof CLOUDS): Grid {
+  const g = newGrid();
   // Clouds: puffy circles with noisy edges, shaded underneath.
-  for (const cloud of CLOUDS) {
+  for (const cloud of clouds) {
     const bottom = Math.max(...cloud.map((p) => p.y + p.r));
     for (const p of cloud) {
       for (let y = Math.floor(p.y - p.r - 1); y <= p.y + p.r + 1; y++) {
@@ -162,6 +167,11 @@ function paintBackground(crown: number): Grid {
       }
     }
   }
+  return g;
+}
+
+function paintLandscape(crown: number): Grid {
+  const g = newGrid();
   // Distant hills just above the horizon.
   for (let x = 0; x < GRID_W; x++) {
     const top = HORIZON - 2 - Math.round(1.2 + 1.2 * Math.sin(x / 9) + 0.8 * Math.sin(x / 4.1 + 1));
@@ -396,6 +406,8 @@ function paintFruit(spots: FruitSpot[]): Grid {
 }
 
 const cache = new Map<string, PixelScene>();
+export const SKY_PATHS = toPaths(paintSky());
+export const CLOUD_LAYERS = [toPaths(paintClouds(CLOUDS.slice(2))), toPaths(paintClouds(CLOUDS.slice(0, 2)))];
 
 export function pixelScene(stage: TreeStage, fruitCount = 0): PixelScene {
   const key = `${stage}:${fruitCount}`;
@@ -409,7 +421,7 @@ export function pixelScene(stage: TreeStage, fruitCount = 0): PixelScene {
   const crown = stage >= 3 ? TREE_SPEC[stage as 3 | 4 | 5 | 6].crown : 0;
   const fruitSpots = pickFruitSpots(stage, foliage, fruitCount);
   const scene: PixelScene = {
-    background: toPaths(paintBackground(crown)),
+    landscape: toPaths(paintLandscape(crown)),
     wood: toPaths(wood),
     foliage: toPaths(foliage),
     fruit: toPaths(paintFruit(fruitSpots)),
