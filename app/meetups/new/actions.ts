@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { categoryValues } from "@/components/feed/categories";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
+import { COURSE_CODE_PATTERN } from "@/lib/course-codes";
 import { getCampusLocation } from "@/lib/locations";
-import { createMeetup } from "@/lib/meetups";
+import { createMeetup, MeetupValidationError } from "@/lib/meetups";
 
 const meetupInput = z.object({
   title: z.string().trim().min(3, "Enter at least 3 characters.").max(80, "Use 80 characters or fewer."),
@@ -20,6 +21,11 @@ const meetupInput = z.object({
   }),
   startsAt: z.iso.datetime({ error: "Enter a valid date and time." })
     .refine((value) => Date.parse(value) > Date.now(), "Choose a start time in the future."),
+  // Optional McGill course; only study meetups can have one (checked below and by the database).
+  course_code: z.string().regex(COURSE_CODE_PATTERN, "Choose a course from the list.").nullable(),
+}).refine((input) => !input.course_code || input.category === "study", {
+  path: ["course_code"],
+  message: "Only study meetups can have a course.",
 });
 
 export type CreateState = {
@@ -34,13 +40,14 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
     category: formData.get("category"),
     location: formData.get("location") ?? "",
     startsAt: formData.get("startsAt"),
+    course_code: formData.get("course_code") || null,
   });
 
   if (!input.success) {
     return { message: "Check the highlighted fields.", fields: z.flattenError(input.error).fieldErrors };
   }
 
-  const { title, description, category, location, startsAt } = input.data;
+  const { title, description, category, location, startsAt, course_code } = input.data;
   let id: string;
   try {
     if (!(await getMeetupViewer())) {
@@ -55,9 +62,13 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
       latitude: location.latitude,
       longitude: location.longitude,
       starts_at: startsAt,
+      course_code,
     });
     id = meetup.id;
   } catch (error) {
+    if (error instanceof MeetupValidationError && error.fieldErrors.course_code) {
+      return { message: "Check the highlighted fields.", fields: { course_code: [error.fieldErrors.course_code] } };
+    }
     console.error("Meetup creation failed", error);
     return { message: "Couldn’t create the meetup. Try again when the meetup service is available." };
   }

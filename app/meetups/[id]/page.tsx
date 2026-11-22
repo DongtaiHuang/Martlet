@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, MapPin, UserRound } from "lucide-react";
+import { ArrowLeft, CalendarDays, GraduationCap, MapPin, UserRound } from "lucide-react";
 import { categories } from "@/components/feed/categories";
 import { CancelMeetupForm } from "@/components/forms/CancelMeetupForm";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
@@ -39,6 +39,7 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
         <article className="mt-3 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap gap-2">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${color}`}><CategoryIcon aria-hidden="true" size={15} /> {label}</span>
+            {meetup.course_code && <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={15} /> {meetup.course_code}</span>}
             {cancelled && <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-900">Cancelled</span>}
             {!cancelled && expired && <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-800">Past meetup</span>}
           </div>

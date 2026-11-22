@@ -1,9 +1,11 @@
 "use client";
 
-import { startTransition, useActionState, type FormEvent } from "react";
+import { startTransition, useActionState, useState, type FormEvent } from "react";
 import { ArrowRight } from "lucide-react";
 import { submitMeetup, type CreateState } from "@/app/meetups/new/actions";
+import { MeetupCoursePicker } from "@/components/courses/MeetupCoursePicker";
 import { categories, categoryValues } from "@/components/feed/categories";
+import type { Course } from "@/lib/course-codes";
 import { CAMPUS_LOCATIONS } from "@/lib/locations";
 
 const fieldStyle = "mt-2 block w-full min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700 aria-invalid:border-red-700";
@@ -13,8 +15,9 @@ function FieldError({ name, fields }: { name: keyof NonNullable<CreateState["fie
   return message ? <p id={`${name}-error`} className="mt-1 text-sm text-red-800">{message}</p> : null;
 }
 
-export function MeetupForm() {
+export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
   const [state, dispatch, pending] = useActionState(submitMeetup, {});
+  const [category, setCategory] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,7 +54,7 @@ export function MeetupForm() {
         <div className="grid min-w-0 gap-5 sm:grid-cols-2">
           <div className="min-w-0">
             <label htmlFor="category" className="font-semibold">Category</label>
-            <select id="category" name="category" required defaultValue="" className={fieldStyle} {...fieldErrorProps("category")}>
+            <select id="category" name="category" required value={category} onChange={(event) => setCategory(event.target.value)} className={fieldStyle} {...fieldErrorProps("category")}>
               <option value="" disabled>Choose a category</option>
               {categoryValues.map((category) => <option key={category} value={category}>{categories[category].label}</option>)}
             </select>
@@ -66,6 +69,7 @@ export function MeetupForm() {
             <FieldError name="location" fields={state.fields} />
           </div>
         </div>
+        {category === "study" && <MeetupCoursePicker myCourses={myCourses} error={state.fields?.course_code?.[0]} />}
         <div>
           <label htmlFor="startsAt" className="font-semibold">Start date and time</label>
           <input id="startsAt" name="startsAt" type="datetime-local" required className={fieldStyle} {...fieldErrorProps("startsAt")} aria-describedby={state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />

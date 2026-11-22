@@ -1,46 +1,18 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { GraduationCap, X } from "lucide-react";
-import { addCourse, findCourses, removeCourse } from "@/app/profile/course-actions";
-import { MAX_COURSES, normalizeCourseQuery, type Course } from "@/lib/course-codes";
+import { addCourse, removeCourse } from "@/app/profile/course-actions";
+import { MAX_COURSES, type Course } from "@/lib/course-codes";
+import { CourseSearch } from "./CourseSearch";
 
 /** Profile section where students search the McGill catalogue and save the courses they take (issue #25). */
 export function CourseCodesForm({ initial }: { initial: Course[] }) {
   const [courses, setCourses] = useState(initial);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Course[]>([]);
-  const [activeIndex, setActiveIndex] = useState(-1);
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
-  const latestSearch = useRef(0);
   const id = useId();
-  const listId = `${id}-results`;
   const full = courses.length >= MAX_COURSES;
-
-  // Debounced search; ignores answers to older queries that arrive late.
-  useEffect(() => {
-    if (normalizeCourseQuery(query).length < 2) return;
-    const search = ++latestSearch.current;
-    const timer = setTimeout(async () => {
-      const found = await findCourses(query);
-      if (search !== latestSearch.current) return;
-      setResults(found);
-      setActiveIndex(found.length > 0 ? 0 : -1);
-      setMessage(found.length > 0 ? `${found.length} matching courses. Use the arrow keys to choose.` : "No McGill course matches that.");
-    }, 200);
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  function changeQuery(value: string) {
-    setQuery(value);
-    setMessage("");
-    if (normalizeCourseQuery(value).length < 2) {
-      latestSearch.current++;
-      setResults([]);
-      setActiveIndex(-1);
-    }
-  }
 
   function add(course: Course) {
     if (courses.some((c) => c.code === course.code)) {
@@ -52,7 +24,6 @@ export function CourseCodesForm({ initial }: { initial: Course[] }) {
       if (!result.ok) return setMessage(result.message);
       setCourses((current) => [...current, course].sort((a, b) => a.code.localeCompare(b.code)));
       setMessage(`Added ${course.code}.`);
-      changeQuery("");
     });
   }
 
@@ -64,22 +35,6 @@ export function CourseCodesForm({ initial }: { initial: Course[] }) {
       setMessage(`Removed ${course.code}.`);
     });
   }
-
-  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (results.length === 0) return;
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      const step = event.key === "ArrowDown" ? 1 : -1;
-      setActiveIndex((index) => (index + step + results.length) % results.length);
-    } else if (event.key === "Enter" && activeIndex >= 0) {
-      event.preventDefault();
-      add(results[activeIndex]);
-    } else if (event.key === "Escape") {
-      changeQuery("");
-    }
-  }
-
-  const open = results.length > 0;
 
   return (
     <section aria-labelledby={`${id}-heading`} className="mt-5 border-t border-stone-100 pt-4">
@@ -107,33 +62,13 @@ export function CourseCodesForm({ initial }: { initial: Course[] }) {
         </ul>
       )}
 
-      <div className="relative mt-3">
-        <label htmlFor={`${id}-input`} className="sr-only">Add a course</label>
-        <input
-          id={`${id}-input`} type="text" role="combobox" autoComplete="off" spellCheck={false}
-          value={query} onChange={(event) => changeQuery(event.target.value)} onKeyDown={onKeyDown}
-          disabled={full} maxLength={60}
+      <div className="mt-3">
+        <CourseSearch
+          label="Add a course" onPick={add} disabled={full} describedBy={`${id}-hint ${id}-status`}
           placeholder={full ? `You’ve added ${MAX_COURSES} courses` : "Add a course, e.g. COMP 202 or Calculus"}
-          aria-expanded={open} aria-controls={listId} aria-autocomplete="list"
-          aria-activedescendant={open && activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
-          aria-describedby={`${id}-hint ${id}-status`}
-          className="min-h-11 w-full rounded-xl border border-stone-300 px-3 text-sm focus-visible:outline-2 focus-visible:outline-red-700 disabled:bg-stone-100"
         />
-        <ul id={listId} role="listbox" aria-label="Matching McGill courses" hidden={!open}
-          className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-stone-200 bg-white py-1 shadow-lg">
-          {results.map((course, index) => (
-            <li
-              key={course.code} id={`${listId}-${index}`} role="option" aria-selected={index === activeIndex}
-              onMouseDown={(event) => event.preventDefault()} onClick={() => add(course)}
-              onMouseEnter={() => setActiveIndex(index)}
-              className={`cursor-pointer px-3 py-2 text-sm ${index === activeIndex ? "bg-red-50 text-red-950" : "text-stone-800"}`}
-            >
-              <span className="font-semibold">{course.code}</span> <span className="text-stone-600">{course.title}</span>
-            </li>
-          ))}
-        </ul>
       </div>
-      <p id={`${id}-status`} role="status" className="mt-1 min-h-5 text-xs text-stone-700">{message}</p>
+      <p id={`${id}-status`} role="status" className="min-h-5 text-xs text-stone-700">{message}</p>
     </section>
   );
 }

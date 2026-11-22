@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { ArrowUpRight, CalendarDays, Heart, MapPin, UsersRound } from "lucide-react";
+import { ArrowUpRight, CalendarDays, GraduationCap, Heart, MapPin, UsersRound } from "lucide-react";
 import { FlapButton } from "@/components/social/FlapButton";
 import { PeckButton } from "@/components/social/PeckButton";
 import type { MeetupSummary } from "@/types/meetup";
@@ -40,6 +40,7 @@ export function MeetupCard({ meetup, viewerId = null }: MeetupCardProps) {
           <CategoryIcon aria-hidden="true" size={15} />
           {label}
         </span>
+        {meetup.course_code && <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={14} />{meetup.course_code}</span>}
         {isHost && <span className="rounded-full bg-stone-900 px-2.5 py-1 text-xs font-semibold text-white">Hosting</span>}
         {joined && <span className="rounded-full bg-red-800 px-2.5 py-1 text-xs font-semibold text-white">You’re going</span>}
       </div>
