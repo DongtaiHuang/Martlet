@@ -1,0 +1,101 @@
+/*
+ * Martlet colour tokens (ADR 0012). Components use semantic utilities such as bg-canvas,
+ * bg-surface, text-ink, border-line, bg-brand and text-brand-ink, never raw palette colours.
+ * Themes and modes only change the variables below; components never change.
+ *
+ *   <html data-theme="classic" data-mode="light|dark">   (set before paint in app/layout.tsx)
+ *
+ * Light "McGill Classic" reproduces the original stone/red palette exactly.
+ */
+
+@theme inline {
+  --color-canvas: var(--m-canvas);              /* page background */
+  --color-surface: var(--m-surface);            /* cards, header, inputs */
+  --color-surface-muted: var(--m-surface-muted);/* chips, subtle fills */
+  --color-line: var(--m-line);                  /* default borders */
+  --color-line-soft: var(--m-line-soft);        /* dividers inside cards */
+  --color-line-strong: var(--m-line-strong);    /* inputs, outlined buttons */
+  --color-ink: var(--m-ink);                    /* primary text */
+  --color-ink-soft: var(--m-ink-soft);          /* strong secondary text */
+  --color-ink-2: var(--m-ink-2);                /* secondary text */
+  --color-ink-muted: var(--m-ink-muted);        /* hints, metadata */
+  --color-ink-subtle: var(--m-ink-subtle);      /* icons, placeholders */
+  --color-brand: var(--m-brand);                /* primary buttons, logo tile */
+  --color-brand-hover: var(--m-brand-hover);
+  --color-brand-ink: var(--m-brand-ink);        /* links, brand-coloured text */
+  --color-brand-ink-strong: var(--m-brand-ink-strong);
+  --color-brand-soft: var(--m-brand-soft);      /* brand-tinted backgrounds, hover */
+  --color-brand-line: var(--m-brand-line);      /* brand-tinted borders */
+  --color-on-brand: var(--m-on-brand);          /* text on bg-brand */
+  --color-focus: var(--m-focus);                /* focus outlines */
+  --color-warn-soft: var(--m-warn-soft);
+  --color-warn-muted: var(--m-warn-muted);
+  --color-warn-line: var(--m-warn-line);
+  --color-warn-ink: var(--m-warn-ink);
+  --color-ok-soft: var(--m-ok-soft);
+  --color-ok-line: var(--m-ok-line);
+  --color-ok-ink: var(--m-ok-ink);
+}
+
+/* McGill Classic: light (default) */
+:root,
+[data-theme="classic"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #fafaf9;        /* stone-50 */
+  --m-surface: #ffffff;
+  --m-surface-muted: #f5f5f4; /* stone-100 */
+  --m-line: #e7e5e4;          /* stone-200 */
+  --m-line-soft: #f5f5f4;     /* stone-100 */
+  --m-line-strong: #d6d3d1;   /* stone-300 */
+  --m-ink: #0c0a09;           /* stone-950 */
+  --m-ink-soft: #1c1917;      /* stone-900 */
+  --m-ink-2: #44403c;         /* stone-700 */
+  --m-ink-muted: #57534e;     /* stone-600 */
+  --m-ink-subtle: #78716c;    /* stone-500 */
+  --m-brand: #991b1b;         /* red-800 */
+  --m-brand-hover: #7f1d1d;   /* red-900 */
+  --m-brand-ink: #991b1b;     /* red-800 */
+  --m-brand-ink-strong: #7f1d1d;
+  --m-brand-soft: #fef2f2;    /* red-50 */
+  --m-brand-line: #fecaca;    /* red-200 */
+  --m-on-brand: #ffffff;
+  --m-focus: #b91c1c;         /* red-700 */
+  --m-warn-soft: #fffbeb;     /* amber-50 */
+  --m-warn-muted: #fef3c7;    /* amber-100 */
+  --m-warn-line: #fde68a;     /* amber-200 */
+  --m-warn-ink: #78350f;      /* amber-900 */
+  --m-ok-soft: #f0fdf4;       /* green-50 */
+  --m-ok-line: #bbf7d0;       /* green-200 */
+  --m-ok-ink: #166534;        /* green-800 */
+}
+
+/* McGill Classic: dark. Not offered in the UI until every area uses tokens (ADR 0012). */
+[data-theme="classic"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #121010;
+  --m-surface: #1c1917;
+  --m-surface-muted: #292524;
+  --m-line: #3a3532;
+  --m-line-soft: #292524;
+  --m-line-strong: #57534e;
+  --m-ink: #f5f5f4;
+  --m-ink-soft: #e7e5e4;
+  --m-ink-2: #d6d3d1;
+  --m-ink-muted: #a8a29e;
+  --m-ink-subtle: #8a837e;
+  --m-brand: #b91c1c;
+  --m-brand-hover: #991b1b;
+  --m-brand-ink: #f87171;
+  --m-brand-ink-strong: #fca5a5;
+  --m-brand-soft: #3b1414;
+  --m-brand-line: #7f1d1d;
+  --m-on-brand: #ffffff;
+  --m-focus: #f87171;
+  --m-warn-soft: #2e2208;
+  --m-warn-muted: #3d2c09;
+  --m-warn-line: #78530f;
+  --m-warn-ink: #fcd34d;
+  --m-ok-soft: #0f2a1a;
+  --m-ok-line: #166534;
+  --m-ok-ink: #86efac;
+}

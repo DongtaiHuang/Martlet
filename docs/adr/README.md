@@ -15,6 +15,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0009 | [Landmark photo unlocks with visit check-ins](0009-landmark-photo-unlocks.md) | Proposed |
 | 0010 | [Martlet avatar with in-browser expression tracking](0010-martlet-avatar-expression-tracking.md) | Proposed |
 | 0011 | [Advisory meetup polls and single-choice voting](0011-meetup-polls.md) | Proposed |
+| 0012 | [Colour tokens, themes and dark mode](0012-theme-tokens-and-dark-mode.md) | Proposed |
 
 ## Adding a new ADR
 
