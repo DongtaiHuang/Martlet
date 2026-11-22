@@ -66,7 +66,7 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
       <div className="min-w-0 space-y-6">
         <section aria-labelledby="face-heading">
           <h2 id="face-heading" className="font-bold">Animate with my face</h2>
-          <p className="mt-1 text-sm text-stone-600">Your martlet copies your blinks, smile, mouth, brows and head turns.</p>
+          <p className="mt-1 text-sm text-stone-600">Your martlet copies your blinks, smile, mouth, brows and head turns. Sit back so your shoulders and elbows are in view, then raise your arms to flap its wings.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {!tracking ? (
               <button type="button" disabled={tracker.status === "loading"} onClick={() => void tracker.start()} className={`${btn} bg-red-800 text-white hover:bg-red-900`}>
@@ -89,7 +89,7 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
             )}
           </div>
           <p role="status" className="mt-2 min-h-5 text-sm text-stone-700">
-            {tracker.status === "live" && "Tracking: try blinking, smiling, opening your mouth or tilting your head."}
+            {tracker.status === "live" && "Tracking: try blinking, smiling, opening your mouth, tilting your head or raising your arms."}
             {tracker.status === "recording" && "Recording… do your best expression!"}
             {clip && tracker.status === "idle" && `Clip saved in this tab: ${clip.frames.length} expression samples (numbers only).`}
           </p>

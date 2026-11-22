@@ -28,7 +28,7 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
   const eyes = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
   const brows = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
   const cheeks = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
-  const wings = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
+  const wings = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
   const nextBlink = useRef(2);
 
   useFrame(({ clock }) => {
@@ -63,14 +63,19 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
       br.rotation.z = s * (c.browDown * 0.4 - c.browUp * 0.3);
     });
     cheeks.forEach((r) => r.current?.scale.setScalar(0.1 * (1 + c.smile * 0.9)));
-    const flap = c.smile > 0.55 ? Math.sin(t * 16) * 0.35 * (c.smile - 0.55) * 2 : 0;
-    wings.forEach((r, i) => { if (r.current) r.current.rotation.z = (i === 0 ? 1 : -1) * (0.22 + flap); });
+    // Wings follow your arms (0 = down, 1 = overhead); a big grin adds a happy flutter.
+    const flutter = c.smile > 0.55 ? Math.abs(Math.sin(t * 16)) * 0.3 * (c.smile - 0.55) * 2 : 0;
+    [c.wingL, c.wingR].forEach((lift, i) => {
+      const w = wings[i].current; if (!w) return;
+      const s = i === 0 ? -1 : 1;
+      w.rotation.z = s * (0.12 + clamp(lift, 0, 1) * 2.3 + flutter); // rotate outward and up from the shoulder
+    });
     if (body.current) body.current.scale.y = 1 + (animate ? Math.sin(t * 2.2) * 0.012 : 0);
   });
 
   const leaves = useMemo(() => [[-1.6, 0.18, 0.1], [-1.35, 0.3, -0.2], [1.7, 0.2, 0.05], [1.45, 0.32, 0.25]] as const, []);
   return (
-    <group rotation={[0, -0.35, 0]}>
+    <group>
       {/* Branch */}
       <mesh position={[0, 0.05, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.11, 0.14, 4.2, 7]} /><Mat color="#5b4031" /></mesh>
       {leaves.map((p, i) => <mesh key={i} position={p as unknown as [number, number, number]} scale={[0.22, 0.08, 0.14]}><icosahedronGeometry args={[1, 0]} /><Mat color={i % 2 ? "#6b8f4e" : "#7aa35a"} /></mesh>)}
@@ -94,10 +99,13 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
         <mesh position={[0, 0.95, -0.08]} scale={[0.74, 0.8, 0.88]}><icosahedronGeometry args={[1, 1]} /><Mat color={plumage.body} /></mesh>
         <mesh position={[0, 0.92, 0.5]} scale={[0.5, 0.56, 0.4]}><icosahedronGeometry args={[1, 1]} /><Mat color={CREAM} /></mesh>
         {[-1, 1].map((s, i) => (
-          <mesh key={s} ref={wings[i]} position={[s * 0.7, 1.0, -0.14]} scale={[0.17, 0.5, 0.74]} rotation={[0.15, 0, s * 0.22]}><icosahedronGeometry args={[1, 1]} /><Mat color={plumage.wing} /></mesh>
-        ))}
-        {Array.from({ length: pins }, (_, i) => (
-          <mesh key={i} position={[0.86, 1.12 - i * 0.13, 0.05 - (i % 2) * 0.12]} scale={0.055}><icosahedronGeometry args={[1, 0]} /><Mat color={PIN_COLORS[i]} emissive={PIN_COLORS[i]} emissiveIntensity={0.15} /></mesh>
+          <group key={s} ref={wings[i]} position={[s * 0.55, 1.36, -0.12]}>
+            <mesh position={[s * 0.07, -0.42, 0]} scale={[0.17, 0.5, 0.7]} rotation={[0.15, 0, 0]}><icosahedronGeometry args={[1, 1]} /><Mat color={plumage.wing} /></mesh>
+            {/* Landmark pins ride on the right-hand wing so they move with it. */}
+            {s === 1 && Array.from({ length: pins }, (_, p) => (
+              <mesh key={p} position={[0.25, -0.22 - p * 0.13, 0.12 - (p % 2) * 0.12]} scale={0.055}><icosahedronGeometry args={[1, 0]} /><Mat color={PIN_COLORS[p]} emissive={PIN_COLORS[p]} emissiveIntensity={0.15} /></mesh>
+            ))}
+          </group>
         ))}
         {wearing.has("camera") && (
           <group position={[0.18, 0.92, 0.72]} rotation={[0.1, -0.2, 0]}>
@@ -160,7 +168,7 @@ export default function Martlet3D(props: Props & { name: string }) {
   return (
     <div className="aspect-square w-full max-w-[520px] overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50 to-stone-100">
       <Canvas
-        dpr={[1, 2]} camera={{ position: [1.5, 2.1, 6.2], fov: 36 }}
+        dpr={[1, 2]} camera={{ position: [0, 2.0, 6.3], fov: 36 }}
         onCreated={({ camera }) => camera.lookAt(0, 1.15, 0)}
         fallback={<MartletAvatar plumage={props.plumage} wearing={props.wearing} pins={props.pins} size={480} title={`${props.name}’s martlet`} />}
         aria-label={`${props.name}’s martlet`}
