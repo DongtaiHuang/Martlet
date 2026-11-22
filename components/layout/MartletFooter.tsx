@@ -10,6 +10,7 @@ const sections = [
       { href: "/explore", label: "Explore Map" },
       { href: "/landmarks", label: "Campus Landmarks" },
       { href: "/progress", label: "Your Progress" },
+      { href: "/guide", label: "Student Guide" },
     ],
   },
   {
