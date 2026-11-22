@@ -1,17 +1,17 @@
 "use client";
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Trophy, UserRound } from "lucide-react";
+import { MessagesSquare, ShieldCheck, Trophy, UserRound } from "lucide-react";
 import { myAchievements } from "@/app/achievements/actions";
 import { ACHIEVEMENTS, type EarnedMap } from "@/lib/achievement-catalog";
 import { useEarned } from "@/components/achievements/useEarned";
 
 /**
  * The Profile nav link. On larger screens, hovering or keyboard-focusing it opens a menu
- * with Your profile and Achievements (with a count). Phones have no hover, so
+ * with Your profile, Achievements (with a count), the campus board and, for moderators, Moderation. Phones have no hover, so
  * tapping goes to the profile, which links to Achievements too.
  */
-export function ProfileNavItem({ className, current, name }: { className: string; current?: "page" | "location"; name?: string }) {
+export function ProfileNavItem({ className, current, name, moderator = false }: { className: string; current?: "page" | "location"; name?: string; moderator?: boolean }) {
   const [account, setAccount] = useState<EarnedMap | null | undefined>(undefined);
   const loading = useRef(false);
   const earned = useEarned(account);
@@ -48,6 +48,8 @@ export function ProfileNavItem({ className, current, name }: { className: string
             <Trophy aria-hidden="true" size={16} className="text-amber-500" /> Achievements
             <span className="ml-auto text-xs font-bold text-ink-subtle">{account === undefined ? "" : `${done} / ${ACHIEVEMENTS.length}`}</span>
           </Link>
+          <Link href="/board" className={item}><MessagesSquare aria-hidden="true" size={16} className="text-brand-ink" /> Campus board</Link>
+          {moderator && <Link href="/moderation" className={item}><ShieldCheck aria-hidden="true" size={16} className="text-ok-ink" /> Moderation</Link>}
         </div>
       </div>
     </div>

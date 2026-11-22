@@ -14,7 +14,7 @@ const links = [
 ];
 const linkClass = "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 text-[11px] max-[359px]:text-[10px] max-[359px]:tracking-tighter font-semibold sm:flex-row focus-visible:outline-2 focus-visible:outline-focus sm:gap-2 sm:px-3 sm:text-sm";
 
-export function MartletNavLinks({ profileName }: { profileName?: string }) {
+export function MartletNavLinks({ profileName, moderator = false }: { profileName?: string; moderator?: boolean }) {
   const pathname = usePathname();
   const activePath = pathname.startsWith("/meetups/") && pathname !== "/meetups/new" ? "/meetups"
     : pathname.startsWith("/landmarks/") ? "/landmarks" : pathname === "/avatar" || pathname === "/achievements" || pathname === "/play" ? "/profile" : pathname;
@@ -31,7 +31,7 @@ export function MartletNavLinks({ profileName }: { profileName?: string }) {
         </Link>
       ))}
       {/* Profile (labelled with the user's name when signed in), with a hover/focus menu for Achievements on larger screens. */}
-      <ProfileNavItem name={profileName} current={current("/profile")} className={`${linkClass} ${tone("/profile")}`} />
+      <ProfileNavItem name={profileName} moderator={moderator} current={current("/profile")} className={`${linkClass} ${tone("/profile")}`} />
     </nav>
   );
 }

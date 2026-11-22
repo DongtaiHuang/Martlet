@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Bird } from "lucide-react";
 import { AuthStatus } from "@/components/auth/AuthStatus";
+import { isModerator } from "@/lib/board";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -11,6 +12,7 @@ import { ThemeSwitch } from "./ThemeSwitch";
 export async function MartletNav() {
   // Looked up once here and shared: the Profile link shows the name, AuthStatus shows sign-in/out.
   const user = getDataMode() === "live" ? await getCurrentUser().catch(() => null) : null;
+  const moderator = user ? await isModerator().catch(() => false) : false;
 
   return (
     <header className="border-b border-line bg-surface text-ink-soft">
@@ -26,7 +28,7 @@ export async function MartletNav() {
           {/* Phones: Light/Dark/System and sign in/out live inside the palette menu. */}
           <ThemeSwitch account={<AuthStatus user={user} />} />
         </div>
-        <div className="order-3 min-w-0 sm:w-full xl:order-2 xl:ml-auto xl:w-auto"><MartletNavLinks profileName={user?.display_name} /></div>
+        <div className="order-3 min-w-0 sm:w-full xl:order-2 xl:ml-auto xl:w-auto"><MartletNavLinks profileName={user?.display_name} moderator={moderator} /></div>
       </div>
     </header>
   );
