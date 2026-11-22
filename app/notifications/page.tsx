@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { BellRing, CalendarPlus, CheckCheck, Heart, LogIn } from "lucide-react";
+import { BellRing, CalendarPlus, CheckCheck, Heart, LogIn, CalendarClock } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { markAllRead } from "@/components/notifications/actions";
 import { listNotifications } from "@/lib/notifications";
@@ -22,6 +22,7 @@ const KIND_META: Record<NotificationKind, {
 }> = {
   meetup_new: { label: "New meetup", icon: CalendarPlus, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200", edge: "border-l-sky-400" },
   meetup_reminder: { label: "Reminder", icon: BellRing, chip: "bg-amber-100 text-amber-950 ring-1 ring-amber-200", edge: "border-l-amber-400" },
+  meetup_updated: { label: "Meetup updated", icon: CalendarClock, chip: "bg-emerald-100 text-emerald-950 ring-1 ring-emerald-200 dark:bg-emerald-400/15 dark:text-emerald-200 dark:ring-emerald-800", edge: "border-l-emerald-400" },
   trend_like: { label: "Trend like", icon: Heart, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200", edge: "border-l-violet-400" },
 };
 

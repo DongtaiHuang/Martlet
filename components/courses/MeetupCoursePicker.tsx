@@ -9,8 +9,8 @@ import { CourseSearch } from "./CourseSearch";
  * Optional course for a study meetup (issue #25). Submits the code as `course_code`;
  * the server re-validates it and the database only accepts real McGill courses.
  */
-export function MeetupCoursePicker({ myCourses, error }: { myCourses: Course[]; error?: string }) {
-  const [selected, setSelected] = useState<Course | null>(null);
+export function MeetupCoursePicker({ myCourses, error, initialCourse = null }: { myCourses: Course[]; error?: string; initialCourse?: Course | null }) {
+  const [selected, setSelected] = useState<Course | null>(initialCourse);
 
   return (
     <fieldset className="min-w-0">
