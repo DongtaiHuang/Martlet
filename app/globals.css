@@ -667,5 +667,7 @@ body:has(> .martlet-footer) > .martlet-page > .min-h-screen {
 }
 @media (max-width: 639px) {
   .martlet-stage .martlet-lane { bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  /* The nest keeps its desktop offset from the lane (0.75rem lower), so Marty still lands in it. */
+  .martlet-nest { bottom: calc(6.25rem + env(safe-area-inset-bottom) - 5 * var(--martlet-px)); }
   .martlet-season-floor { bottom: calc(3.75rem + env(safe-area-inset-bottom)); }
 }
