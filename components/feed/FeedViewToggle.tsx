@@ -20,9 +20,9 @@ export function FeedViewToggle({ view }: { view: FeedView }) {
             href={href}
             scroll={false}
             aria-current={active ? "page" : undefined}
-            className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 sm:flex-none sm:text-base ${active ? "bg-red-800 text-white shadow-sm" : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"}`}
+            className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm max-[359px]:px-2 font-bold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 sm:flex-none sm:text-base ${active ? "bg-red-800 text-white shadow-sm" : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"}`}
           >
-            <Icon aria-hidden="true" size={17} />
+            <Icon aria-hidden="true" size={17} className="max-[359px]:hidden" />
             {label}
           </Link>
         );

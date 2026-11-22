@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Compass, FlaskConical, LogIn, Plus, Sprout } from "lucide-react";
+import { ArrowUpRight, Compass, FlaskConical, LogIn, Plus } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { FeedUnavailable } from "@/components/feed/FeedUnavailable";
 import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle";
@@ -64,8 +64,8 @@ async function FeedLandmarks() {
         <p role="status" className="text-sm font-medium text-stone-600">
           {landmarks.length} {landmarks.length === 1 ? "landmark" : "landmarks"} · {unlocked} unlocked
         </p>
-        <Link href="/progress" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-emerald-800 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-red-700">
-          <Sprout aria-hidden="true" size={16} /> See your tree
+        <Link href="/landmarks" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-red-800 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700">
+          All landmarks <ArrowUpRight aria-hidden="true" size={16} />
         </Link>
       </div>
       {landmarks.length > 0 ? (
