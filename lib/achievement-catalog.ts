@@ -10,8 +10,8 @@ export const ACHIEVEMENTS = [
   { id: "new-angle", icon: "🧭", title: "New angle", description: "Tilted or rotated the campus map.", hidden: true },
   { id: "night-owl", icon: "🦉", title: "Night owl", description: "Opened Martlet between 2 and 5 a.m. Go to sleep.", hidden: true },
   { id: "old-school", icon: "🎮", title: "Old school", description: "Entered ↑ ↑ ↓ ↓ ← → ← → B A.", hidden: true },
-  { id: "field-trip", icon: "🚌", title: "Field trip", description: "Open an off-campus landmark on the map.", hidden: false },
-  { id: "tourist", icon: "🗺️", title: "Tourist", description: "Open every landmark on the map.", hidden: false },
+  { id: "field-trip", icon: "🚌", title: "Field trip", description: "Visit an off-campus landmark on the map.", hidden: false },
+  { id: "tourist", icon: "🗺️", title: "Tourist", description: "Explore every landmark on the map.", hidden: false },
 ] as const;
 
 export type Achievement = (typeof ACHIEVEMENTS)[number];

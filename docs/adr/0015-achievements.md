@@ -29,8 +29,8 @@ Constraints:
   | New angle | Tilt or rotate the campus map yourself | Yes |
   | Night owl | Open Martlet between 2 and 5 a.m. (browser's local time) | Yes |
   | Old school | Type ↑ ↑ ↓ ↓ ← → ← → B A | Yes |
-  | Field trip | Open an off-campus landmark (more than 1.5 km from campus) on a map | No |
-  | Tourist | Open every landmark on a map | No |
+  | Field trip | Visit an off-campus landmark (more than 1.5 km from campus) on a map | No |
+  | Tourist | Explore every landmark on a map | No |
 
 ### Saving
 - New table `user_achievements (user_id, achievement_id, earned_at)` (`supabase/migrations/008_achievements.sql`), one row per user per achievement.
@@ -55,7 +55,8 @@ Constraints:
 - A toast only appears for a **newly** earned achievement, so earning one on another device doesn't pop it up again.
 
 ### The page
-- Its own page, `/achievements`, linked from the profile card. It shows "X of N unlocked", a progress bar and a card per achievement, earned ones first, each with the date it was earned. It updates live when one is earned on the page.
+- Its own page, `/achievements`. It shows "X of N unlocked", a progress bar, then **Still to unlock** (goals first, hidden ones as "???") and **Unlocked** (with the date each was earned). It updates live when one is earned on the page.
+- **Profile menu:** on larger screens, hovering or keyboard-focusing **Profile** in the nav opens a menu with Your profile, Achievements (X / N) and the achievements still to unlock (visible goals, plus a count of hidden ones). It loads the user's achievements the first time it opens (server action `myAchievements()`), so other pages don't pay for it. Phones have no hover: tapping Profile opens the profile, which links to Achievements.
 
 ## Alternatives considered
 
@@ -71,5 +72,5 @@ Constraints:
 - One new table, readable only by its owner. Anyone signed in can earn any achievement by calling the server action directly; that's accepted because they're cosmetic.
 - Adding an achievement is a code change (catalogue entry plus a trigger). Removing one leaves old rows that the page ignores.
 - The toaster is on every page, as a small client component with a few listeners.
-- `app/profile/` (Developer 1) and the migrations (Developer 3) gain small additions; coordinate in the PR.
+- `app/profile/` and `components/layout/` (Developer 1) and the migrations (Developer 3) gain small additions; coordinate in the PR.
 - Follow-ups: let other people see your achievements once public profiles exist, and add achievements for core actions (first meetup hosted, first landmark unlocked).
