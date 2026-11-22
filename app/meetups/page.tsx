@@ -1,11 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Compass, FlaskConical, LogIn, Plus } from "lucide-react";
+import { ArrowUpRight, Compass, FlaskConical, LogIn, Plus } from "lucide-react";
+import type { LandmarkSummary } from "@/types/landmark";
 import { FeedUnavailable } from "@/components/feed/FeedUnavailable";
+import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle";
 import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import campusBanner from "@/components/feed/campus-banner.webp";
+import { LandmarkPreviewCard } from "@/components/landmarks/LandmarkPreviewCard";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { listLandmarks } from "@/lib/landmarks";
 import { listMeetups } from "@/lib/meetups";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
@@ -25,24 +29,62 @@ async function loadUpcomingMeetups() {
   }
 }
 
+function SignInPrompt({ subject, next }: { subject: "meetups" | "landmarks"; next: string }) {
+  const title = subject === "meetups" ? "Meetups" : "Landmarks";
+  return (
+    <div className="mt-5 rounded-2xl border border-stone-200 bg-white px-5 py-8 text-center">
+      <LogIn aria-hidden="true" className="mx-auto mb-3 text-red-800" />
+      <h3 className="text-lg font-bold text-stone-900">Sign in to see {subject}</h3>
+      <p className="mt-1 text-sm text-stone-600">{title} are visible to signed-in McGill students.</p>
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
+        <Link href={`/login?next=${encodeURIComponent(next)}`} className="inline-flex min-h-11 items-center rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">Sign in</Link>
+        <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl border border-stone-300 px-4 text-sm font-bold text-stone-800 hover:border-red-700 focus-visible:outline-2 focus-visible:outline-red-700">Create account</Link>
+      </div>
+    </div>
+  );
+}
+
+async function FeedLandmarks() {
+  const live = getDataMode() === "live";
+  const viewer = live ? await getCurrentUser().catch(() => null) : null;
+  if (live && !viewer) return <SignInPrompt subject="landmarks" next="/meetups?view=landmarks" />;
+
+  let landmarks: LandmarkSummary[];
+  try {
+    landmarks = await listLandmarks();
+  } catch (error) {
+    console.error("Failed to load landmarks for the feed", error);
+    return <FeedUnavailable subject="landmarks" />;
+  }
+  const unlocked = landmarks.filter((l) => l.unlocked).length;
+
+  return (
+    <>
+      <div className="mt-4 mb-5 flex flex-wrap items-center justify-between gap-2">
+        <p role="status" className="text-sm font-medium text-stone-600">
+          {landmarks.length} {landmarks.length === 1 ? "landmark" : "landmarks"} · {unlocked} unlocked
+        </p>
+        <Link href="/landmarks" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-red-800 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700">
+          All landmarks <ArrowUpRight aria-hidden="true" size={16} />
+        </Link>
+      </div>
+      {landmarks.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {landmarks.map((landmark) => <LandmarkPreviewCard key={landmark.id} landmark={landmark} />)}
+        </div>
+      ) : (
+        <p className="rounded-2xl border border-dashed border-stone-300 bg-white px-5 py-10 text-center text-stone-600">No landmarks yet.</p>
+      )}
+    </>
+  );
+}
+
 async function UpcomingMeetups() {
   const live = getDataMode() === "live";
   const viewer = live ? await getCurrentUser().catch(() => null) : null;
 
   // Live mode: meetups are only readable when signed in (RLS), so don't show an empty feed.
-  if (live && !viewer) {
-    return (
-      <div className="mt-5 rounded-2xl border border-stone-200 bg-white px-5 py-8 text-center">
-        <LogIn aria-hidden="true" className="mx-auto mb-3 text-red-800" />
-        <h3 className="text-lg font-bold text-stone-900">Sign in to see meetups</h3>
-        <p className="mt-1 text-sm text-stone-600">Meetups are visible to signed-in McGill students.</p>
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <Link href="/login?next=/meetups" className="inline-flex min-h-11 items-center rounded-xl bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">Sign in</Link>
-          <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl border border-stone-300 px-4 text-sm font-bold text-stone-800 hover:border-red-700 focus-visible:outline-2 focus-visible:outline-red-700">Create account</Link>
-        </div>
-      </div>
-    );
-  }
+  if (live && !viewer) return <SignInPrompt subject="meetups" next="/meetups" />;
 
   const upcoming = await loadUpcomingMeetups();
   if (!upcoming) return <FeedUnavailable />;
@@ -60,10 +102,10 @@ async function UpcomingMeetups() {
   );
 }
 
-function FeedLoading() {
+function FeedLoading({ subject }: { subject: FeedView }) {
   return (
     <div className="mt-5">
-      <p role="status" className="mb-4 text-sm text-stone-600">Loading meetups…</p>
+      <p role="status" className="mb-4 text-sm text-stone-600">Loading {subject}…</p>
       <div aria-hidden="true" className="grid gap-4 motion-safe:animate-pulse md:grid-cols-2">
         {[1, 2].map((card) => (
           <div key={card} className="space-y-4 rounded-2xl border border-stone-200 bg-white p-5">
@@ -78,7 +120,12 @@ function FeedLoading() {
   );
 }
 
-export default function MeetupsPage() {
+export default async function MeetupsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string | string[] }>;
+}) {
+  const view: FeedView = (await searchParams).view === "landmarks" ? "landmarks" : "meetups";
   return (
     <div className="min-h-screen bg-stone-50 text-stone-950">
       <MartletNav />
@@ -93,10 +140,12 @@ export default function MeetupsPage() {
             <Link href="/explore" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/50 bg-stone-950/55 px-4 text-sm font-bold text-white hover:bg-stone-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Compass aria-hidden="true" size={18} /> Explore map</Link>
           </div>
         </section>
-        <section aria-labelledby="upcoming-heading" className="mt-8 sm:mt-10">
-          <h2 id="upcoming-heading" className="text-2xl font-bold tracking-tight sm:text-3xl">Upcoming meetups</h2>
-          <Suspense fallback={<FeedLoading />}>
-            <UpcomingMeetups />
+        <section aria-labelledby="feed-heading" className="mt-8 sm:mt-10">
+          <h2 id="feed-heading" className="sr-only">{view === "landmarks" ? "Landmarks" : "Upcoming meetups"}</h2>
+          <FeedViewToggle view={view} />
+          {/* key: show the loading state again when switching views */}
+          <Suspense key={view} fallback={<FeedLoading subject={view} />}>
+            {view === "landmarks" ? <FeedLandmarks /> : <UpcomingMeetups />}
           </Suspense>
         </section>
       </main>
