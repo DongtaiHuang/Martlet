@@ -19,6 +19,11 @@ from (values
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', true);
+select pg_temp.expect_error($q$
+  insert into public.meetups (host_id, title, category, location_name, latitude, longitude, starts_at)
+  select auth.uid(), 'Past meetup fixture', 'coffee', name, latitude, longitude, now() - interval '1 minute'
+  from public.campus_locations where id = 'redpath-library'
+$q$, '42501');
 select pg_temp.expect_error($q$select public.create_meetup_poll('00000000-0000-4000-8000-000000000013', 'activity', 'What should we do?', clock_timestamp()+interval '1 hour', array['Coffee',' coffee '])$q$, '23505');
 select pg_temp.expect_error($q$select public.create_meetup_poll('00000000-0000-4000-8000-000000000013', 'location', 'What should we do?', clock_timestamp()+interval '1 hour', array['redpath-library','invented'])$q$, '22023');
 select pg_temp.expect_error($q$select public.create_meetup_poll('00000000-0000-4000-8000-000000000013', 'activity', 'What should we do?', clock_timestamp()+interval '3 hours', array['Coffee','Games'])$q$, '22023');

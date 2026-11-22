@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { pollFailureCategory } from "@/lib/poll-diagnostics";
 import { CAMPUS_LOCATIONS } from "@/lib/locations";
 import { MockModeError } from "@/lib/meetups";
 import { pollTypeSchema, validatePoll } from "@/lib/poll-validation";
@@ -30,7 +31,10 @@ async function pollClient() {
   if (getDataMode() === "mock") throw new MockModeError("use polls");
   const client = await createClient();
   const { data, error } = await client.auth.getClaims();
-  if (error || !data?.claims.sub) throw new AuthRequiredError("Sign in to use polls.");
+  if (error || !data?.claims.sub) {
+    pollDiagnostic(error?.name === "AuthRetryableFetchError" ? "database-or-network-error" : "permission-denied-or-expired-session", "session");
+    throw new AuthRequiredError("Sign in to use polls.");
+  }
   return client;
 }
 
@@ -39,7 +43,19 @@ function pollId(value: string) {
   return value;
 }
 
-function databaseError(error: { code: string; message: string }, operation: "read" | "create" | "vote" | "close"): never {
+function pollDiagnostic(category: string, operation: string, code?: string) {
+  if (process.env.NODE_ENV === "development") {
+    console.warn("[meetup-polls]", {
+      category, operation, code,
+      hint: category.startsWith("poll-") ? "Check migration 007, RPC grants, and PostgREST schema cache. See docs/SUPABASE_SETUP.md." : undefined,
+    });
+  }
+}
+
+function databaseError(error: { code: string }, operation: "read" | "create" | "vote" | "close"): never {
+  if (operation === "read" || ["42501", "PGRST202", "PGRST205", "42P01", "42883"].includes(error.code)) {
+    pollDiagnostic(pollFailureCategory(error.code), operation, /^[A-Z0-9]{5,8}$/.test(error.code) ? error.code : undefined);
+  }
   if (error.code === "42501") throw new PollError("You don’t have permission to do that.");
   if (error.code === "P0002") throw new PollError("This poll or meetup no longer exists.");
   if (error.code === "55000") throw new PollError("This poll is closed.");
@@ -49,7 +65,9 @@ function databaseError(error: { code: string; message: string }, operation: "rea
       ? "Choose an option from this poll."
       : "Check that the meetup is upcoming, the choices are valid, and voting closes before or at the meetup start.");
   }
-  console.error("Meetup poll operation failed", { operation, code: error.code });
+  if (operation !== "read" && pollFailureCategory(error.code) === "database-or-network-error") {
+    pollDiagnostic("database-or-network-error", operation);
+  }
   throw new PollError("The poll service is unavailable. Try again later.");
 }
 
@@ -58,7 +76,13 @@ export async function getMeetupPoll(meetupId: string): Promise<MeetupPollData | 
   const client = await pollClient();
   const { data, error } = await client.rpc("get_meetup_poll_results", { p_meetup_id: pollId(meetupId) });
   if (error) databaseError(error, "read");
-  return data === null ? null : responseSchema.parse(data);
+  if (data === null) return null;
+  const parsed = responseSchema.safeParse(data);
+  if (!parsed.success) {
+    pollDiagnostic("invalid-rpc-response", "read");
+    throw new PollError("The poll service is unavailable. Try again later.");
+  }
+  return parsed.data;
 }
 
 export async function createMeetupPoll(meetupId: string, input: unknown) {

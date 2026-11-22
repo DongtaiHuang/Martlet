@@ -2,6 +2,7 @@ import { getMeetupPoll } from "@/lib/polls";
 import { getDataMode } from "@/lib/supabase/env";
 import type { MeetupPollData } from "@/types/poll";
 import { CreatePollForm } from "./CreatePollForm";
+import { PollRetry } from "./PollRetry";
 import { PollResults } from "./PollResults";
 
 const sample: MeetupPollData = {
@@ -27,7 +28,7 @@ export async function MeetupPoll({ meetupId, startsAt, canCreate }: { meetupId: 
     <section aria-labelledby="meetup-poll-heading" className="mt-6 min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
       <h2 id="meetup-poll-heading" className="mb-3 text-lg font-bold text-stone-950">Meetup poll</h2>
       {result === undefined ? (
-        <p role="alert" className="text-sm text-red-900">Polls are temporarily unavailable. Refresh to try again.</p>
+        <PollRetry />
       ) : result ? (
         <PollResults key={result.id} poll={result} preview={preview} />
       ) : <CreatePollForm meetupId={meetupId} startsAt={startsAt} />}

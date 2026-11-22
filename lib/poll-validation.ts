@@ -30,15 +30,6 @@ export function validatePoll(input: unknown, approvedIds: readonly string[], now
   }).safeParse(input);
 }
 
-/** Interpret a datetime-local control in the browser’s timezone and reject skipped DST times. */
-export function localPollTimeToUtc(value: string): string {
-  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return "";
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return "";
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString();
-  return local.slice(0, 16) === value ? date.toISOString() : "";
-}
-
 export function votePercentages(counts: readonly number[]): number[] {
   const total = counts.reduce((sum, count) => sum + count, 0);
   if (total === 0) return counts.map(() => 0);
