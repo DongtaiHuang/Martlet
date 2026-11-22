@@ -10,6 +10,10 @@
 
 The style URL ends up in the browser, so only use **domain-restricted** public keys. Never put a secret key here.
 
+## Dark mode map style (ADR 0014)
+
+In dark mode the maps use OpenFreeMap's `dark` style (`https://tiles.openfreemap.org/styles/dark`). To use a different provider's dark style, set `NEXT_PUBLIC_MAP_STYLE_URL_DARK` (optional, same rules as `NEXT_PUBLIC_MAP_STYLE_URL`).
+
 ## Martlet avatar models (ADR 0010)
 
 `npm run dev` and `npm run build` run `scripts/copy-mediapipe-wasm.mjs`. It copies MediaPipe's WebAssembly runtime and downloads the face model (about 3.8 MB) and the pose model (about 5.8 MB) into `public/mediapipe/` (git-ignored), so the build needs network access the first time. If the download fails, the build still passes and `/avatar` shows a tracking error. No environment variables are needed.

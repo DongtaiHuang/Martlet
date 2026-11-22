@@ -10,7 +10,7 @@ import { ITEMS, PLUMAGES, pinCount, total, type ItemId, type PlumageId, type Pro
 // Three.js and the bird only load in the browser, on this page.
 const Martlet3D = dynamic(() => import("@/components/avatar3d/Martlet3D"), {
   ssr: false,
-  loading: () => <div className="grid aspect-square w-full max-w-[520px] place-items-center rounded-3xl bg-stone-100"><p role="status" className="text-sm text-stone-600">Hatching your martlet…</p></div>,
+  loading: () => <div className="grid aspect-square w-full max-w-[520px] place-items-center rounded-3xl bg-surface-muted"><p role="status" className="text-sm text-ink-muted">Hatching your martlet…</p></div>,
 });
 
 const subscribeMotion = (cb: () => void) => {
@@ -50,51 +50,51 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
   }
 
   const chip = (on: boolean, locked: boolean) =>
-    `inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-left text-sm focus-visible:outline-2 focus-visible:outline-red-700 ${locked ? "cursor-not-allowed border-dashed border-stone-300 bg-stone-50 text-stone-500" : on ? "border-red-800 bg-red-800 text-white" : "border-stone-300 bg-white text-stone-800 hover:border-red-700"}`;
-  const btn = "inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-50";
+    `inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-left text-sm focus-visible:outline-2 focus-visible:outline-focus ${locked ? "cursor-not-allowed border-dashed border-line-strong bg-canvas text-ink-subtle" : on ? "border-brand bg-brand text-on-brand" : "border-line-strong bg-surface text-ink-soft hover:border-brand"}`;
+  const btn = "inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-50";
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-      <div className="flex min-w-0 flex-col items-center rounded-3xl border border-stone-200 bg-white p-4 shadow-sm">
+      <div className="flex min-w-0 flex-col items-center rounded-3xl border border-line bg-surface p-4 shadow-sm">
         <Martlet3D
           name={name} plumage={plumage} wearing={wearing} pins={pinCount(progress)}
           live={tracker.faceRef} tracking={tracking} clip={clip} playId={playId} animate={!reduced}
         />
-        <p className="mt-2 text-sm text-stone-600">{name} · {total(progress)} achievements</p>
+        <p className="mt-2 text-sm text-ink-muted">{name} · {total(progress)} achievements</p>
       </div>
 
       <div className="min-w-0 space-y-6">
         <section aria-labelledby="face-heading">
           <h2 id="face-heading" className="font-bold">Animate with my face</h2>
-          <p className="mt-1 text-sm text-stone-600">Your martlet copies your blinks, smile, mouth, brows and head turns. Sit back so your shoulders and elbows are in view, then raise your arms to flap its wings.</p>
+          <p className="mt-1 text-sm text-ink-muted">Your martlet copies your blinks, smile, mouth, brows and head turns. Sit back so your shoulders and elbows are in view, then raise your arms to flap its wings.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {!tracking ? (
-              <button type="button" disabled={tracker.status === "loading"} onClick={() => void tracker.start()} className={`${btn} bg-red-800 text-white hover:bg-red-900`}>
+              <button type="button" disabled={tracker.status === "loading"} onClick={() => void tracker.start()} className={`${btn} bg-brand text-on-brand hover:bg-brand-hover`}>
                 <Camera aria-hidden="true" size={16} /> {tracker.status === "loading" ? "Starting…" : "Start camera"}
               </button>
             ) : (
               <>
-                <button type="button" disabled={tracker.status === "recording"} onClick={() => void recordClip()} className={`${btn} bg-red-800 text-white hover:bg-red-900`}>
+                <button type="button" disabled={tracker.status === "recording"} onClick={() => void recordClip()} className={`${btn} bg-brand text-on-brand hover:bg-brand-hover`}>
                   <Video aria-hidden="true" size={16} /> {tracker.status === "recording" ? `Recording ${tracker.clipSeconds}s…` : "Record expression"}
                 </button>
-                <button type="button" disabled={tracker.status === "recording"} onClick={tracker.stop} className={`${btn} border border-stone-300 bg-white text-stone-800`}>
+                <button type="button" disabled={tracker.status === "recording"} onClick={tracker.stop} className={`${btn} border border-line-strong bg-surface text-ink-soft`}>
                   <CircleStop aria-hidden="true" size={16} /> Stop camera
                 </button>
               </>
             )}
             {clip && !tracking && (
-              <button type="button" onClick={() => setPlayId((n) => n + 1)} className={`${btn} border border-stone-300 bg-white text-stone-800 hover:border-red-700`}>
+              <button type="button" onClick={() => setPlayId((n) => n + 1)} className={`${btn} border border-line-strong bg-surface text-ink-soft hover:border-brand`}>
                 <Play aria-hidden="true" size={16} /> Play my clip
               </button>
             )}
           </div>
-          <p role="status" className="mt-2 min-h-5 text-sm text-stone-700">
+          <p role="status" className="mt-2 min-h-5 text-sm text-ink-2">
             {tracker.status === "live" && "Tracking: try winking, smiling, frowning, puffing your cheeks, sticking your tongue out, or moving your arms up, forward and back."}
             {tracker.status === "recording" && "Recording… do your best expression!"}
             {clip && tracker.status === "idle" && `Clip saved in this tab: ${clip.frames.length} expression samples (numbers only).`}
           </p>
-          {tracker.error && <p role="alert" className="text-sm text-red-800">{tracker.error}</p>}
-          <p className="mt-1 text-xs text-stone-500">Runs in your browser. The video is never uploaded or stored; a clip is just expression numbers, kept in this tab for the prototype.</p>
+          {tracker.error && <p role="alert" className="text-sm text-brand-ink">{tracker.error}</p>}
+          <p className="mt-1 text-xs text-ink-subtle">Runs in your browser. The video is never uploaded or stored; a clip is just expression numbers, kept in this tab for the prototype.</p>
         </section>
 
         <section aria-labelledby="gear-heading">
@@ -131,7 +131,7 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
           </div>
         </section>
 
-        <p className="text-xs text-stone-500">Landmark pins: {pinCount(progress)} of 5 · Hosted {progress.hosted} · Joined {progress.joined} · Landmarks {progress.landmarks}</p>
+        <p className="text-xs text-ink-subtle">Landmark pins: {pinCount(progress)} of 5 · Hosted {progress.hosted} · Joined {progress.joined} · Landmarks {progress.landmarks}</p>
       </div>
     </div>
   );

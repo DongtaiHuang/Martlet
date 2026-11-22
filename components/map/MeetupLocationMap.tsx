@@ -5,7 +5,7 @@ import { Map, Marker, NavigationControl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory } from "@/types/meetup";
 import { MARKER_COLORS } from "./map-config";
-import { mapStyleUrl } from "./map-style";
+import { initialMapStyle, trackMapStyle, useMapColorMode } from "./map-mode";
 
 interface MeetupLocationMapProps {
   category?: MeetupCategory;
@@ -35,9 +35,10 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
     }, 12_000);
 
     try {
+      const style = initialMapStyle();
       map = new Map({
         container: container.current,
-        style: mapStyleUrl,
+        style,
         ...initialCamera(),
         scrollZoom: false,
         dragRotate: false,
@@ -46,6 +47,7 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
         attributionControl: { compact: true },
       });
       mapRef.current = map;
+      trackMapStyle(map, style);
       map.addControl(new NavigationControl({ showCompass: false }), "top-right");
       map.touchZoomRotate.disableRotation();
       map.on("load", () => {
@@ -69,6 +71,7 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
       mapRef.current = null;
     };
   }, []);
+  useMapColorMode(mapRef);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -103,10 +106,10 @@ export function MeetupLocationMap({ category, color, locationName, latitude, lon
   }, [latitude, longitude, locationName, zoom]);
 
   return (
-    <div role="region" aria-label={`Map showing ${locationName}`} className="relative h-56 min-w-0 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 sm:h-72">
+    <div role="region" aria-label={`Map showing ${locationName}`} className="relative h-56 min-w-0 overflow-hidden rounded-xl border border-line bg-surface-muted sm:h-72">
       <div ref={container} className="h-full w-full [&_.maplibregl-ctrl-group_button]:size-11! [&_.maplibregl-ctrl-attrib-button]:size-11!" />
       {status !== "ready" && (
-        <p role="status" className="pointer-events-none absolute inset-x-2 bottom-12 mx-auto w-fit rounded-lg bg-white px-3 py-2 text-center text-sm text-stone-800 shadow">
+        <p role="status" className="pointer-events-none absolute inset-x-2 bottom-12 mx-auto w-fit rounded-lg bg-surface px-3 py-2 text-center text-sm text-ink-soft shadow">
           {status === "loading" ? "Loading map…" : "The map is unavailable. You can still use the selected location."}
         </p>
       )}

@@ -34,4 +34,4 @@ See `docs/TEAM_PLAN.md`. Don't edit another developer's files without coordinati
 - No service-role key in `NEXT_PUBLIC_*` or client code.
 - Never accept `userId` from the browser; use the Supabase session.
 - RLS (`supabase/migrations/`) is the real authorization; UI checks are UX only.
-- Meetup locations must come from the approved campus or public venue catalogs (ADR 0014). The map's "show my location" stays in the browser; never send, store or share a user's position (ADR 0008).
+- Meetup locations must come from the approved campus or public venue catalogs (ADR 0015). The map's "show my location" stays in the browser; never send, store or share a user's position (ADR 0008).

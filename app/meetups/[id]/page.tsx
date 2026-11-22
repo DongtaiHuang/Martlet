@@ -33,26 +33,26 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
   const { icon: CategoryIcon, label, color } = categories[meetup.category];
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-950">
+    <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-3xl px-4 py-7 sm:px-8 sm:py-12">
-        <Link href="/meetups" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-red-800 hover:underline"><ArrowLeft aria-hidden="true" size={16} /> Back to feed</Link>
-        <article className="mt-3 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
+        <Link href="/meetups" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-ink hover:underline"><ArrowLeft aria-hidden="true" size={16} /> Back to feed</Link>
+        <article className="mt-3 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap gap-2">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${color}`}><CategoryIcon aria-hidden="true" size={15} /> {label}</span>
-            {cancelled && <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-900">Cancelled</span>}
-            {!cancelled && expired && <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-800">Past meetup</span>}
+            {cancelled && <span className="rounded-full bg-brand-muted px-3 py-1 text-xs font-semibold text-brand-ink-strong">Cancelled</span>}
+            {!cancelled && expired && <span className="rounded-full bg-line px-3 py-1 text-xs font-semibold text-ink-soft">Past meetup</span>}
           </div>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight [overflow-wrap:anywhere] sm:text-4xl">{meetup.title}</h1>
-          {cancelled && <p className="mt-3 text-sm text-red-900">The host cancelled this meetup.</p>}
-          {!cancelled && expired && <p className="mt-3 text-sm text-stone-600">This meetup’s start time has passed.</p>}
-          <dl className="mt-5 grid gap-4 rounded-xl bg-stone-50 p-4 [overflow-wrap:anywhere]">
-            <div><dt className="relative pl-7 text-sm font-bold"><UserRound aria-hidden="true" size={18} className="absolute top-0 left-0 text-red-800" />Host</dt><dd className="pl-7 text-sm text-stone-700">{meetup.host_display_name}</dd></div>
-            <div><dt className="relative pl-7 text-sm font-bold"><CalendarDays aria-hidden="true" size={18} className="absolute top-0 left-0 text-red-800" />Starts</dt><dd className="pl-7 text-sm text-stone-700"><MeetupStartTime startsAt={meetup.starts_at} /></dd></div>
-            <div><dt className="relative pl-7 text-sm font-bold"><MapPin aria-hidden="true" size={18} className="absolute top-0 left-0 text-red-800" />Meetup location</dt><dd className="pl-7 text-sm text-stone-700">
+          {cancelled && <p className="mt-3 text-sm text-brand-ink-strong">The host cancelled this meetup.</p>}
+          {!cancelled && expired && <p className="mt-3 text-sm text-ink-muted">This meetup’s start time has passed.</p>}
+          <dl className="mt-5 grid gap-4 rounded-xl bg-canvas p-4 [overflow-wrap:anywhere]">
+            <div><dt className="relative pl-7 text-sm font-bold"><UserRound aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Host</dt><dd className="pl-7 text-sm text-ink-2">{meetup.host_display_name}</dd></div>
+            <div><dt className="relative pl-7 text-sm font-bold"><CalendarDays aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Starts</dt><dd className="pl-7 text-sm text-ink-2"><MeetupStartTime startsAt={meetup.starts_at} /></dd></div>
+            <div><dt className="relative pl-7 text-sm font-bold"><MapPin aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Meetup location</dt><dd className="pl-7 text-sm text-ink-2">
               {/* Explore only lists upcoming meetups, so only link to it while this one is upcoming. */}
               {upcoming ? (
-                <Link href={exploreMeetupHref(meetup.id)} className="font-semibold text-red-800 underline decoration-red-300 underline-offset-2 hover:decoration-red-800 focus-visible:outline-2 focus-visible:outline-red-700">
+                <Link href={exploreMeetupHref(meetup.id)} className="font-semibold text-brand-ink underline decoration-brand-line underline-offset-2 hover:decoration-brand-ink focus-visible:outline-2 focus-visible:outline-focus">
                   {meetup.location_name}<span className="sr-only">, view on the meetup map</span>
                 </Link>
               ) : meetup.location_name}
@@ -66,7 +66,7 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
               longitude={meetup.longitude}
             />
             {upcoming && (
-              <Link href={exploreMeetupHref(meetup.id)} className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-red-800 hover:underline focus-visible:outline-2 focus-visible:outline-red-700">
+              <Link href={exploreMeetupHref(meetup.id)} className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus">
                 <MapPin aria-hidden="true" size={15} /> See nearby meetups on the meetup map
               </Link>
             )}
@@ -74,7 +74,7 @@ export default async function MeetupDetailsPage({ params }: { params: Promise<{ 
           {meetup.description && (
             <section aria-labelledby="description-heading" className="mt-6">
               <h2 id="description-heading" className="text-lg font-bold">About this meetup</h2>
-              <p className="mt-1 leading-7 whitespace-pre-wrap text-stone-700 [overflow-wrap:anywhere]">{meetup.description}</p>
+              <p className="mt-1 leading-7 whitespace-pre-wrap text-ink-2 [overflow-wrap:anywhere]">{meetup.description}</p>
             </section>
           )}
           <MeetupPoll meetupId={meetup.id} startsAt={meetup.starts_at} canCreate={canCancel} />
