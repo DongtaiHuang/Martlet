@@ -1,4 +1,4 @@
-import type { LandmarkDetail, LandmarkPhoto, LandmarkSummary } from "@/types/landmark";
+import type { LandmarkDetail, LandmarkPhoto, LandmarkSummary, MyUnlock } from "@/types/landmark";
 import { getMockLandmarks } from "@/lib/mock-landmarks";
 import { AuthRequiredError, MockModeError } from "@/lib/meetups";
 import { getDataMode } from "@/lib/supabase/env";
@@ -145,6 +145,41 @@ export async function getLandmark(id: string): Promise<LandmarkDetail | null> {
     unlocked: Boolean(mine.data),
     my_unlock: mine.data ? toPhoto(mine.data, urls, userId) : null,
   };
+}
+
+/** The current user's own unlocks in the order they were made, with signed photo URLs. */
+export async function listMyUnlocks(): Promise<MyUnlock[]> {
+  if (getDataMode() === "mock") return [];
+
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from("landmark_unlocks")
+    .select("landmark_id, caption, photo_path, created_at, landmark:landmarks(name)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .returns<{
+      landmark_id: string;
+      caption: string;
+      photo_path: string;
+      created_at: string;
+      landmark: { name: string } | { name: string }[] | null;
+    }[]>();
+  if (error) throw new Error(`Failed to load your unlocks: ${error.message}`);
+
+  const urls = await signPhotos(supabase, data.map((row) => row.photo_path));
+  return data.map((row) => {
+    const landmark = Array.isArray(row.landmark) ? row.landmark[0] : row.landmark;
+    return {
+      landmark_id: row.landmark_id,
+      landmark_name: landmark?.name ?? row.landmark_id,
+      caption: row.caption,
+      photo_url: urls.get(row.photo_path) ?? null,
+      created_at: row.created_at,
+    };
+  });
 }
 
 /** Everyone's photos for a landmark, newest first. RLS returns nothing until you've unlocked it. */
