@@ -7,6 +7,7 @@ import { FeedViewToggle, type FeedView } from "@/components/feed/FeedViewToggle"
 import { MeetupFeed } from "@/components/feed/MeetupFeed";
 import { HeroCarousel } from "@/components/feed/HeroCarousel";
 import { LandmarkFeedList } from "@/components/landmarks/LandmarkFeedList";
+import { MartletFlightLoader } from "@/components/game/MartletFlightLoader";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
 import { listMyCourses } from "@/lib/courses";
@@ -135,14 +136,13 @@ export default async function MeetupsPage({
             <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
               <TrendPanel view={view} activeType={trend} />
             </Suspense>
-            <Link href="/play" className="mt-4 flex min-h-11 items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 shadow-sm hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
-              <Gamepad2 aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />
-              <span className="min-w-0">
-                <span className="block text-sm font-bold text-ink">Martlet Flight</span>
-                <span className="block text-xs text-ink-muted">Fly your martlet between campus columns. Beat your best score.</span>
-              </span>
-              <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
-            </Link>
+            <section aria-labelledby="flight-heading" className="mt-6 rounded-2xl border border-line bg-surface p-4 shadow-sm">
+              <div className="mb-3 flex items-baseline justify-between gap-3">
+                <h2 id="flight-heading" className="flex items-center gap-2 text-lg font-bold text-ink"><Gamepad2 aria-hidden="true" size={18} className="text-brand-ink" />Martlet Flight</h2>
+                <Link href="/play" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-ink hover:underline">Full screen <ArrowRight aria-hidden="true" size={14} /></Link>
+              </div>
+              <MartletFlightLoader embedded />
+            </section>
           </aside>
         </div>
       </main>

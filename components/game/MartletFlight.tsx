@@ -58,8 +58,15 @@ function drawColumn(g: CanvasRenderingContext2D, x: number, top: number, bottom:
   drawPart(bottom, H - GROUND + 4, false);
 }
 
-export default function MartletFlight() {
+/** `embedded`: shown inside another page (the feed), so keys only act while the game has focus
+ *  and play pauses when it scrolls out of view. */
+export default function MartletFlight({ embedded = false }: { embedded?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const embeddedRef = useRef(embedded);
+  // Embedded: the game owns Space/↑ after you click/tap/focus it, until you interact elsewhere.
+  // (Not document.activeElement: Start/Fly again unmount after a click, dropping focus to <body>.)
+  const engagedRef = useRef(false);
   const mode = useColorMode();
   const [state, setState] = useState<State>("ready");
   const [score, setScore] = useState(0);
@@ -192,13 +199,19 @@ export default function MartletFlight() {
 
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+      if (embeddedRef.current && !engagedRef.current) return;
       if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") { e.preventDefault(); if (stateRef.current !== "paused") flapRef.current(); }
       if (e.code === "KeyP") { const s = stateRef.current; if (s === "playing" || s === "paused") { const n = s === "playing" ? "paused" : "playing"; stateRef.current = n; setState(n); } }
     };
     const onHide = () => { if (document.hidden && stateRef.current === "playing") { stateRef.current = "paused"; setState("paused"); } };
     window.addEventListener("keydown", onKey);
+    const engage = (e: Event) => { engagedRef.current = !!boxRef.current?.parentElement?.contains(e.target as Node); };
+    document.addEventListener("pointerdown", engage, true);
+    document.addEventListener("focusin", engage);
+    const io = embeddedRef.current ? new IntersectionObserver(([en]) => { if (!en.isIntersecting && stateRef.current === "playing") { stateRef.current = "paused"; setState("paused"); } }) : null;
+    if (io && boxRef.current) io.observe(boxRef.current);
     document.addEventListener("visibilitychange", onHide);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener("keydown", onKey); document.removeEventListener("visibilitychange", onHide); };
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); io?.disconnect(); window.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", engage, true); document.removeEventListener("focusin", engage); document.removeEventListener("visibilitychange", onHide); };
   }, []);
 
   const btn = "inline-flex min-h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
@@ -206,12 +219,12 @@ export default function MartletFlight() {
 
   return (
     <div className="mx-auto w-full max-w-[420px]">
-      <div className="relative overflow-hidden rounded-3xl shadow-lg ring-1 ring-line" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div ref={boxRef} tabIndex={-1} className="relative overflow-hidden rounded-3xl shadow-lg ring-1 ring-line outline-none" style={{ aspectRatio: `${W} / ${H}` }}>
         <canvas
           ref={canvasRef}
           className="block h-full w-full touch-none select-none"
           aria-label="Martlet Flight game. Press Space, the Up arrow, or tap to flap."
-          onPointerDown={(e) => { e.preventDefault(); if (stateRef.current !== "paused") flapRef.current(); }}
+          onPointerDown={(e) => { e.preventDefault(); boxRef.current?.focus({ preventScroll: true }); if (stateRef.current !== "paused") flapRef.current(); }}
         />
         {state === "ready" && (
           <div className="absolute inset-x-0 bottom-24 flex flex-col items-center gap-3 text-center">
@@ -230,7 +243,7 @@ export default function MartletFlight() {
               <p className="text-sm font-semibold tracking-wide text-ink-muted uppercase">Grounded!</p>
               <p className="mt-1 text-4xl font-black text-ink tabular-nums">{score}</p>
               <p className="text-sm text-ink-muted">Best <span className="font-bold text-ink tabular-nums">{best}</span>{score > 0 && score >= best && " · new record!"}</p>
-              <button type="button" autoFocus onClick={() => flapRef.current()} className={`${btn} mt-4 w-full justify-center bg-brand text-on-brand hover:bg-brand-hover`}><RotateCcw aria-hidden="true" size={16} /> Fly again</button>
+              <button type="button" autoFocus={!embedded} onClick={() => flapRef.current()} className={`${btn} mt-4 w-full justify-center bg-brand text-on-brand hover:bg-brand-hover`}><RotateCcw aria-hidden="true" size={16} /> Fly again</button>
             </div>
           </div>
         )}
