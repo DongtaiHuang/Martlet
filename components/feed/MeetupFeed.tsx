@@ -39,12 +39,12 @@ export function MeetupFeed({ meetups, viewerId = null, myCourses = [] }: { meetu
         ))}
       </div>
       {category === "study" && myCourses.length > 0 && (
-        <button type="button" aria-pressed={onlyMyCourses} onClick={() => { setOnlyMyCourses((on) => !on); resetPage(); }} className={`mb-4 inline-flex min-h-11 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 ${onlyMyCourses ? "border-red-800 bg-red-50 text-red-900" : "border-stone-200 bg-white text-stone-700 hover:border-red-300"}`}>
+        <button type="button" aria-pressed={onlyMyCourses} onClick={() => { setOnlyMyCourses((on) => !on); resetPage(); }} className={`mb-4 inline-flex min-h-11 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${onlyMyCourses ? "border-brand bg-brand-soft text-brand-ink-strong" : "border-line bg-surface text-ink-2 hover:border-brand-line"}`}>
           <GraduationCap aria-hidden="true" size={16} />
           My courses only ({myCourses.join(", ")})
         </button>
       )}
-      <p ref={listTop} role="status" className="mb-4 scroll-mt-4 text-sm font-medium text-stone-600">{visible.length} {visible.length === 1 ? "meetup" : "meetups"}{category === "all" ? "" : ` · ${categories[category].label}`}{courseFilter ? " · my courses" : ""}{pageCount > 1 ? ` · showing ${firstShown}–${lastShown}` : ""}</p>
+      <p ref={listTop} role="status" className="mb-4 scroll-mt-4 text-sm font-medium text-ink-muted">{visible.length} {visible.length === 1 ? "meetup" : "meetups"}{category === "all" ? "" : ` · ${categories[category].label}`}{courseFilter ? " · my courses" : ""}{pageCount > 1 ? ` · showing ${firstShown}–${lastShown}` : ""}</p>
       {visible.length > 0 ? (
         <>
           <div className="grid gap-4 md:grid-cols-2">
@@ -53,10 +53,10 @@ export function MeetupFeed({ meetups, viewerId = null, myCourses = [] }: { meetu
           <Pagination page={page} pageCount={pageCount} onChange={goToPage} label="Meetup pages" />
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-5 py-10 text-center">
-          <CalendarDays aria-hidden="true" className="mx-auto mb-3 text-red-800" />
-          <h3 className="text-lg font-bold text-stone-900">{courseFilter ? "No study meetups for your courses yet" : category === "all" ? "No upcoming meetups" : `No ${categories[category].label.toLowerCase()} meetups yet`}</h3>
-          <p className="mt-1 text-sm text-stone-600">{courseFilter ? "Start one and pick your course, so classmates find it." : category === "all" ? "Start something near campus." : "Try another category to see what’s happening."}</p>
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface px-5 py-10 text-center">
+          <CalendarDays aria-hidden="true" className="mx-auto mb-3 text-brand-ink" />
+          <h3 className="text-lg font-bold text-ink-soft">{courseFilter ? "No study meetups for your courses yet" : category === "all" ? "No upcoming meetups" : `No ${categories[category].label.toLowerCase()} meetups yet`}</h3>
+          <p className="mt-1 text-sm text-ink-muted">{courseFilter ? "Start one and pick your course, so classmates find it." : category === "all" ? "Start something near campus." : "Try another category to see what’s happening."}</p>
           {category === "all" ? (
             <Link href="/meetups/new" className="mt-4 inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-bold text-brand-ink hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-focus">Create a meetup</Link>
           ) : (

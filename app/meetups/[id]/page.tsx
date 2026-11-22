@@ -46,9 +46,9 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
         <article className="mt-3 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap gap-2">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${color}`}><CategoryIcon aria-hidden="true" size={15} /> {label}</span>
-            {meetup.course_code && <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={15} /> {meetup.course_code}</span>}
-            {cancelled && <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-900">Cancelled</span>}
-            {!cancelled && expired && <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-800">Past meetup</span>}
+            {meetup.course_code && <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold text-red-950 ring-1 ring-red-200"><GraduationCap aria-hidden="true" size={15} /> {meetup.course_code}</span>}
+            {cancelled && <span className="rounded-full bg-brand-muted px-3 py-1 text-xs font-semibold text-brand-ink-strong">Cancelled</span>}
+            {!cancelled && expired && <span className="rounded-full bg-line px-3 py-1 text-xs font-semibold text-ink-soft">Past meetup</span>}
           </div>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight [overflow-wrap:anywhere] sm:text-4xl">{meetup.title}</h1>
           {cancelled && <p className="mt-3 text-sm text-brand-ink-strong">The host cancelled this meetup.</p>}

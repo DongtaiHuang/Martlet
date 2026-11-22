@@ -14,10 +14,10 @@ const TYPE_META: Record<TrendType, {
   icon: ComponentType<{ size?: number; "aria-hidden"?: boolean; className?: string }>;
   chip: string;
 }> = {
-  coffee: { label: "Coffee", icon: Coffee, chip: "bg-amber-100 text-amber-950 ring-1 ring-amber-200" },
-  study: { label: "Study", icon: BookOpen, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200" },
-  recipe: { label: "Recipe", icon: ChefHat, chip: "bg-lime-100 text-lime-950 ring-1 ring-lime-200" },
-  song: { label: "Song", icon: Music, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200" },
+  coffee: { label: "Coffee", icon: Coffee, chip: "bg-warn-muted text-warn-ink ring-1 ring-warn-line" },
+  study: { label: "Study", icon: BookOpen, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200 dark:bg-sky-400/15 dark:text-sky-200 dark:ring-sky-800" },
+  recipe: { label: "Recipe", icon: ChefHat, chip: "bg-lime-100 text-lime-950 ring-1 ring-lime-200 dark:bg-lime-400/15 dark:text-lime-200 dark:ring-lime-800" },
+  song: { label: "Song", icon: Music, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200 dark:bg-violet-400/15 dark:text-violet-200 dark:ring-violet-800" },
 };
 
 const TABS: { key: TrendType | null; label: string }[] = [

@@ -14,16 +14,16 @@ export function MeetupCoursePicker({ myCourses, error, initialCourse = null }: {
 
   return (
     <fieldset className="min-w-0">
-      <legend className="font-semibold">Course <span className="text-sm font-normal text-stone-500">(optional)</span></legend>
-      <p id="course_code-hint" className="mt-1 text-sm text-stone-600">Classmates who added this course see your meetup under Study → My courses.</p>
+      <legend className="font-semibold">Course <span className="text-sm font-normal text-ink-subtle">(optional)</span></legend>
+      <p id="course_code-hint" className="mt-1 text-sm text-ink-muted">Classmates who added this course see your meetup under Study → My courses.</p>
       {selected && <input type="hidden" name="course_code" value={selected.code} />}
 
       {selected ? (
-        <p className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl bg-red-50 py-1 pr-1 pl-3 text-sm text-red-950 ring-1 ring-red-200">
+        <p className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl bg-brand-soft py-1 pr-1 pl-3 text-sm text-red-950 ring-1 ring-red-200">
           <GraduationCap aria-hidden="true" size={16} className="shrink-0" />
           <span className="min-w-0 truncate"><strong>{selected.code}</strong> {selected.title}</span>
           <button type="button" onClick={() => setSelected(null)} aria-label={`Remove course ${selected.code}`}
-            className="grid size-9 shrink-0 place-items-center rounded-lg hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-red-700">
+            className="grid size-9 shrink-0 place-items-center rounded-lg hover:bg-brand-muted focus-visible:outline-2 focus-visible:outline-focus">
             <X aria-hidden="true" size={16} />
           </button>
         </p>
@@ -33,7 +33,7 @@ export function MeetupCoursePicker({ myCourses, error, initialCourse = null }: {
             <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Your courses">
               {myCourses.map((course) => (
                 <button key={course.code} type="button" onClick={() => setSelected(course)} title={course.title}
-                  className="min-h-11 rounded-full border border-stone-200 bg-white px-3.5 text-sm font-semibold text-stone-700 hover:border-red-300 hover:text-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
+                  className="min-h-11 rounded-full border border-line bg-surface px-3.5 text-sm font-semibold text-ink-2 hover:border-brand-line hover:text-brand-ink-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
                   {course.code}
                 </button>
               ))}
@@ -45,7 +45,7 @@ export function MeetupCoursePicker({ myCourses, error, initialCourse = null }: {
           </div>
         </>
       )}
-      {error && <p id="course_code-error" className="mt-1 text-sm text-red-800">{error}</p>}
+      {error && <p id="course_code-error" className="mt-1 text-sm text-brand-ink">{error}</p>}
     </fieldset>
   );
 }

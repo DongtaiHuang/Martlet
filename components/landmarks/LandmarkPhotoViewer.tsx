@@ -17,8 +17,8 @@ const subscribeMotion = (cb: () => void) => {
 };
 const getReduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const glass = "bg-white/10 ring-1 ring-white/20 backdrop-blur-md";
-const iconBtn = `inline-grid size-11 place-items-center rounded-full ${glass} text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-35`;
+const glass = "bg-surface/10 ring-1 ring-white/20 backdrop-blur-md";
+const iconBtn = `inline-grid size-11 place-items-center rounded-full ${glass} text-white hover:bg-surface/20 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-35`;
 
 export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkName, morphIndex }: {
   photos: LandmarkPhoto[];
@@ -133,8 +133,8 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
             </div>
           </div>
           {playing && count > 1 && (
-            <div aria-hidden="true" className="relative z-10 mx-3 mt-2 h-0.5 overflow-hidden rounded bg-white/15 sm:mx-5">
-              <div key={`bar-${index}`} className="h-full origin-left bg-white/80" style={{ animation: `martlet-progress ${SLIDE_MS}ms linear` }} />
+            <div aria-hidden="true" className="relative z-10 mx-3 mt-2 h-0.5 overflow-hidden rounded bg-surface/15 sm:mx-5">
+              <div key={`bar-${index}`} className="h-full origin-left bg-surface/80" style={{ animation: `martlet-progress ${SLIDE_MS}ms linear` }} />
             </div>
           )}
 
@@ -185,7 +185,7 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
             <div key={`cap-${index}`} className={`max-w-xl rounded-2xl px-4 py-3 ${glass} animate-[martlet-fade-in_400ms_ease-out]`}>
               <h2 id={titleId} className="text-base font-bold">
                 {photo.display_name}
-                {photo.is_mine && <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold">You</span>}
+                {photo.is_mine && <span className="ml-2 rounded-full bg-surface/20 px-2 py-0.5 text-xs font-semibold">You</span>}
               </h2>
               {photo.caption && <p className="mt-0.5 text-sm text-white/85 [overflow-wrap:anywhere]">{photo.caption}</p>}
               <p className="mt-0.5 text-xs text-white/60">{landmarkName} · <time dateTime={photo.created_at}>{date}</time></p>
@@ -204,7 +204,7 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
                   {p.photo_url
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={p.photo_url} alt="" loading="lazy" className="h-full w-full object-cover" />
-                    : <span className="block h-full w-full bg-white/10" />}
+                    : <span className="block h-full w-full bg-surface/10" />}
                 </button>
               ))}
             </div>

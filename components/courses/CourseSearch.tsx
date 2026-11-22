@@ -77,23 +77,23 @@ export function CourseSearch({ label, onPick, placeholder = "e.g. COMP 202 or Ca
           aria-expanded={open} aria-controls={listId} aria-autocomplete="list"
           aria-activedescendant={open && activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
           aria-describedby={[describedBy, `${id}-status`].filter(Boolean).join(" ")}
-          className="min-h-11 w-full rounded-xl border border-stone-300 bg-white px-3 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700 disabled:bg-stone-100 sm:text-sm"
+          className="min-h-11 w-full rounded-xl border border-line-strong bg-surface px-3 text-base text-ink focus-visible:outline-2 focus-visible:outline-focus disabled:bg-surface-muted sm:text-sm"
         />
         <ul id={listId} role="listbox" aria-label="Matching McGill courses" hidden={!open}
-          className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-stone-200 bg-white py-1 shadow-lg">
+          className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-line bg-surface py-1 shadow-lg">
           {results.map((course, index) => (
             <li
               key={course.code} id={`${listId}-${index}`} role="option" aria-selected={index === activeIndex}
               onMouseDown={(event) => event.preventDefault()} onClick={() => pick(course)}
               onMouseEnter={() => setActiveIndex(index)}
-              className={`cursor-pointer px-3 py-2 text-sm ${index === activeIndex ? "bg-red-50 text-red-950" : "text-stone-800"}`}
+              className={`cursor-pointer px-3 py-2 text-sm ${index === activeIndex ? "bg-brand-soft text-red-950" : "text-ink-soft"}`}
             >
-              <span className="font-semibold">{course.code}</span> <span className="text-stone-600">{course.title}</span>
+              <span className="font-semibold">{course.code}</span> <span className="text-ink-muted">{course.title}</span>
             </li>
           ))}
         </ul>
       </div>
-      <p id={`${id}-status`} role="status" className="mt-1 min-h-5 text-xs text-stone-700">{status}</p>
+      <p id={`${id}-status`} role="status" className="mt-1 min-h-5 text-xs text-ink-2">{status}</p>
     </div>
   );
 }

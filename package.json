@@ -11,7 +11,8 @@
     "prebuild": "node scripts/copy-maplibre-worker.mjs && node scripts/copy-mediapipe-wasm.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.1.3",
