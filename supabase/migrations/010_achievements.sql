@@ -1,5 +1,5 @@
 -- ADR 0015: achievements for niche and hidden features.
--- Run after 001-007 in the Supabase SQL Editor. Safe to re-run.
+-- Run after 001-009 in the Supabase SQL Editor. Safe to re-run.
 --
 -- Rules enforced here (not just in the UI):
 --  - Users can only read and add their OWN achievements.

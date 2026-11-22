@@ -3,7 +3,7 @@ import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 // Server-only achievements service (ADR 0015). The user always comes from the Supabase
-// session, never from the browser; RLS in supabase/migrations/008_achievements.sql is the
+// session, never from the browser; RLS in supabase/migrations/010_achievements.sql is the
 // real enforcement. Mock mode and signed-out users have no account to save to ("guest"),
 // so the browser keeps their achievements locally.
 
@@ -12,7 +12,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 /** The achievements table doesn't exist yet (migration 008 hasn't been run). */
 export class AchievementsNotSetUpError extends Error {
   constructor() {
-    super("Achievements need supabase/migrations/008_achievements.sql to be run.");
+    super("Achievements need supabase/migrations/010_achievements.sql to be run.");
     this.name = "AchievementsNotSetUpError";
   }
 }

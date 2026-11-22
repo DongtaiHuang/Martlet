@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { MeetupForm } from "@/components/forms/MeetupForm";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { listMyCourses } from "@/lib/courses";
 import { getDataMode } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,8 @@ export const dynamic = "force-dynamic";
 export default async function CreateMeetupPage() {
   const viewer = await getMeetupViewer();
   const isMockMode = getDataMode() === "mock";
+  // Quick picks for the course field; if courses aren't set up, the search box still shows.
+  const myCourses = viewer ? await listMyCourses().catch(() => []) : [];
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -31,7 +34,7 @@ export default async function CreateMeetupPage() {
             )}
           </div>
         )}
-        <div className="mt-5"><MeetupForm /></div>
+        <div className="mt-5"><MeetupForm myCourses={myCourses} /></div>
       </main>
     </div>
   );

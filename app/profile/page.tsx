@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Bird, LogIn, Trophy, UserRound } from "lucide-react";
+import { CourseCodesForm } from "@/components/courses/CourseCodesForm";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
 import { ProfileActivity } from "@/components/profile/ProfileActivity";
+import type { Course } from "@/lib/course-codes";
+import { listMyCourses } from "@/lib/courses";
 import { getCurrentUser, type CurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
 
@@ -12,14 +15,19 @@ type ProfileState =
   | { kind: "preview" }
   | { kind: "signed-out" }
   | { kind: "error" }
-  | { kind: "ready"; user: CurrentUser };
+  | { kind: "ready"; user: CurrentUser; courses: Course[] | null };
 
 async function loadProfile(): Promise<ProfileState> {
   if (getDataMode() === "mock") return { kind: "preview" };
   try {
     const user = await getCurrentUser();
     if (!user) return { kind: "signed-out" };
-    return { kind: "ready", user };
+    // Courses are optional: if they fail to load (e.g. migration 007 not applied yet), the profile still works.
+    const courses = await listMyCourses().catch((error) => {
+      console.error("Failed to load the student's courses", error);
+      return null;
+    });
+    return { kind: "ready", user, courses };
   } catch (error) {
     console.error("Failed to load the student profile", error);
     return { kind: "error" };
@@ -63,6 +71,7 @@ export default async function ProfilePage() {
             </div>
           </div>
           {state.kind === "ready" && <DisplayNameForm current={state.user.display_name} />}
+          {state.kind === "ready" && state.courses && <CourseCodesForm initial={state.courses} />}
           {state.kind === "ready" && (
             <Link href="/avatar" className="mt-4 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
               <Bird aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />

@@ -33,7 +33,7 @@ Constraints:
   | Tourist | Explore every landmark on a map | No |
 
 ### Saving
-- New table `user_achievements (user_id, achievement_id, earned_at)` (`supabase/migrations/008_achievements.sql`), one row per user per achievement.
+- New table `user_achievements (user_id, achievement_id, earned_at)` (`supabase/migrations/010_achievements.sql`), one row per user per achievement.
   - RLS: users can **read and insert only their own rows**. No update or delete, so achievements are permanent.
   - `achievement_id` is checked for shape in SQL; the server action only accepts ids from the catalogue.
 - Server action `earnAchievement(id)` (`app/achievements/actions.ts`) gets the user from the session and returns `new`, `already`, `guest`, `invalid` or `error`. It never takes a user id.

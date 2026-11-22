@@ -1,6 +1,6 @@
 // The list of achievements (ADR 0015). Client-safe: no server imports.
 // Hidden achievements show as "???" until earned. Adding one is a code change only;
-// ids must match the shape checked in supabase/migrations/008_achievements.sql.
+// ids must match the shape checked in supabase/migrations/010_achievements.sql.
 
 export const ACHIEVEMENTS = [
   { id: "bird-whisperer", icon: "🐦", title: "Bird whisperer", description: "Hovered over a martlet until it spoke.", hidden: true },
