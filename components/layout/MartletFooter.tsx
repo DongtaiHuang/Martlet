@@ -63,7 +63,7 @@ export function MartletFooter() {
             <div>
               <div className="flex items-center gap-3 text-xl font-bold tracking-tight">
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand text-on-brand"><Bird size={22} aria-hidden="true" /></span>
-                McGill Martlet
+                Martlet
               </div>
               <p className="mt-3 text-sm font-semibold">Find your flock. Make campus yours.</p>
               <p className="mt-1 max-w-md text-sm leading-6 text-neutral-300">
@@ -83,9 +83,9 @@ export function MartletFooter() {
           <div className="mt-6 border-t border-neutral-800 pt-4 text-xs leading-5 text-neutral-300">
             <div className="flex flex-wrap justify-between gap-x-6 gap-y-1">
               <p>Built by students, for students in Montréal.</p>
-              <p>© {new Date().getFullYear()} McGill Martlet.</p>
+              <p>© {new Date().getFullYear()} Martlet.</p>
             </div>
-            <p className="mt-2">McGill Martlet is an independent student project and is not affiliated with or endorsed by McGill University.</p>
+            <p className="mt-2">Martlet is an independent student project and is not affiliated with or endorsed by McGill University.</p>
           </div>
         </div>
       </div>

@@ -18,8 +18,7 @@ export async function MartletNav() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:px-8 sm:py-3">
         <Link href="/meetups" className="order-1 inline-flex min-h-11 w-fit items-center gap-2.5 rounded-lg text-lg font-extrabold tracking-tight whitespace-nowrap focus-visible:outline-2 focus-visible:outline-focus">
           <span className="grid size-9 place-items-center rounded-xl bg-brand text-on-brand"><Bird aria-hidden="true" size={21} /></span>
-          <span className="max-[380px]:hidden">McGill Martlet</span>
-          <span className="hidden max-[380px]:inline">Martlet</span>
+          Martlet
         </Link>
         <div className="order-2 ml-auto flex min-h-10 flex-wrap items-center justify-end gap-2 xl:order-3 xl:ml-0">
           <NotificationBell />
