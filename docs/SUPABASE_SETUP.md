@@ -26,6 +26,7 @@ In **SQL Editor**, paste and run each file once:
 4. `supabase/migrations/004_backfill_profiles.sql` (profiles for accounts created before `001` ran). Safe to re-run.
 5. `supabase/migrations/005_table_grants.sql` (explicit table privileges; newer Supabase projects don't auto-grant them, causing `permission denied`). Safe to re-run.
 6. `supabase/migrations/006_landmarks.sql` (ADR 0009: landmarks, photo unlocks, and the private `landmark-photos` Storage bucket with its policies). Safe to re-run. Landmark coordinates are approximate; check them on the map and keep `lib/mock-landmarks.ts` in sync.
+7. `supabase/migrations/007_meetup_polls.sql` (advisory meetup polls). After 001–006 are applied, open a new SQL Editor query, paste the full 007 file, and run it once before deploying the poll UI.
 
 `002` adds a foreign key from `meetups(location_name, latitude, longitude)` to `campus_locations`. If the project already holds meetups at non-approved coordinates, it will fail; cancel/delete those rows first (Table editor) and re-run.
 
@@ -78,6 +79,12 @@ Signatures are frozen (see `docs/CONTRACTS.md`). Call them from Server Component
 Errors to catch in Server Actions: `AuthRequiredError`, `MeetupValidationError` (has `fieldErrors`), `MeetupNotFoundError` (also when the caller is not the host), `MockModeError`.
 
 Auth helpers: `getCurrentUser()` / `requireUser()` in `lib/supabase/auth.ts`; `<AuthStatus />` and `<SignOutButton />` in `components/auth/`.
+
+## Verify meetup polls
+
+Run `node --test tests/poll-validation.test.mjs` with Node.js 22 or newer. On a disposable local database with migrations 001–007 applied, run `tests/poll-database.test.sql` with SQL Editor or `psql -v ON_ERROR_STOP=1 -f tests/poll-database.test.sql`. The test creates synthetic fixtures inside a transaction and rolls them back.
+
+For hosted verification, use two approved test accounts. Have the host create a location poll on an upcoming meetup. Have the second account vote and change its choice without Pecking. Check the totals, then have the host close the poll and confirm the choices are read-only.
 
 ## Known limitations
 
