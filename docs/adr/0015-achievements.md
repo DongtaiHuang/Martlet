@@ -56,7 +56,7 @@ Constraints:
 
 ### The page
 - Its own page, `/achievements`. It shows "X of N unlocked", a progress bar, then **Still to unlock** (goals first, hidden ones as "???") and **Unlocked** (with the date each was earned). It updates live when one is earned on the page.
-- **Profile menu:** on larger screens, hovering or keyboard-focusing **Profile** in the nav opens a menu with Your profile, Achievements (X / N) and the achievements still to unlock (visible goals, plus a count of hidden ones). It loads the user's achievements the first time it opens (server action `myAchievements()`), so other pages don't pay for it. Phones have no hover: tapping Profile opens the profile, which links to Achievements.
+- **Profile menu:** on larger screens, hovering or keyboard-focusing **Profile** in the nav opens a menu with Your profile and Achievements (X / N); the list of what's still to unlock is on the Achievements page. It loads the user's achievements the first time it opens (server action `myAchievements()`), so other pages don't pay for it. Phones have no hover: tapping Profile opens the profile, which links to Achievements.
 
 ## Alternatives considered
 
