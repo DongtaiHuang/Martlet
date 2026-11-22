@@ -23,6 +23,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0017 | [Like-ranked trends side panel](0017-trends-side-panel.md) | Proposed |
 | 0018 | [Open the Landmarks map with all pins in 3D](0018-landmarks-overview.md) | Proposed |
 | 0019 | [Achievements for niche and hidden features](0019-achievements.md) | Proposed |
+| 0021 | [Persistent, color-coded notifications](0021-notifications.md) | Proposed |
 
 ## Adding a new ADR
 
