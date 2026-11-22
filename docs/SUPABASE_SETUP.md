@@ -21,7 +21,7 @@ Check the mode in code with `getMeetupDataMode()` from `lib/meetups.ts` (or `get
 In **SQL Editor**, paste and run each file once:
 
 1. `supabase/migrations/001_mvp.sql` (schema, profile trigger, base RLS). Only on a fresh project, since it is not re-runnable.
-2. `supabase/migrations/002_security_hardening.sql` (RLS/privilege hardening, approved campus locations). Safe to re-run.
+2. `supabase/migrations/002_security_hardening.sql` (RLS/privilege hardening, approved campus locations). Apply before 008.
 3. `supabase/migrations/003_more_campus_locations.sql` (additional downtown campus meetup locations). Safe to re-run.
 4. `supabase/migrations/004_backfill_profiles.sql` (profiles for accounts created before `001` ran). Safe to re-run.
 5. `supabase/migrations/005_table_grants.sql` (explicit table privileges; newer Supabase projects don't auto-grant them, causing `permission denied`). Safe to re-run.
@@ -29,7 +29,7 @@ In **SQL Editor**, paste and run each file once:
 7. `supabase/migrations/007_meetup_polls.sql` (advisory meetup polls). After 001–006 are applied, open a new SQL Editor query, paste the full 007 file, and run it once before deploying the poll UI.
 8. `supabase/migrations/008_off_campus_meetups.sql` (curated public venues). After verifying 001–007, have the database owner run 008 once before deploying off-campus creation. Existing meetups keep their stored locations. The migration replaces the original campus foreign key with separately enforced campus and public venue foreign keys.
 
-`002` adds a foreign key from `meetups(location_name, latitude, longitude)` to `campus_locations`. If the project already holds meetups at non-approved coordinates, it will fail; cancel/delete those rows first (Table editor) and re-run.
+`002` adds the original campus-only foreign key. On a project upgrading from 001, resolve any existing locations that fail that constraint before running 002. After applying 008, do not rerun 002 because it reinstates the campus-only foreign key.
 
 **When adding a campus location**, update `lib/locations.ts` and create a new idempotent migration to insert the matching canonical name and coordinates in `public.campus_locations`; then run it in Supabase. Do not rewrite migrations that teammates may have already applied.
 
