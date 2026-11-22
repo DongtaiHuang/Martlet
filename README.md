@@ -142,7 +142,7 @@ For privacy, guest meetup summaries are limited and custom meeting instructions 
 
 ### Project structure
 
-\`\`\`text
+```text
 app/             Next.js routes (meetups, explore, landmarks, board, profile, ...)
 components/      Reusable UI: feed, forms, maps, social, landmarks, avatar, game
 lib/             Supabase services, validation, business logic, shared utilities
@@ -151,7 +151,7 @@ supabase/        SQL migrations, database tests, verification helpers
 docs/            Deployment, setup, ADRs, team notes, screenshots
 tests/           Unit, browser, and SQL regression checks
 public/          Public assets
-\`\`\`
+```
 
 ### How the pieces fit together
 
@@ -161,19 +161,19 @@ A visitor opens a Next.js page. Server-side services fetch the content that user
 
 **Requirements:** Node.js **22.13+ (22.x)**, npm, and an internet connection for map tiles.
 
-\`\`\`bash
+```bash
 git clone https://github.com/DongtaiHuang/Martlet.git
 cd Martlet
 npm ci
 cp .env.example .env.local
 npm run dev
-\`\`\`
+```
 
 Windows PowerShell equivalent for the copy step:
 
-\`\`\`powershell
+```powershell
 Copy-Item .env.example .env.local
-\`\`\`
+```
 
 Open **http://localhost:3000**.
 
@@ -183,10 +183,10 @@ Without Supabase credentials, Martlet runs in **mock/demo mode**: you can explor
 
 For a live local Supabase project, fill in the following values in **.env.local**:
 
-\`\`\`env
+```env
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR-PUBLISHABLE-KEY
-\`\`\`
+```
 
 Then restart the development server. The database also requires the applicable migrations, grants, RLS policies, and Storage configuration; adding keys alone does not initialize the schema.
 
@@ -198,12 +198,12 @@ For setup details, see [Supabase setup](docs/SUPABASE_SETUP.md).
 
 ### Quality checks
 
-\`\`\`bash
+```bash
 npx tsc --noEmit
 npm run lint
 npm run check:contrast
 npm run build
-\`\`\`
+```
 
 Additional targeted browser and SQL tests live in [tests/](tests/). Database tests require an authorized test environment.
 
