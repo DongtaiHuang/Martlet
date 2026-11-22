@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { AchievementGrid } from "@/components/achievements/AchievementGrid";
 import { EarnActivity } from "@/components/achievements/EarnActivity";
+import { MartletTale } from "@/components/achievements/MartletTale";
 import { AchievementsNotSetUpError, listMyAchievements } from "@/lib/achievements";
 import { activityProgress, satisfiedActivityAchievements } from "@/lib/activity-achievements";
 import { loadActivityCounts } from "@/lib/activity-counts";
@@ -61,7 +62,10 @@ export default async function AchievementsPage() {
           {state.kind === "error" ? (
             <p role="alert" className="text-sm text-ink-muted">Couldn’t load your achievements. Refresh the page to try again.</p>
           ) : (
-            <AchievementGrid earned={state.kind === "account" ? state.earned : null} progress={activityCounts ? activityProgress(activityCounts) : undefined} />
+            <>
+              <AchievementGrid earned={state.kind === "account" ? state.earned : null} progress={activityCounts ? activityProgress(activityCounts) : undefined} />
+              <MartletTale earned={state.kind === "account" ? state.earned : null} />
+            </>
           )}
         </div>
       </main>

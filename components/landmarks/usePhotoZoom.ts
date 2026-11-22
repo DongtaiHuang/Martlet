@@ -2,6 +2,7 @@
 
 // Zoom + pan for a photo viewer: buttons/keys, pinch, drag, double-click.
 // Extracted from DongtaiHuang's LandmarkPhotoZoom (#72) so the gallery viewer can reuse it.
+import { earn } from "@/components/achievements/earn";
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 
 export const MIN_ZOOM = 1;
@@ -29,6 +30,7 @@ export function usePhotoZoom() {
 
   function changeZoom(next: number) {
     const scale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, next));
+    if (scale >= MAX_ZOOM) void earn("enhance");
     setZoom(scale);
     setOffset((point) => (scale === MIN_ZOOM ? { x: 0, y: 0 } : clampOffset(point, scale)));
   }

@@ -2,6 +2,7 @@
 
 // "Shake to reveal" for a landmark's photos (issue #17). Phone: shake (DeviceMotion; iOS asks
 // permission once). Desktop: wiggle the mouse left-right over the photos. Remembered per landmark.
+import { earn } from "@/components/achievements/earn";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 
 const key = (landmarkId: string) => `martlet.revealed.${landmarkId}`;
@@ -23,6 +24,7 @@ export function useShakeReveal(landmarkId: string, enabled: boolean) {
     try { localStorage.setItem(key(landmarkId), "1"); } catch {}
     setRevealing(true);
     navigator.vibrate?.(60);
+    void earn("shake-it-off");
     listeners.forEach((l) => l());
     window.setTimeout(() => setRevealing(false), 1400);
   }, [landmarkId]);
