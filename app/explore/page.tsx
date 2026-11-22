@@ -19,7 +19,7 @@ export default async function ExplorePage({
   return <div className="min-h-screen bg-neutral-50 text-neutral-900"><MartletNav />
     <main className="mx-auto max-w-5xl px-5 py-9">
       <h1 className="text-3xl font-bold">Explore campus</h1>
-      <p className="mt-2 mb-5 text-neutral-600">Find spontaneous meetups on a map. Filter by category.</p>
+      <p className="mt-2 mb-5 text-neutral-600">Find spontaneous meetups and landmarks on a map. Show either or both, and filter meetups by category.</p>
       <CampusMap meetups={meetups} focusId={focusId} landmarks={landmarks} />
       <p className="mt-3 text-xs text-neutral-500">Tap a marker for details. Meetup locations are approved campus landmarks only.</p>
       {landmarks.length > 0 && (

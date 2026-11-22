@@ -2,9 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Map, Marker, Popup } from "maplibre-gl";
+import { LngLatBounds, Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { ArrowUpRight, LockKeyhole, Star, UsersRound } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, LockKeyhole, UsersRound } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { landmarkMarkerElement, landmarkPopupContent } from "./landmark-markers";
 import { landmarkZoom } from "./landmark-style";
@@ -31,9 +31,14 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
 
   useEffect(() => {
     if (!mapEl.current) return;
-    // Same map as Explore (style, campus view, controls); off-campus landmarks are a
-    // sidebar click away.
+    // Same map as Explore (style, controls), but opening zoomed out far enough to show
+    // every landmark, including the off-campus ones.
     const map = createCampusMap(mapEl.current);
+    if (landmarks.length > 0) {
+      const bounds = new LngLatBounds();
+      for (const l of landmarks) bounds.extend([l.longitude, l.latitude]);
+      map.fitBounds(bounds, { padding: 56, maxZoom: 16, duration: 0 });
+    }
 
     const byId = markers.current;
     for (const landmark of landmarks) {
@@ -124,8 +129,8 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
                       </span>
                       {landmark.name}
                     </span>
-                    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${landmark.unlocked ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-700"}`}>
-                      {landmark.unlocked ? <Star aria-hidden="true" size={12} /> : <LockKeyhole aria-hidden="true" size={12} />}
+                    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${landmark.unlocked ? "bg-emerald-100 text-emerald-900" : "bg-stone-100 text-stone-700"}`}>
+                      {landmark.unlocked ? <CheckCircle2 aria-hidden="true" size={12} /> : <LockKeyhole aria-hidden="true" size={12} />}
                       {landmark.unlocked ? "Unlocked" : "Locked"}
                     </span>
                   </span>

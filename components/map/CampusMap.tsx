@@ -54,11 +54,13 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   const markersRef = useRef(new globalThis.Map<string, Marker>());
   const router = useRouter();
   const [active, setActive] = useState<MeetupCategory | "all">("all");
+  const [layer, setLayer] = useState<"all" | "meetups" | "landmarks">("all");
 
-  const visible = useMemo(
-    () => (active === "all" ? meetups : meetups.filter((m) => m.category === active)),
-    [meetups, active],
-  );
+  const visible = useMemo(() => {
+    if (layer === "landmarks") return [];
+    return active === "all" ? meetups : meetups.filter((m) => m.category === active);
+  }, [meetups, active, layer]);
+  const shownLandmarks = useMemo(() => (layer === "meetups" ? NO_LANDMARKS : landmarks), [landmarks, layer]);
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
   // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
   const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
@@ -89,13 +91,13 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const markers = landmarks.map((landmark) =>
+    const markers = shownLandmarks.map((landmark) =>
       new Marker({ element: landmarkMarkerElement(landmark) })
         .setLngLat([landmark.longitude, landmark.latitude])
         .setPopup(new Popup({ offset: 18 }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
         .addTo(map));
     return () => markers.forEach((m) => m.remove());
-  }, [landmarks, router]);
+  }, [shownLandmarks, router]);
 
   // Runs after the marker effect above, and only when focusId changes, so changing
   // the category filter doesn't keep re-opening the popup.
@@ -117,18 +119,41 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
           That meetup isn’t on the map anymore. It may have been cancelled or already started.
         </p>
       )}
-      <div role="group" aria-label="Filter map by category" className="mb-4 flex flex-wrap gap-2">
-        <button type="button" aria-pressed={active === "all"} onClick={() => setActive("all")} className={`${chip} ${chipState(active === "all")}`}>
-          All ({meetups.length})
-        </button>
-        {categoryValues.filter((c) => present.has(c)).map((c) => (
-          <button key={c} type="button" aria-pressed={active === c} onClick={() => setActive(c)} className={`${chip} ${chipState(active === c)}`}>
-            {categories[c].label}
+      {landmarks.length > 0 && (
+        <div role="group" aria-label="Show on map" className="mb-3 inline-flex w-full max-w-md rounded-2xl border border-stone-200 bg-white p-1 shadow-sm sm:w-auto">
+          {([
+            ["all", `All (${meetups.length + landmarks.length})`],
+            ["meetups", `Meetups (${meetups.length})`],
+            ["landmarks", `★ Landmarks (${landmarks.length})`],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={layer === value}
+              onClick={() => setLayer(value)}
+              className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-bold whitespace-nowrap max-[359px]:px-1.5 max-[359px]:text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 sm:flex-none sm:px-4 ${layer === value ? "bg-red-800 text-white shadow-sm" : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+      {layer !== "landmarks" && (
+        <div role="group" aria-label="Filter meetups by category" className="mb-4 flex flex-wrap gap-2">
+          <button type="button" aria-pressed={active === "all"} onClick={() => setActive("all")} className={`${chip} ${chipState(active === "all")}`}>
+            All categories
           </button>
-        ))}
-      </div>
-      <div ref={ref} aria-label="Map of McGill meetups" className={CAMPUS_MAP_FRAME} />
-      {visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
+          {categoryValues.filter((c) => present.has(c)).map((c) => (
+            <button key={c} type="button" aria-pressed={active === c} onClick={() => setActive(c)} className={`${chip} ${chipState(active === c)}`}>
+              {categories[c].label}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Keep this className constant: MapLibre adds its own classes to the container, and
+          React rewriting className would remove them and break the map's positioning. */}
+      <div ref={ref} aria-label="Map of McGill meetups and landmarks" className={CAMPUS_MAP_FRAME} />
+      {layer !== "landmarks" && visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
     </div>
   );
 }
