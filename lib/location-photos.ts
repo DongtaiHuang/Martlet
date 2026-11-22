@@ -1,12 +1,15 @@
 type LocationPhoto = {
   src: string;
+  /** Who took it, or who supplied it. */
   photographer: string;
-  source: string;
-  license: string;
-  licenseUrl: string;
+  /** Where it came from, and its licence. Every openly licensed photo must have these. */
+  source?: string;
+  license?: string;
+  licenseUrl?: string;
 };
 
-// Each WebP is distributed under the license linked here.
+// Each WebP is distributed under the license linked here. Photos without a source or licence
+// were supplied by the team; their permissions still need confirming.
 export const LOCATION_PHOTOS: Partial<Record<string, LocationPhoto>> = {
   "arts-building": {
     src: "/images/locations/arts-building.webp",
@@ -91,6 +94,27 @@ export const LOCATION_PHOTOS: Partial<Record<string, LocationPhoto>> = {
     source: "https://commons.wikimedia.org/wiki/File:March%C3%A9_Jean-Talon%2C_outside_view%2C_Montr%C3%A9al_2005-09-04.jpg",
     license: "CC BY-SA 3.0",
     licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+  },
+  // Supplied by the team (source and licence to be confirmed).
+  "university-centre": {
+    src: "/images/locations/university-centre.webp",
+    photographer: "Photo supplied by the Martlet team",
+    // Source and licence not recorded yet: confirm permission before relying on this photo.
+  },
+  "bronfman-building": {
+    src: "/images/locations/bronfman-building.webp",
+    photographer: "Photo supplied by the Martlet team",
+    // Source and licence not recorded yet: confirm permission before relying on this photo.
+  },
+  "stewart-biology": {
+    src: "/images/locations/stewart-biology.webp",
+    photographer: "Photo supplied by the Martlet team",
+    // Source and licence not recorded yet: confirm permission before relying on this photo.
+  },
+  "rutherford-physics": {
+    src: "/images/locations/rutherford-physics.webp",
+    photographer: "Photo supplied by the Martlet team",
+    // Source and licence not recorded yet: confirm permission before relying on this photo.
   },
   "montreal-biosphere": {
     src: "/images/locations/montreal-biosphere.webp",

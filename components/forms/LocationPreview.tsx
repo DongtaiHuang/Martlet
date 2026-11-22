@@ -35,8 +35,14 @@ function LocationPhoto({ location }: { location: CampusLocation }) {
         />
       </div>
       <figcaption className="px-1 text-xs text-ink-2">
-        <a href={photo.source} className="inline-flex min-h-11 items-center py-1 pr-2 underline">{photo.photographer}</a>
-        <a href={photo.licenseUrl} className="inline-flex min-h-11 items-center py-1 pr-2 underline">{photo.license}</a>
+        {photo.source ? (
+          <a href={photo.source} className="inline-flex min-h-11 items-center py-1 pr-2 underline">{photo.photographer}</a>
+        ) : (
+          <span className="inline-flex min-h-11 items-center py-1 pr-2">{photo.photographer}</span>
+        )}
+        {photo.license && photo.licenseUrl && (
+          <a href={photo.licenseUrl} className="inline-flex min-h-11 items-center py-1 pr-2 underline">{photo.license}</a>
+        )}
         <span>Resized and converted to WebP</span>
       </figcaption>
     </figure>
