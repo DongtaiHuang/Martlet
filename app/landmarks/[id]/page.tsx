@@ -85,6 +85,7 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
               latitude={landmark.latitude}
               longitude={landmark.longitude}
               zoom={landmarkZoom(landmark.radius_m)}
+              showMeAndPlace
             />
           </section>
 
