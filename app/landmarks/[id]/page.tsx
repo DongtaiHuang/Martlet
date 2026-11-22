@@ -37,7 +37,7 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
           <h2 id="gallery-heading" className="text-xl font-bold">Photos from {landmark.name}</h2>
           <div className="mt-4">
             {landmark.unlocked ? (
-              <LandmarkGallery photos={photos} landmarkName={landmark.name} />
+              <LandmarkGallery photos={photos} landmarkName={landmark.name} landmarkId={landmark.id} />
             ) : (
               <div className="relative overflow-hidden rounded-2xl border border-line bg-surface p-6 text-center">
                 <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid grid-cols-3 gap-2 p-2 opacity-60 blur-sm">
