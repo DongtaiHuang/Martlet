@@ -1,19 +1,19 @@
 # McGill Martlet
 
-McGill Martlet is a campus social discovery app for spontaneous meetups. Students will be able to post meetups at approved campus landmarks, find events in a feed or on a map, Peck to join, and Flap to like.
+McGill Martlet is a campus social discovery app for spontaneous meetups. Students can create and edit multi-category meetups, discover campus landmarks, Peck to join, and Flap to like.
 
 The stack is Next.js App Router, React, TypeScript, Tailwind CSS, Supabase (PostgreSQL, Auth, Realtime), and MapLibre GL JS. Vercel is the deployment target.
 
 ## Local setup
 
-Use Node.js 22.13+ and npm. From the repository root:
+Use Node.js 22.x (22.13 or later) and npm. From the repository root:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000). The mock feed and development map work without a Supabase project. The demo map needs network access to load its style and tiles.
+Open [localhost:3000](http://localhost:3000). Without Supabase settings the app uses sample data and disables writes. The map uses OpenFreeMap by default and needs network access for its style and tiles.
 
 For local overrides, copy `.env.example` to `.env.local` and restart the development server after changing it. `.env.local` is Git-ignored.
 
@@ -21,25 +21,26 @@ For local overrides, copy `.env.example` to `.env.local` and restart the develop
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL. Set with the publishable key to enable session handling. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key. Keep service-role secrets out of public variables. |
-| `NEXT_PUBLIC_MAP_STYLE_URL` | MapLibre style JSON URL. Development falls back to MapLibre demo tiles. Set a suitable licensed provider before building for Vercel. |
+| `NEXT_PUBLIC_MAP_STYLE_URL`, `NEXT_PUBLIC_MAP_STYLE_URL_DARK` | Optional MapLibre style overrides. Both default to OpenFreeMap. |
 
-Run checks with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
+Run checks with `npx tsc --noEmit`, `npm run lint`, `npm run check:contrast`, and `npm run build`.
 
 ## Routes
 
 | Route | Current behavior |
 | --- | --- |
 | `/` | Redirects to `/meetups`. |
-| `/meetups` | Shows sample meetup cards with links to their detail pages. |
-| `/meetups/new` | Meetup creation placeholder. |
-| `/meetups/[id]` | Meetup detail placeholder. Try `/meetups/demo-coffee`. |
-| `/explore` | Campus map with sample meetup markers. A production build without a map style shows a fallback message. |
-| `/profile` | Student profile placeholder. |
+| `/meetups` | Upcoming meetups, category filters, community trends, and Martlet Flight. |
+| `/meetups/new` | Create a campus or custom-location meetup with up to three categories. |
+| `/meetups/[id]` | Meetup details, Pecks, and Flaps. Hosts can edit or cancel eligible meetups. |
+| `/explore` | Meetup and landmark map, with a list for text-only meetup locations. |
+| `/landmarks` | Campus discovery, photo galleries, and landmark unlocks. |
+| `/profile` | Student profile, courses, and meetup history. |
 | `/login`, `/signup` | Email/password auth. With Supabase configured, all other pages redirect here when signed out. |
 
-## Implementation status
+## Production deployment
 
-Without Supabase credentials the app runs in **mock mode** (sample feed/map, no auth, writes disabled). With credentials it runs in **live mode**: email auth, protected pages, and real `listMeetups`/`getMeetup`/`createMeetup`/`cancelMeetup` backed by Supabase with RLS. Mock and live data are never mixed. Follow [Supabase setup](docs/SUPABASE_SETUP.md) to create the project, apply both migrations, and verify with two test accounts. Peck/Flap services, profile editing, and Realtime are team follow-up work.
+Use live Supabase settings for Vercel Production. Configure the project, confirm the hosted schema and auth callback, and verify the release with two approved accounts. See the [deployment and rollback guide](docs/DEPLOYMENT.md) and [Supabase setup](docs/SUPABASE_SETUP.md).
 
 ## Team ownership and Git workflow
 

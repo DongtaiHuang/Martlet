@@ -56,5 +56,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Public build assets must keep their original content type and avoid session redirects.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|maplibre-gl-worker\\.mjs$|mediapipe/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

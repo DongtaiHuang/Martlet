@@ -9,8 +9,14 @@ import { safeRedirectPath } from "@/lib/supabase/redirect";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const next = safeRedirectPath(searchParams.get("next"));
+  const redirectTo = (path: string) => {
+    const target = new URL(path, request.url);
+    // Keep the browser on the exact origin where its authentication cookies were set.
+    const location = safeRedirectPath(`${target.pathname}${target.search}${target.hash}`);
+    return new NextResponse(null, { status: 307, headers: { location } });
+  };
   const fail = (reason: string) =>
-    NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(reason)}`, request.url));
+    redirectTo(`/login?error=${encodeURIComponent(reason)}`);
 
   if (!getSupabaseConfig()) return fail("Supabase is not configured.");
 
@@ -21,10 +27,10 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(next, request.url));
+    if (!error) return redirectTo(next);
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) return NextResponse.redirect(new URL(next, request.url));
+    if (!error) return redirectTo(next);
   }
 
   return fail("That confirmation link is invalid or has expired. Try signing in, or sign up again.");
