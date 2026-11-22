@@ -89,7 +89,7 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
             )}
           </div>
           <p role="status" className="mt-2 min-h-5 text-sm text-stone-700">
-            {tracker.status === "live" && "Tracking: try blinking, smiling, opening your mouth, tilting your head or raising your arms."}
+            {tracker.status === "live" && "Tracking: try winking, smiling, frowning, puffing your cheeks, sticking your tongue out, or moving your arms up, forward and back."}
             {tracker.status === "recording" && "Recording… do your best expression!"}
             {clip && tracker.status === "idle" && `Clip saved in this tab: ${clip.frames.length} expression samples (numbers only).`}
           </p>

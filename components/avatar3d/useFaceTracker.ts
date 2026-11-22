@@ -3,7 +3,7 @@
 // Camera → MediaPipe Face Landmarker → Face values (prototype). Runs fully in the browser.
 // The video never leaves the device and is never stored; only expression numbers are read.
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { FaceLandmarker, FaceLandmarkerResult, NormalizedLandmark, PoseLandmarker } from "@mediapipe/tasks-vision";
+import type { FaceLandmarker, FaceLandmarkerResult, Landmark, NormalizedLandmark, PoseLandmarker } from "@mediapipe/tasks-vision";
 import { NEUTRAL, toRow, type Clip, type Face } from "./face";
 
 // All served from our own origin by scripts/copy-mediapipe-wasm.mjs.
@@ -14,13 +14,29 @@ const CLIP_SECONDS = 3, CLIP_FPS = 15;
 
 export type TrackerStatus = "idle" | "loading" | "live" | "recording" | "error";
 
-/** How far an arm is raised: 0 hanging down, 1 straight up. Uses shoulder→elbow in image space. */
-function armRaise(lm: NormalizedLandmark[], shoulder: number, elbow: number): number {
-  const a = lm[shoulder], b = lm[elbow];
-  if (!a || !b || (a.visibility ?? 1) < 0.5 || (b.visibility ?? 1) < 0.5) return 0;
-  const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
-  const angle = Math.acos(Math.max(-1, Math.min(1, dy / len))); // 0 = pointing down
-  return Math.max(0, Math.min(1, angle / (Math.PI * 0.85)));
+type Arm = { raise: number; swing: number; bend: number };
+const REST: Arm = { raise: 0, swing: 0, bend: 0 };
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+
+/**
+ * One arm's pose from MediaPipe world landmarks (metres, hip-centred, y down, smaller z = closer
+ * to the camera): raise (down → sideways → overhead), swing (back ↔ toward camera), elbow bend.
+ */
+function armPose(world: Landmark[], img: NormalizedLandmark[], shoulder: number, elbow: number, wrist: number): Arm {
+  const a = world[shoulder], b = world[elbow], c = world[wrist];
+  const seen = (i: number) => (img[i]?.visibility ?? 1) >= 0.5;
+  if (!a || !b || !seen(shoulder) || !seen(elbow)) return REST;
+  let vx = b.x - a.x, vy = b.y - a.y, vz = b.z - a.z;
+  const len = Math.hypot(vx, vy, vz) || 1; vx /= len; vy /= len; vz /= len;
+  const raise = clamp01(Math.atan2(Math.abs(vx), vy) / (Math.PI * 0.85));
+  const swing = Math.max(-1, Math.min(1, Math.asin(Math.max(-1, Math.min(1, -vz))) / (Math.PI / 2)));
+  let bend = 0;
+  if (c && seen(wrist)) {
+    const ux = a.x - b.x, uy = a.y - b.y, uz = a.z - b.z, wx = c.x - b.x, wy = c.y - b.y, wz = c.z - b.z;
+    const cos = (ux * wx + uy * wy + uz * wz) / ((Math.hypot(ux, uy, uz) * Math.hypot(wx, wy, wz)) || 1);
+    bend = clamp01((Math.PI - Math.acos(Math.max(-1, Math.min(1, cos)))) / (Math.PI * 0.7));
+  }
+  return { raise, swing, bend };
 }
 
 function toFace(res: FaceLandmarkerResult): Face | null {
@@ -32,7 +48,12 @@ function toFace(res: FaceLandmarkerResult): Face | null {
     blinkL: s("eyeBlinkRight"), blinkR: s("eyeBlinkLeft"), jaw: s("jawOpen"),
     smile: (s("mouthSmileLeft") + s("mouthSmileRight")) / 2,
     browUp: s("browInnerUp"), browDown: (s("browDownLeft") + s("browDownRight")) / 2,
-    yaw: 0, pitch: 0, roll: 0, wingL: 0, wingR: 0,
+    yaw: 0, pitch: 0, roll: 0,
+    tongue: s("tongueOut"), pucker: Math.max(s("mouthPucker"), s("mouthFunnel")), puff: s("cheekPuff"),
+    frown: (s("mouthFrownLeft") + s("mouthFrownRight")) / 2,
+    wide: (s("eyeWideLeft") + s("eyeWideRight")) / 2, squint: (s("eyeSquintLeft") + s("eyeSquintRight")) / 2,
+    mouthX: s("mouthLeft") - s("mouthRight"), // your mouth's left is on the screen's right (mirrored)
+    wingL: 0, wingR: 0, swingL: 0, swingR: 0, bendL: 0, bendR: 0,
   };
   const m = res.facialTransformationMatrixes?.[0]?.data;
   if (m) { // column-major 4x4 rotation → yaw/pitch/roll (radians), mirrored
@@ -50,7 +71,7 @@ export function useFaceTracker() {
   const faceRef = useRef<Face>({ ...NEUTRAL });
   const landmarkerRef = useRef<FaceLandmarker | null>(null);
   const poseRef = useRef<PoseLandmarker | null>(null);
-  const wingsRef = useRef({ l: 0, r: 0 });
+  const armsRef = useRef<{ l: Arm; r: Arm }>({ l: REST, r: REST });
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef(0);
   const recordingRef = useRef<{ start: number; rows: number[][]; done: (c: Clip) => void } | null>(null);
@@ -99,12 +120,19 @@ export function useFaceTracker() {
           const now = performance.now();
           const pose = poseRef.current;
           if (pose && frame++ % 2 === 0) { // arms every other frame keeps it light on phones
-            const p = pose.detectForVideo(video, now).landmarks?.[0];
-            // Mirrored: your right arm (12/14) lifts the wing on the left of the screen.
-            wingsRef.current = p ? { l: armRaise(p, 12, 14), r: armRaise(p, 11, 13) } : { l: 0, r: 0 };
+            const res = pose.detectForVideo(video, now);
+            const img = res.landmarks?.[0], world = res.worldLandmarks?.[0];
+            // Mirrored: your right arm (12/14/16) drives the wing on the left of the screen.
+            armsRef.current = img && world
+              ? { l: armPose(world, img, 12, 14, 16), r: armPose(world, img, 11, 13, 15) }
+              : { l: REST, r: REST };
           }
           const face = toFace(lm.detectForVideo(video, now));
-          if (face) { face.wingL = wingsRef.current.l; face.wingR = wingsRef.current.r; faceRef.current = face; }
+          if (face) {
+            const { l, r } = armsRef.current;
+            Object.assign(face, { wingL: l.raise, wingR: r.raise, swingL: l.swing, swingR: r.swing, bendL: l.bend, bendR: r.bend });
+            faceRef.current = face;
+          }
           const rec = recordingRef.current;
           if (rec) { // always ends on time, even if the face is lost mid-recording
             const elapsed = (performance.now() - rec.start) / 1000;

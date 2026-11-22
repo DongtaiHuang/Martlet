@@ -63,10 +63,11 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
   const cur = useRef<Face>({ ...NEUTRAL });
   const playStart = useRef<{ id: number; t: number } | null>(null);
   const head = useRef<THREE.Group>(null), body = useRef<THREE.Group>(null), jaw = useRef<THREE.Group>(null);
-  const eyes = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
+  const eyes = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)]; // whole eye: white + pupil + highlight
   const brows = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
   const cheeks = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
   const wings = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
+  const beak = useRef<THREE.Group>(null), tongue = useRef<THREE.Mesh>(null);
   const nextBlink = useRef(2);
   const spin = useRef<THREE.Group>(null);
   const orbitRef = useOrbit();
@@ -96,23 +97,38 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
     // 3. Drive the rig.
     const clamp = THREE.MathUtils.clamp;
     if (head.current) head.current.rotation.set(clamp(c.pitch, -0.5, 0.5), clamp(c.yaw, -0.8, 0.8), clamp(c.roll, -0.5, 0.5));
-    if (jaw.current) jaw.current.rotation.x = clamp(c.jaw, 0, 1) * 0.65;
+    const tongueOut = clamp(c.tongue, 0, 1);
+    // Sticking your tongue out opens the beak at least a little so the tongue shows.
+    if (jaw.current) jaw.current.rotation.x = Math.max(clamp(c.jaw, 0, 1), tongueOut * 0.45) * 0.65;
+    if (tongue.current) {
+      tongue.current.visible = tongueOut > 0.05;
+      tongue.current.position.set(0, -0.04 - tongueOut * 0.05, 0.1 + tongueOut * 0.22);
+      tongue.current.scale.set(0.075, 0.03, 0.06 + tongueOut * 0.13);
+    }
+    if (beak.current) { // pucker narrows and pushes the beak forward; mouth sideways shifts it
+      beak.current.scale.x = 1 - clamp(c.pucker, 0, 1) * 0.35;
+      beak.current.position.set(clamp(c.mouthX, -1, 1) * 0.09, 0, clamp(c.pucker, 0, 1) * 0.08);
+    }
+    const wide = 1 + clamp(c.wide, 0, 1) * 0.28;
     [c.blinkL, c.blinkR].forEach((b, i) => {
-      const e = eyes[i].current;
-      if (e) e.scale.y = Math.max(0.08, 1 - clamp(b, 0, 1) * 0.95 - c.smile * 0.25);
+      const e = eyes[i].current; if (!e) return;
+      const open = 1 - clamp(b, 0, 1) * 0.95 - c.smile * 0.25 - c.squint * 0.4 - c.frown * 0.18;
+      e.scale.set(wide, Math.max(0.08, open * wide), wide);
     });
     brows.forEach((r, i) => {
       const s = i === 0 ? -1 : 1, br = r.current; if (!br) return;
-      br.position.y = 0.36 + c.browUp * 0.13 - c.browDown * 0.08;
-      br.rotation.z = s * (c.browDown * 0.4 - c.browUp * 0.3);
+      br.position.y = 0.36 + c.browUp * 0.13 + c.wide * 0.06 - c.browDown * 0.08;
+      br.rotation.z = s * (c.browDown * 0.4 - (c.browUp + c.frown * 0.9) * 0.3); // frown = sad, inner ends up
     });
-    cheeks.forEach((r) => r.current?.scale.setScalar(0.1 * (1 + c.smile * 0.9)));
+    cheeks.forEach((r) => r.current?.scale.setScalar(0.1 * (1 + c.smile * 0.9 + clamp(c.puff, 0, 1) * 1.6)));
     // Wings follow your arms (0 = down, 1 = overhead); a big grin adds a happy flutter.
     const flutter = c.smile > 0.55 ? Math.abs(Math.sin(t * 16)) * 0.3 * (c.smile - 0.55) * 2 : 0;
-    [c.wingL, c.wingR].forEach((lift, i) => {
+    [[c.wingL, c.swingL, c.bendL], [c.wingR, c.swingR, c.bendR]].forEach(([lift, swing, bend], i) => {
       const w = wings[i].current; if (!w) return;
       const s = i === 0 ? -1 : 1;
-      w.rotation.z = s * (0.12 + clamp(lift, 0, 1) * 2.3 + flutter); // rotate outward and up from the shoulder
+      // From the shoulder: swing forward/back (x), then raise outward/up (z); a bent elbow folds the wing in.
+      w.rotation.set(-clamp(swing, -1, 1) * 1.3 - bend * 0.35, 0, s * (0.12 + clamp(lift, 0, 1) * 2.3 + flutter), "ZXY");
+      w.scale.y = 1 - clamp(bend, 0, 1) * 0.3;
     });
     if (body.current) body.current.scale.y = 1 + (animate ? Math.sin(t * 2.2) * 0.012 : 0);
   });
@@ -195,8 +211,8 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
         <mesh><icosahedronGeometry args={[0.62, 1]} /><Mat color={plumage.body} /></mesh>
         <mesh position={[0, -0.5, 0.3]} scale={[0.24, 0.11, 0.13]}><icosahedronGeometry args={[1, 1]} /><Mat color={RED} /></mesh>
         {[-1, 1].map((s, i) => (
-          <group key={s} position={[s * 0.25, 0.1, 0.5]}>
-            <mesh ref={eyes[i]}><sphereGeometry args={[0.16, 12, 10]} /><Mat color="#ffffff" roughness={0.3} /></mesh>
+          <group key={s} ref={eyes[i]} position={[s * 0.25, 0.1, 0.5]}>
+            <mesh><sphereGeometry args={[0.16, 12, 10]} /><Mat color="#ffffff" roughness={0.3} /></mesh>
             <mesh position={[0, 0, 0.12]}><sphereGeometry args={[0.075, 12, 10]} /><meshStandardMaterial color={INK} roughness={0.2} /></mesh>
             <mesh position={[0.03, 0.035, 0.19]}><sphereGeometry args={[0.022, 6, 6]} /><meshBasicMaterial color="#ffffff" /></mesh>
           </group>
@@ -208,9 +224,12 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
           <mesh key={s} ref={cheeks[i]} position={[s * 0.42, -0.14, 0.38]} scale={0.1}><sphereGeometry args={[1, 8, 6]} /><Mat color="#f4a3a8" transparent opacity={0.8} /></mesh>
         ))}
         {/* Beak: upper fixed, lower opens with your jaw */}
-        <mesh position={[0, -0.08, 0.72]} rotation={[Math.PI / 2, 0, 0]}><coneGeometry args={[0.13, 0.42, 5]} /><Mat color={GOLD} /></mesh>
-        <group ref={jaw} position={[0, -0.16, 0.56]}>
-          <mesh position={[0, -0.02, 0.15]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 0.6]}><coneGeometry args={[0.1, 0.32, 5]} /><Mat color="#c98d1f" /></mesh>
+        <group ref={beak}>
+          <mesh position={[0, -0.08, 0.72]} rotation={[Math.PI / 2, 0, 0]}><coneGeometry args={[0.13, 0.42, 5]} /><Mat color={GOLD} /></mesh>
+          <group ref={jaw} position={[0, -0.16, 0.56]}>
+            <mesh position={[0, -0.02, 0.15]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 0.6]}><coneGeometry args={[0.1, 0.32, 5]} /><Mat color="#c98d1f" /></mesh>
+            <mesh ref={tongue} visible={false}><icosahedronGeometry args={[1, 1]} /><Mat color="#e86a7f" roughness={0.5} /></mesh>
+          </group>
         </group>
         {wearing.has("beanie") && (
           <group position={[0, 0.3, 0]}>
