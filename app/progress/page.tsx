@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, CheckCircle2, Eye, LockKeyhole } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
-import { GrowthTree } from "@/components/progress/GrowthTree";
-import { listLandmarks } from "@/lib/landmarks";
+import { GrowthTree, type TreeFruit } from "@/components/progress/GrowthTree";
+import { listLandmarks, listMyUnlocks } from "@/lib/landmarks";
 import { TREE_STAGES, treeStage, unlocksToNextStage, type TreeStage } from "@/lib/progress";
 import { getDataMode } from "@/lib/supabase/env";
 
@@ -15,7 +15,15 @@ export default async function ProgressPage({
 }: {
   searchParams: Promise<{ stage?: string | string[] }>;
 }) {
-  const [landmarks, { stage: stageParam }] = await Promise.all([listLandmarks(), searchParams]);
+  const [landmarks, myUnlocks, { stage: stageParam }] = await Promise.all([listLandmarks(), listMyUnlocks(), searchParams]);
+  // Each photo the user has added hangs on the tree as a fruit linking back to it.
+  const fruits: TreeFruit[] = myUnlocks.map((unlock) => ({
+    landmarkId: unlock.landmark_id,
+    landmarkName: unlock.landmark_name,
+    caption: unlock.caption,
+    photoUrl: unlock.photo_url,
+    href: `/landmarks/${encodeURIComponent(unlock.landmark_id)}#my-photo`,
+  }));
   const total = landmarks.length;
   const unlocked = landmarks.filter((l) => l.unlocked).length;
   const realStage = treeStage(unlocked, total);
@@ -69,8 +77,8 @@ export default async function ProgressPage({
         )}
 
         <section aria-labelledby="tree-heading" className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 text-center shadow-sm sm:p-8">
-          <div className="overflow-hidden rounded-xl border border-stone-200">
-            <GrowthTree stage={stage} unlocked={unlocked} total={total} preview={previewing} />
+          <div className="rounded-xl border border-stone-200">
+            <GrowthTree stage={stage} unlocked={unlocked} total={total} preview={previewing} fruits={fruits} />
           </div>
           <h2 id="tree-heading" className="mt-3 text-2xl font-extrabold tracking-tight">{TREE_STAGES[stage]}</h2>
           <p className="mt-1 text-stone-600">
@@ -82,6 +90,11 @@ export default async function ProgressPage({
                 ? "reach full bloom"
                 : `grow into a ${TREE_STAGES[stage + 1].toLowerCase()}`}.`}
           </p>
+          {fruits.length > 0 && (
+            <p className="mt-2 text-sm text-stone-600">
+              Each <span className="font-semibold text-red-700">apple</span> is one of your landmark photos. Hover to preview it, or tap to open it.
+            </p>
+          )}
           <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-stone-500">Tap a stage to preview it</p>
           <ol aria-label="Growth stages" className="mt-2 flex flex-wrap justify-center gap-1.5">
             {TREE_STAGES.map((name, i) => {

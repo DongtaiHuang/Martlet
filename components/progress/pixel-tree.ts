@@ -37,6 +37,9 @@ const BW = {
   leaf2: "#7b7b7b",
   leaf3: "#a9a9a9",
   blossom: "#ffffff",
+  fruit: "#efefef",
+  fruitShine: "#ffffff",
+  fruitDark: "#8f8f8f",
   ink: "#111111",
 } as const;
 
@@ -65,7 +68,10 @@ const COLOR: Record<keyof typeof BW, string> = {
   leaf1: "#2e7638",
   leaf2: "#4c9d44",
   leaf3: "#8bc65a",
-  blossom: "#e0314a", // McGill-ish red blossoms at full bloom
+  blossom: "#ffd6e0", // pale pink blossoms at full bloom (red is reserved for photo fruit)
+  fruit: "#d62828", // one apple per landmark photo
+  fruitShine: "#ff8a80",
+  fruitDark: "#8e1b1b",
   ink: "#1d2a3a",
 };
 
@@ -76,10 +82,14 @@ export type PixelColor = keyof typeof BW;
 type Grid = (PixelColor | undefined)[];
 export interface PixelPath { color: PixelColor; d: string }
 export interface PixelLeaf { x: number; y: number; fall: number; drift: number; delay: number; color: PixelColor }
+/** Where a photo fruit hangs: top-left grid cell and size (3x3 apples on big trees, 2x2 on young ones, 1 px berries on small plants). */
+export interface FruitSpot { x: number; y: number; size: number }
 export interface PixelScene {
   background: PixelPath[];
   wood: PixelPath[];
   foliage: PixelPath[];
+  fruit: PixelPath[];
+  fruitSpots: FruitSpot[];
   falling: PixelLeaf[];
   bird: PixelPath[] | null;
 }
@@ -207,10 +217,10 @@ const CLUSTERS = [
 ];
 
 const TREE_SPEC: Record<3 | 4 | 5 | 6, { height: number; crown: number; clusters: number; trunk: number }> = {
-  3: { height: 13, crown: 5, clusters: 3, trunk: 1 },
-  4: { height: 21, crown: 7.5, clusters: 5, trunk: 2 },
-  5: { height: 32, crown: 10.5, clusters: 7, trunk: 2 },
-  6: { height: 41, crown: 14, clusters: 9, trunk: 3 },
+  3: { height: 14, crown: 6, clusters: 3, trunk: 1 },
+  4: { height: 23, crown: 8.5, clusters: 5, trunk: 2 },
+  5: { height: 33, crown: 11.5, clusters: 7, trunk: 2 },
+  6: { height: 42, crown: 15, clusters: 9, trunk: 3 },
 };
 
 const LEAF_LEVELS = ["leaf0", "leaf1", "leaf2", "leaf3"] as const;
@@ -328,10 +338,68 @@ function birdPaths(): PixelPath[] {
   return toPaths(g);
 }
 
-const cache = new Map<TreeStage, PixelScene>();
+/**
+ * Picks spots for `count` fruits on the plant: inside the lower canopy (away from the trunk)
+ * on trees, on the leaves of small plants. Farthest-point sampling spreads them out, and the
+ * order is stable, so fruit i (the user's i-th unlock) keeps its place as more are added.
+ */
+function pickFruitSpots(stage: TreeStage, foliage: Grid, count: number): FruitSpot[] {
+  if (count <= 0 || stage === 0) return [];
+  const size = stage >= 5 ? 3 : stage >= 3 ? 2 : 1;
+  const leafy = (x: number, y: number) => (foliage[y * GRID_W + x] ?? "").startsWith("leaf");
+  let minY = 0;
+  let start: [number, number] = [BASE_X - 3, BASE_Y];
+  if (stage >= 3) {
+    const { height, crown: R } = TREE_SPEC[stage as 3 | 4 | 5 | 6];
+    const cy = BASE_Y - height + R;
+    minY = cy - R * 0.15;
+    start = [BASE_X - R * 0.7, cy + R * 0.55];
+  }
+  const candidates: [number, number][] = [];
+  for (let y = Math.ceil(minY); y < GRID_H - size; y++) {
+    for (let x = 0; x < GRID_W - size; x++) {
+      let fits = true;
+      for (let dy = 0; dy < size && fits; dy++) for (let dx = 0; dx < size && fits; dx++) fits = leafy(x + dx, y + dy);
+      // Keep fruit off the trunk line, and berries off the small plant's stem.
+      if (fits && (stage < 3 ? x !== BASE_X : Math.abs(x + size / 2 - BASE_X) > 2)) candidates.push([x, y]);
+    }
+  }
+  if (candidates.length === 0) return [];
+  const dist = (a: [number, number], b: [number, number]) => Math.hypot(a[0] - b[0], (a[1] - b[1]) * 1.2);
+  const chosen: [number, number][] = [candidates.reduce((best, c) => (dist(c, start) < dist(best, start) ? c : best))];
+  while (chosen.length < Math.min(count, candidates.length)) {
+    let best = candidates[0], bestScore = -1;
+    for (const c of candidates) {
+      const score = Math.min(...chosen.map((q) => dist(c, q)));
+      if (score > bestScore) { best = c; bestScore = score; }
+    }
+    chosen.push(best);
+  }
+  return chosen.map(([x, y]) => ({ x, y, size }));
+}
 
-export function pixelScene(stage: TreeStage): PixelScene {
-  const cached = cache.get(stage);
+function paintFruit(spots: FruitSpot[]): Grid {
+  const g = newGrid();
+  for (const { x, y, size } of spots) {
+    if (size === 1) { set(g, x, y, "fruit"); continue; }
+    if (size === 2) {
+      set(g, x, y, "fruitShine"); set(g, x + 1, y, "fruit");
+      set(g, x, y + 1, "fruit"); set(g, x + 1, y + 1, "fruitDark");
+      continue;
+    }
+    // 3x3 apple: highlight top-left, shade bottom-right, rounded bottom.
+    set(g, x, y, "fruitShine"); set(g, x + 1, y, "fruit"); set(g, x + 2, y, "fruit");
+    set(g, x, y + 1, "fruit"); set(g, x + 1, y + 1, "fruit"); set(g, x + 2, y + 1, "fruitDark");
+    set(g, x + 1, y + 2, "fruitDark");
+  }
+  return g;
+}
+
+const cache = new Map<string, PixelScene>();
+
+export function pixelScene(stage: TreeStage, fruitCount = 0): PixelScene {
+  const key = `${stage}:${fruitCount}`;
+  const cached = cache.get(key);
   if (cached) return cached;
   const wood = newGrid();
   const foliage = newGrid();
@@ -339,14 +407,17 @@ export function pixelScene(stage: TreeStage): PixelScene {
   if (stage <= 2) paintSmallPlant(stage as 0 | 1 | 2, wood, foliage);
   else falling = paintTree(stage as 3 | 4 | 5 | 6, wood, foliage);
   const crown = stage >= 3 ? TREE_SPEC[stage as 3 | 4 | 5 | 6].crown : 0;
+  const fruitSpots = pickFruitSpots(stage, foliage, fruitCount);
   const scene: PixelScene = {
     background: toPaths(paintBackground(crown)),
     wood: toPaths(wood),
     foliage: toPaths(foliage),
+    fruit: toPaths(paintFruit(fruitSpots)),
+    fruitSpots,
     falling,
     bird: stage === 6 ? birdPaths() : null,
   };
-  cache.set(stage, scene);
+  cache.set(key, scene);
   return scene;
 }
 

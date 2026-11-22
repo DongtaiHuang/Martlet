@@ -9,7 +9,7 @@
 ADR 0009 lists progress ("5 / 20 landmarks") as follow-up work. A plain progress bar on the Landmarks page didn't give students much reason to keep exploring. We want a visible reward that grows as they unlock more landmarks, something they want to show friends and that works in a demo.
 
 Constraints:
-- It must not add new data or permissions: progress comes from the user's existing `landmark_unlocks` (RLS from 0009).
+- It must not add new data or permissions: progress and fruit come from the user's existing `landmark_unlocks` and photos (RLS from 0009).
 - It must work on phones (375 px) and stay light, with no extra libraries or image assets to manage.
 - Motion must respect users who prefer reduced motion.
 - The landmark count will change, so growth can't be hard-coded to 6 landmarks.
@@ -30,6 +30,11 @@ Constraints:
 - **Pixel art**, generated in code (`components/progress/pixel-tree.ts`): the scene is painted on a 120×60 grid and shaded with ordered (Bayer) dithering, so output is deterministic. The grid is converted to **one SVG `<path>` per colour** (row runs), about 33 KB per stage, cached per stage on the server.
 - **Colour by default** (blue sky, golden field, green tree, red blossoms). The black-and-white palette is kept as an option (`<GrowthTree palette="bw" />`).
 - Rendered by a **Server Component**; no client JavaScript.
+
+### Photo fruit
+- Each landmark photo the user has added hangs on the tree as a **red apple**, in unlock order (`listMyUnlocks()` in `lib/landmarks.ts`, the user's own rows only, with signed photo URLs). Canopies are wide enough at every stage to hold them; sprouts and saplings carry 1-pixel berries, young trees 2×2 apples, mature trees 3×3.
+- Fruit spots are chosen inside the lower canopy by farthest-point sampling, so they spread out and keep their places as more are added. Full-bloom blossoms are pale pink so they can't be mistaken for fruit.
+- Each fruit is a link (larger hit area than the fruit itself). **Hover or keyboard focus** shows a ring and a preview card (photo, landmark, caption), CSS-only. **Click** opens `/landmarks/<id>#my-photo`, where the user's photo in the gallery is scrolled to and highlighted. Phones have no hover, so a tap opens the photo directly.
 
 ### Motion (CSS only, `app/globals.css`)
 - The leaves shift one pixel left and right (a pixel-art sway), falling leaves (red petals at full bloom) drop in steps, and the bird bobs.
