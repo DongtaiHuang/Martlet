@@ -91,7 +91,7 @@ export function LandmarkPhotoViewer({ photos, index, onIndex, onClose, landmarkN
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
   }
 
-  const date = photo ? new Date(photo.created_at).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" }) : "";
+  const date = photo ? new Date(photo.created_at).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric", timeZone: "America/Toronto" }) : "";
 
   return (
     <dialog

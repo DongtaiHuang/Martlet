@@ -91,7 +91,7 @@ export function LandmarkGallery({ photos, landmarkName, landmarkId }: { photos: 
                       <span className={`block font-bold text-white drop-shadow ${hero ? "text-lg" : "text-sm"}`}>{photo.display_name}</span>
                       {photo.caption && <span className={`mt-0.5 block text-white/85 ${hero ? "line-clamp-2 text-sm" : "line-clamp-1 text-xs"}`}>{photo.caption}</span>}
                       <span className="mt-0.5 block text-[11px] text-white/60">
-                        {new Date(photo.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}{edited && " · edited"}
+                        {new Date(photo.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric", timeZone: "America/Toronto" })}{edited && " · edited"}
                       </span>
                     </span>
                     <span aria-hidden="true" className="absolute top-2 right-2 grid size-8 place-items-center rounded-full bg-black/40 text-white opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100"><Expand size={15} /></span>
