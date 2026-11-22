@@ -27,6 +27,7 @@ In **SQL Editor**, paste and run each file once:
 5. `supabase/migrations/005_table_grants.sql` (explicit table privileges; newer Supabase projects don't auto-grant them, causing `permission denied`). Safe to re-run.
 6. `supabase/migrations/006_landmarks.sql` (ADR 0009: landmarks, photo unlocks, and the private `landmark-photos` Storage bucket with its policies). Safe to re-run. Landmark coordinates are approximate; check them on the map and keep `lib/mock-landmarks.ts` in sync.
 7. `supabase/migrations/007_meetup_polls.sql` (advisory meetup polls). After 001–006 are applied, open a new SQL Editor query, paste the full 007 file, and run it once before deploying the poll UI.
+8. `supabase/migrations/008_off_campus_meetups.sql` (curated public venues). After verifying 001–007, have the database owner run 008 once before deploying off-campus creation. Existing meetups keep their stored locations. The migration replaces the original campus foreign key with separately enforced campus and public venue foreign keys.
 
 `002` adds a foreign key from `meetups(location_name, latitude, longitude)` to `campus_locations`. If the project already holds meetups at non-approved coordinates, it will fail; cancel/delete those rows first (Table editor) and re-run.
 
@@ -106,9 +107,17 @@ If all poll objects are absent and 001–006 are present, paste and run the full
 
 The development server logs a diagnostic category and safe error code. Production shows a generic error with a Retry button.
 
+## Off-campus meetup locations
+
+Choose **Other — Outside McGill Campus** on the creation form to see the curated Montréal public venues. Keep `lib/public-venues.ts` and the database catalog in sync through new migrations when adding venues. Run `tests/meetup-locations-database.test.sql` on a disposable database with migrations 001–008 applied to verify location constraints and authorization.
+
+OpenFreeMap provides map tiles for previews. Broader venue search requires a separate provider whose terms permit place search, persistent storage of selected venue data, and any required attribution. To enable it, add an authenticated server route with input validation, Montréal bounds, rate limits, and permitted caching. Keep the provider key on the server. Verify that each resolved result is a public venue before adding it to the approved catalog through a trusted server path. The database should continue to check the exact canonical venue tuple.
+
 ## Verify meetup polls
 
 Run `node --test tests/poll-validation.test.mjs` with Node.js 22 or newer. On a disposable local database with migrations 001–007 applied, run `tests/poll-database.test.sql` with SQL Editor or `psql -v ON_ERROR_STOP=1 -f tests/poll-database.test.sql`. The test creates synthetic fixtures inside a transaction and rolls them back.
+
+Location poll choices remain limited to approved campus locations, including on off-campus meetups. Polls are advisory and do not change the meetup venue.
 
 For hosted verification, use two approved test accounts. Have the host create a location poll on an upcoming meetup. Have the second account vote and change its choice without Pecking. Check the totals, then have the host close the poll and confirm the choices are read-only.
 

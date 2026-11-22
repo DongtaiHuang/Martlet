@@ -1,14 +1,15 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Map, Marker, Popup } from "maplibre-gl";
+import { LngLatBounds, Map, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import type { LandmarkSummary } from "@/types/landmark";
+import { PUBLIC_VENUES } from "@/lib/public-venues";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
-import { CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
+import { CAMPUS_CENTER, CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 
 const FOCUS_ZOOM = 17;
 
@@ -89,6 +90,17 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     });
     return () => markers.forEach((m) => m.remove());
   }, [shownLandmarks, router]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || focusId) return;
+    const hasPublicMeetup = meetups.some((meetup) => PUBLIC_VENUES.some((venue) =>
+      meetup.location_name === venue.name && meetup.latitude === venue.latitude && meetup.longitude === venue.longitude));
+    if (!hasPublicMeetup) return;
+    const bounds = new LngLatBounds(CAMPUS_CENTER, CAMPUS_CENTER);
+    meetups.forEach(({ longitude, latitude }) => bounds.extend([longitude, latitude]));
+    map.fitBounds(bounds, { padding: 40, maxZoom: FOCUS_ZOOM, duration: 0 });
+  }, [meetups, focusId]);
 
   // Runs after the marker effect above, and only when focusId changes, so changing
   // the category filter doesn't keep re-opening the popup.

@@ -17,7 +17,7 @@ export default async function CreateMeetupPage() {
       <main className="mx-auto max-w-3xl px-4 py-7 sm:px-8 sm:py-12">
         <Link href="/meetups" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-red-800 hover:underline"><ArrowLeft aria-hidden="true" size={16} /> Back to feed</Link>
         <h1 className="mt-2 text-4xl font-extrabold tracking-tight">Create a meetup</h1>
-        <p className="mt-2 text-stone-600">Give students a place and time to meet you on campus.</p>
+        <p className="mt-2 text-stone-600">Pick a time and an approved campus location or public venue in Montréal.</p>
         {!viewer && (
           <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
             {isMockMode ? (

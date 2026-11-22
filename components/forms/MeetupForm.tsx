@@ -6,9 +6,11 @@ import { submitMeetup, type CreateState } from "@/app/meetups/new/actions";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
-import { CAMPUS_LOCATIONS } from "@/lib/locations";
+import { CAMPUS_LOCATIONS, getCampusLocation } from "@/lib/locations";
+import { getPublicVenue, OTHER_LOCATION, PUBLIC_VENUES } from "@/lib/public-venues";
+import { LocationPreview } from "./LocationPreview";
 
-const fieldStyle = "mt-2 block w-full min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700 aria-invalid:border-red-700";
+const fieldStyle = "mt-2 block min-h-11 w-full min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-950 focus-visible:outline-2 focus-visible:outline-red-700 aria-invalid:border-red-700";
 
 function FieldError({ name, fields }: { name: keyof NonNullable<CreateState["fields"]>; fields: CreateState["fields"] }) {
   const message = fields?.[name]?.[0];
@@ -20,6 +22,10 @@ export function MeetupForm() {
 
   const { minimum, refreshMinimum } = useFutureLocalTime();
   const [timeError, setTimeError] = useState(false);
+  const [locationId, setLocationId] = useState("");
+  const [venueId, setVenueId] = useState("");
+  const offCampus = locationId === OTHER_LOCATION;
+  const location = offCampus ? getPublicVenue(venueId) : getCampusLocation(locationId);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -65,14 +71,26 @@ export function MeetupForm() {
             <FieldError name="category" fields={state.fields} />
           </div>
           <div className="min-w-0">
-            <label htmlFor="location" className="font-semibold">Campus location</label>
-            <select id="location" name="location" required defaultValue="" className={fieldStyle} {...fieldErrorProps("location")}>
+            <label htmlFor="location" className="font-semibold">Meetup location</label>
+            <select id="location" name="location" required value={locationId} onChange={(event) => setLocationId(event.target.value)} className={fieldStyle} {...fieldErrorProps("location")}>
               <option value="" disabled>Choose a location</option>
               {CAMPUS_LOCATIONS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+              <option value={OTHER_LOCATION}>Other — Outside McGill Campus</option>
             </select>
             <FieldError name="location" fields={state.fields} />
           </div>
         </div>
+        {offCampus && (
+          <div className="min-w-0">
+            <label htmlFor="publicVenue" className="font-semibold">Public venue in Montréal</label>
+            <select id="publicVenue" name="publicVenue" required value={venueId} onChange={(event) => setVenueId(event.target.value)} className={fieldStyle} {...fieldErrorProps("publicVenue")}>
+              <option value="" disabled>Choose a public venue</option>
+              {PUBLIC_VENUES.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+            </select>
+            <FieldError name="publicVenue" fields={state.fields} />
+          </div>
+        )}
+        {location && <LocationPreview location={location} />}
         <div>
           <label htmlFor="startsAt" className="font-semibold">Start date and time</label>
           <input id="startsAt" name="startsAt" type="datetime-local" min={minimum} step={60} required className={fieldStyle} onChange={() => setTimeError(false)} aria-invalid={timeError || Boolean(state.fields?.startsAt)} aria-describedby={timeError || state.fields?.startsAt ? "startsAt-hint startsAt-error" : "startsAt-hint"} />

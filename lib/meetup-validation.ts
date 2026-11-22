@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CAMPUS_LOCATIONS, type CampusLocation } from "@/lib/locations";
+import { getPublicVenue } from "@/lib/public-venues";
 import type { CreateMeetupInput, MeetupCategory } from "@/types/meetup";
 
 // Pure validation shared by the server (lib/meetups.ts) and, optionally, client forms.
@@ -29,10 +30,13 @@ export function findApprovedLocation(
   latitude: number,
   longitude: number,
 ): CampusLocation | undefined {
-  return CAMPUS_LOCATIONS.find((place) =>
-    place.name === name &&
+  return CAMPUS_LOCATIONS.find((place) => matchesLocation(place, name, latitude, longitude));
+}
+
+function matchesLocation(place: CampusLocation, name: string, latitude: number, longitude: number): boolean {
+  return place.name === name &&
     Math.abs(place.latitude - latitude) <= COORDINATE_TOLERANCE &&
-    Math.abs(place.longitude - longitude) <= COORDINATE_TOLERANCE);
+    Math.abs(place.longitude - longitude) <= COORDINATE_TOLERANCE;
 }
 
 const createMeetupSchema = z.object({
@@ -43,9 +47,10 @@ const createMeetupSchema = z.object({
     .max(DESCRIPTION_MAX, `Description must be at most ${DESCRIPTION_MAX} characters.`)
     .default(""),
   category: z.enum(MEETUP_CATEGORIES, "Choose a valid category."),
-  location_name: z.string("Choose a campus location.").trim().min(1, "Choose a campus location."),
-  latitude: z.number("Choose a campus location."),
-  longitude: z.number("Choose a campus location."),
+  location_name: z.string("Choose a meetup location.").trim().min(1, "Choose a meetup location."),
+  latitude: z.number("Choose a meetup location."),
+  longitude: z.number("Choose a meetup location."),
+  public_venue_id: z.string().min(1).optional(),
   starts_at: z.string("Choose a start time.").min(1, "Choose a start time."),
 });
 
@@ -65,8 +70,11 @@ export function validateCreateMeetupInput(
   }
 
   const data = parsed.data;
-  const location = findApprovedLocation(data.location_name, data.latitude, data.longitude);
-  if (!location) errors.location_name = "Choose one of the approved campus locations.";
+  const venue = data.public_venue_id === undefined ? undefined : getPublicVenue(data.public_venue_id);
+  const location = data.public_venue_id === undefined
+    ? findApprovedLocation(data.location_name, data.latitude, data.longitude)
+    : venue && matchesLocation(venue, data.location_name, data.latitude, data.longitude) ? venue : undefined;
+  if (!location) errors.location_name = "Choose an approved campus location or public venue.";
 
   const startsAt = new Date(data.starts_at);
   if (Number.isNaN(startsAt.getTime())) {
@@ -81,6 +89,7 @@ export function validateCreateMeetupInput(
     ok: true,
     location,
     value: {
+      ...(venue ? { public_venue_id: venue.id } : {}),
       title: data.title,
       description: data.description,
       category: data.category,

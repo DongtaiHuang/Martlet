@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { categoryValues } from "@/components/feed/categories";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
+import { getPublicVenue, OTHER_LOCATION } from "@/lib/public-venues";
 import { getCampusLocation } from "@/lib/locations";
 import { createMeetup } from "@/lib/meetups";
 
@@ -12,14 +13,16 @@ const meetupInput = z.object({
   title: z.string().trim().min(3, "Enter at least 3 characters.").max(80, "Use 80 characters or fewer."),
   description: z.string().trim().max(500, "Use 500 characters or fewer."),
   category: z.enum(categoryValues, { error: "Choose a category." }),
-  location: z.string().transform((id, context) => {
-    const place = getCampusLocation(id);
-    if (place) return place;
-    context.addIssue({ code: "custom", message: "Choose an approved campus location." });
-    return z.NEVER;
-  }),
+  location: z.string().refine(
+    (id) => id === OTHER_LOCATION || Boolean(getCampusLocation(id)),
+    "Choose an approved campus location or select Other.",
+  ),
+  publicVenue: z.string(),
   startsAt: z.iso.datetime({ error: "Enter a valid date and time." })
     .refine((value) => Date.parse(value) > Date.now(), "Choose a start time in the future."),
+}).refine(({ location, publicVenue }) => location !== OTHER_LOCATION || Boolean(getPublicVenue(publicVenue)), {
+  path: ["publicVenue"],
+  message: "Choose a public venue.",
 });
 
 export type CreateState = {
@@ -33,6 +36,7 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
     description: formData.get("description") ?? "",
     category: formData.get("category"),
     location: formData.get("location") ?? "",
+    publicVenue: formData.get("publicVenue") ?? "",
     startsAt: formData.get("startsAt"),
   });
 
@@ -40,7 +44,10 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
     return { message: "Check the highlighted fields.", fields: z.flattenError(input.error).fieldErrors };
   }
 
-  const { title, description, category, location, startsAt } = input.data;
+  const { title, description, category, location, publicVenue, startsAt } = input.data;
+  const venue = location === OTHER_LOCATION ? getPublicVenue(publicVenue) : undefined;
+  const place = location === OTHER_LOCATION ? venue : getCampusLocation(location);
+  if (!place) return { message: "Choose an approved meetup location." };
   let id: string;
   try {
     if (!(await getMeetupViewer())) {
@@ -51,9 +58,10 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
       title,
       description,
       category,
-      location_name: location.name,
-      latitude: location.latitude,
-      longitude: location.longitude,
+      ...(venue ? { public_venue_id: venue.id } : {}),
+      location_name: place.name,
+      latitude: place.latitude,
+      longitude: place.longitude,
       starts_at: startsAt,
     });
     id = meetup.id;
