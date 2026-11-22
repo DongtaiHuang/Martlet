@@ -291,6 +291,306 @@
   --m-ok-ink: #7dff9e;
 }
 
+/* Summer: warm apricot daylight with sun rays, ocean teal accents; a night beach in dark mode
+   (rubber duckies, the beach and the sun: SeasonalScene.tsx). */
+[data-theme="summer"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #ffeedd;
+  --m-surface: #fffaf3;
+  --m-surface-muted: #fde3c8;
+  --m-line: #f5d2ad;
+  --m-line-soft: #fde3c8;
+  --m-line-strong: #e3b585;
+  --m-ink: #10232a;
+  --m-ink-soft: #17303a;
+  --m-ink-2: #2f4b54;
+  --m-ink-muted: #3b5660;
+  --m-ink-subtle: #58727b;
+  --m-brand: #0b6b80;
+  --m-brand-hover: #08566a;
+  --m-brand-ink: #0a6276;
+  --m-brand-ink-strong: #074a5a;
+  --m-brand-soft: #e1f3f6;
+  --m-brand-muted: #c8e8ee;
+  --m-brand-line: #8fd0dc;
+  --m-on-brand: #ffffff;
+  --m-focus: #0c7a92;
+  --m-warn-soft: #fffbeb;
+  --m-warn-muted: #fef3c7;
+  --m-warn-line: #fde68a;
+  --m-warn-ink: #78350f;
+  --m-ok-soft: #f0fdf4;
+  --m-ok-line: #bbf7d0;
+  --m-ok-ink: #166534;
+}
+[data-theme="summer"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #061a20;
+  --m-surface: #0b252d;
+  --m-surface-muted: #12323b;
+  --m-line: #1c414b;
+  --m-line-soft: #102c34;
+  --m-line-strong: #2f5c67;
+  --m-ink: #eef8f8;
+  --m-ink-soft: #dcf0f1;
+  --m-ink-2: #c0dde0;
+  --m-ink-muted: #9cc3c8;
+  --m-ink-subtle: #7fa8ae;
+  --m-brand: #0b6a7d;
+  --m-brand-hover: #0d778c;
+  --m-brand-ink: #6fdceb;
+  --m-brand-ink-strong: #a6ecf4;
+  --m-brand-soft: #082e38;
+  --m-brand-muted: #0d3d49;
+  --m-brand-line: #1d6676;
+  --m-on-brand: #ffffff;
+  --m-focus: #6fdceb;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+
+/* Chinese New Year: crimson and gold (lanterns, goats and red pockets: SeasonalScene.tsx). */
+[data-theme="cny"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #fff3e6;
+  --m-surface: #fffaf2;
+  --m-surface-muted: #fbe4cc;
+  --m-line: #f1cfa6;
+  --m-line-soft: #fbe4cc;
+  --m-line-strong: #ddb07a;
+  --m-ink: #2a0b0b;
+  --m-ink-soft: #3a1210;
+  --m-ink-2: #5c2a20;
+  --m-ink-muted: #6b3528;
+  --m-ink-subtle: #8a5340;
+  --m-brand: #b3111c;
+  --m-brand-hover: #920d16;
+  --m-brand-ink: #a10f19;
+  --m-brand-ink-strong: #7d0b12;
+  --m-brand-soft: #fdf0d2;
+  --m-brand-muted: #f8dda0;
+  --m-brand-line: #e2b545;
+  --m-on-brand: #ffffff;
+  --m-focus: #c8141f;
+  --m-warn-soft: #fffbeb;
+  --m-warn-muted: #fef3c7;
+  --m-warn-line: #fde68a;
+  --m-warn-ink: #78350f;
+  --m-ok-soft: #f0fdf4;
+  --m-ok-line: #bbf7d0;
+  --m-ok-ink: #166534;
+}
+[data-theme="cny"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #180506;
+  --m-surface: #240a0b;
+  --m-surface-muted: #321112;
+  --m-line: #45191a;
+  --m-line-soft: #2c0f10;
+  --m-line-strong: #6b2b28;
+  --m-ink: #fbefe6;
+  --m-ink-soft: #f3dfd1;
+  --m-ink-2: #e2c3ad;
+  --m-ink-muted: #c9a389;
+  --m-ink-subtle: #ab866c;
+  --m-brand: #b5161f;
+  --m-brand-hover: #c61f28;
+  --m-brand-ink: #f5c84c;
+  --m-brand-ink-strong: #ffe08a;
+  --m-brand-soft: #2e1207;
+  --m-brand-muted: #45200b;
+  --m-brand-line: #8a6420;
+  --m-on-brand: #ffffff;
+  --m-focus: #f5c84c;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+
+/* Seasonal themes. Winter: icy blues and snow white, with gentle snowfall behind the page
+   (see "Winter snowfall" below). Fall: fallen-leaf oranges, rust and bark browns. */
+[data-theme="winter"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #eef4fa;
+  --m-surface: #ffffff;
+  --m-surface-muted: #e3edf7;
+  --m-line: #d3e1ee;
+  --m-line-soft: #e3edf7;
+  --m-line-strong: #afc5da;
+  --m-ink: #0b1a2a;
+  --m-ink-soft: #132538;
+  --m-ink-2: #2c4760;
+  --m-ink-muted: #3b5670;
+  --m-ink-subtle: #5a7590;
+  --m-brand: #1c5a9e;
+  --m-brand-hover: #154a85;
+  --m-brand-ink: #18528f;
+  --m-brand-ink-strong: #113d6c;
+  --m-brand-soft: #e4eefa;
+  --m-brand-muted: #cfe1f5;
+  --m-brand-line: #a6c6e8;
+  --m-on-brand: #ffffff;
+  --m-focus: #1d66c2;
+  --m-warn-soft: #fffbeb;
+  --m-warn-muted: #fef3c7;
+  --m-warn-line: #fde68a;
+  --m-warn-ink: #78350f;
+  --m-ok-soft: #f0fdf4;
+  --m-ok-line: #bbf7d0;
+  --m-ok-ink: #166534;
+}
+[data-theme="winter"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #08111e;
+  --m-surface: #0f1b2c;
+  --m-surface-muted: #16253a;
+  --m-line: #213249;
+  --m-line-soft: #152236;
+  --m-line-strong: #39506e;
+  --m-ink: #eef4fb;
+  --m-ink-soft: #dde8f4;
+  --m-ink-2: #c2d3e6;
+  --m-ink-muted: #9db3cb;
+  --m-ink-subtle: #8099b4;
+  --m-brand: #24609f;
+  --m-brand-hover: #2a6cb1;
+  --m-brand-ink: #8cc5ff;
+  --m-brand-ink-strong: #badcff;
+  --m-brand-soft: #0e2240;
+  --m-brand-muted: #152f55;
+  --m-brand-line: #2a5283;
+  --m-on-brand: #ffffff;
+  --m-focus: #8cc5ff;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+[data-theme="fall"][data-mode="light"] {
+  color-scheme: light;
+  --m-canvas: #faf3e8;
+  --m-surface: #fffaf2;
+  --m-surface-muted: #f3e4cf;
+  --m-line: #e8d3b7;
+  --m-line-soft: #f3e4cf;
+  --m-line-strong: #d2b28b;
+  --m-ink: #2a1607;
+  --m-ink-soft: #3a210e;
+  --m-ink-2: #5a391b;
+  --m-ink-muted: #684526;
+  --m-ink-subtle: #835d36;
+  --m-brand: #a9430c;
+  --m-brand-hover: #8a3609;
+  --m-brand-ink: #96390a;
+  --m-brand-ink-strong: #762c07;
+  --m-brand-soft: #fcede0;
+  --m-brand-muted: #f9d9c0;
+  --m-brand-line: #eeb185;
+  --m-on-brand: #ffffff;
+  --m-focus: #b84a0d;
+  --m-warn-soft: #fffbeb;
+  --m-warn-muted: #fef3c7;
+  --m-warn-line: #fde68a;
+  --m-warn-ink: #78350f;
+  --m-ok-soft: #f0fdf4;
+  --m-ok-line: #bbf7d0;
+  --m-ok-ink: #166534;
+}
+[data-theme="fall"][data-mode="dark"] {
+  color-scheme: dark;
+  --m-canvas: #140c06;
+  --m-surface: #1f130a;
+  --m-surface-muted: #2b1b0f;
+  --m-line: #392515;
+  --m-line-soft: #27180d;
+  --m-line-strong: #5b3b21;
+  --m-ink: #f8ecdf;
+  --m-ink-soft: #efdcc8;
+  --m-ink-2: #dcc1a4;
+  --m-ink-muted: #bf9f81;
+  --m-ink-subtle: #a28465;
+  --m-brand: #b14a12;
+  --m-brand-hover: #c25616;
+  --m-brand-ink: #ffaa70;
+  --m-brand-ink-strong: #ffcaa2;
+  --m-brand-soft: #2e1608;
+  --m-brand-muted: #42200c;
+  --m-brand-line: #7a3913;
+  --m-on-brand: #ffffff;
+  --m-focus: #ffaa70;
+  --m-warn-soft: #2a1f0a;
+  --m-warn-muted: #3a2a0c;
+  --m-warn-line: #6b4d12;
+  --m-warn-ink: #fcd77a;
+  --m-ok-soft: #0e2418;
+  --m-ok-line: #1f5c37;
+  --m-ok-ink: #8ce0aa;
+}
+
+/* Winter snowfall: two layers of flakes drifting down behind the page content (decorative,
+   pointer-events none). The page shells' canvas is made transparent so the body's canvas
+   colour, with the snow on top, shows through; cards keep their solid surfaces, so text
+   contrast is unchanged. Flakes are an SVG mask painted with --snow, so each mode picks its
+   colour. Transform-only animation (cheap); still under reduced motion. */
+[data-theme="winter"] { --snow: #8fb6dd; --snow-opacity: 0.55; }
+[data-theme="winter"][data-mode="dark"] { --snow: #ffffff; --snow-opacity: 0.4; }
+/* Seasonal themes draw behind the page content (snow, moonlight, falling leaves), so the page
+   shells' canvas is transparent and the body's canvas colour shows through. */
+[data-theme="winter"] .martlet-page > .bg-canvas,
+[data-theme="fall"] .martlet-page > .bg-canvas,
+[data-theme="summer"] .martlet-page > .bg-canvas,
+[data-theme="cny"] .martlet-page > .bg-canvas { background-color: transparent; }
+[data-theme="winter"] body::before,
+[data-theme="winter"] body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--snow);
+  opacity: var(--snow-opacity);
+  mask-repeat: repeat;
+  animation: martlet-snowfall linear infinite;
+}
+/* Small flakes and specks, 300px tile, faster. */
+[data-theme="winter"] body::before {
+  --tile: 300px;
+  top: -300px;
+  height: calc(100% + 300px);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cg fill='%23000' stroke='none'%3E%3Ccircle cx='22' cy='40' r='2'/%3E%3Ccircle cx='140' cy='18' r='1.5'/%3E%3Ccircle cx='260' cy='70' r='2.2'/%3E%3Ccircle cx='90' cy='150' r='1.6'/%3E%3Ccircle cx='205' cy='190' r='2'/%3E%3Ccircle cx='40' cy='250' r='1.8'/%3E%3Ccircle cx='160' cy='270' r='1.4'/%3E%3Ccircle cx='280' cy='240' r='1.6'/%3E%3C/g%3E%3Cg stroke-width='1.4'%3E%3Cpath d='M70 80v14M63 83.5l14 7M63 90.5l14-7'/%3E%3Cpath d='M240 130v12M234 133l12 6M234 139l12-6'/%3E%3Cpath d='M120 220v10M115 222.5l10 5M115 227.5l10-5'/%3E%3C/g%3E%3C/svg%3E");
+  animation-duration: 22s;
+}
+/* Bigger, fewer flakes, 480px tile, slower: a parallax layer. */
+[data-theme="winter"] body::after {
+  --tile: 480px;
+  top: -480px;
+  height: calc(100% + 480px);
+  opacity: calc(var(--snow-opacity) * 0.8);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480' fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cg stroke-width='1.8'%3E%3Cg transform='translate(90 70)'%3E%3Cpath d='M0-11v22M-9.5-5.5l19 11M-9.5 5.5l19-11M-3-8l3 3 3-3M-3 8l3-3 3 3'/%3E%3C/g%3E%3Cg transform='translate(360 160)'%3E%3Cpath d='M0-9v18M-7.8-4.5l15.6 9M-7.8 4.5l15.6-9'/%3E%3C/g%3E%3Cg transform='translate(210 300)'%3E%3Cpath d='M0-12v24M-10.4-6l20.8 12M-10.4 6l20.8-12M-3-9l3 3 3-3M-3 9l3-3 3 3'/%3E%3C/g%3E%3Cg transform='translate(430 420)'%3E%3Cpath d='M0-8v16M-6.9-4l13.8 8M-6.9 4l13.8-8'/%3E%3C/g%3E%3Cg transform='translate(50 410)'%3E%3Cpath d='M0-10v20M-8.7-5l17.4 10M-8.7 5l17.4-10'/%3E%3C/g%3E%3C/g%3E%3Cg fill='%23000' stroke='none'%3E%3Ccircle cx='300' cy='40' r='3'/%3E%3Ccircle cx='150' cy='200' r='2.6'/%3E%3Ccircle cx='400' cy='300' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+  animation-duration: 38s;
+}
+@keyframes martlet-snowfall {
+  from { transform: translateY(0); }
+  to { transform: translateY(var(--tile)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="winter"] body::before,
+  [data-theme="winter"] body::after { animation: none; }
+}
+
 /* MapLibre controls follow dark mode (they're plain DOM, not part of the map style). */
 [data-mode="dark"] .maplibregl-ctrl-group {
   background: var(--m-surface-muted);
