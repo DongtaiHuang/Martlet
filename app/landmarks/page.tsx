@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Sprout } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { LandmarkMap } from "@/components/map/LandmarkMap";
 import { listLandmarks } from "@/lib/landmarks";
@@ -21,12 +23,9 @@ export default async function LandmarksPage() {
           Visit a landmark, take a photo of yourself doing its challenge, and unlock everyone else&apos;s photos from there.
         </p>
         {landmarks.length > 0 && (
-          <div className="mt-5 max-w-md">
-            <p className="text-sm font-semibold text-stone-800">You&apos;ve unlocked {unlocked} of {landmarks.length} landmarks</p>
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-stone-200" role="progressbar" aria-valuemin={0} aria-valuemax={landmarks.length} aria-valuenow={unlocked} aria-label="Landmarks unlocked">
-              <div className="h-full rounded-full bg-amber-500" style={{ width: `${(unlocked / landmarks.length) * 100}%` }} />
-            </div>
-          </div>
+          <Link href="/progress" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-900 hover:border-emerald-400 focus-visible:outline-2 focus-visible:outline-red-700">
+            <Sprout aria-hidden="true" size={17} /> {unlocked} of {landmarks.length} unlocked · See your tree
+          </Link>
         )}
         {getDataMode() === "mock" && (
           <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
