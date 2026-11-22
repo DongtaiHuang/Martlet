@@ -28,6 +28,17 @@ unflap(meetupId: string): Promise<void>
 
 Use the authenticated Supabase user ID internally; **never accept a `userId` argument from the browser**.
 
+## Achievements (ADR 0014)
+
+Server (`lib/achievements.ts`; the user always comes from the session):
+
+```typescript
+listMyAchievements(): Promise<EarnedMap | null>   // null = no account (signed out or mock mode)
+recordAchievement(id: AchievementId): Promise<"new" | "already" | "guest">
+```
+
+Server action `earnAchievement(id: unknown): Promise<EarnResult>` (`app/achievements/actions.ts`). In the browser, call `earn(id)` from `components/achievements/earn.ts`, or mark an element with `data-achievement="<id>"` to earn it on hover/focus. Ids and copy live in `lib/achievement-catalog.ts`.
+
 ## Data interpretation
 - A meetup's host is automatically participating without a `meetup_pecks` row.
 - `attendee_count = 1 + pecks count`.

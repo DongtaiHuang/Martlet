@@ -79,6 +79,7 @@ export function GrowthTree({ stage, unlocked, total, preview = false, palette = 
             key={fruit.landmarkId}
             href={fruit.href}
             aria-label={`Your photo at ${fruit.landmarkName}`}
+            data-achievement="fruit-inspector"
             className="group absolute z-10 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full hover:z-20 focus-visible:z-20 focus-visible:outline-none sm:size-8"
             style={{ left: `${left}%`, top: `${top}%` }}
           >

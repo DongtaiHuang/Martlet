@@ -7,6 +7,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { ArrowUpRight, CheckCircle2, LockKeyhole, UsersRound } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
 import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
+import { openedLandmark, watchMapAngle } from "./map-achievements";
 import { towerSvg, towerTier } from "./landmark-tower";
 import { POPUP_MAX_WIDTH } from "./popup-content";
 import { landmarkZoom } from "./landmark-style";
@@ -37,6 +38,7 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
     // landmarks would drop below zoom 13, where the map has no 3D buildings; the list flies
     // to those instead.)
     const map = createCampusMap(mapEl.current);
+    watchMapAngle(map);
 
     const byId = markers.current;
     for (const landmark of landmarks) {
@@ -47,6 +49,7 @@ export function LandmarkMap({ landmarks }: { landmarks: LandmarkSummary[] }) {
         // One popup at a time, and keep the list in sync.
         byId.forEach((other, id) => { if (id !== landmark.id && other.getPopup()?.isOpen()) other.togglePopup(); });
         setSelected(landmark.id);
+        openedLandmark(landmark, landmarks.length);
       });
       const marker = new Marker({ element, anchor: "bottom" })
         .setLngLat([landmark.longitude, landmark.latitude])

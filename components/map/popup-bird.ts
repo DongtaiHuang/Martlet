@@ -3,6 +3,7 @@
 // The body colour looks random per landmark/meetup but is derived from its id, so the
 // same place always shows the same bird.
 
+import { earn, heardQuote } from "@/components/achievements/earn";
 import { randomQuote } from "./bird-quotes";
 
 const BIRD_COLORS = [
@@ -103,8 +104,13 @@ export function birdIcon(color: string, muted = false): HTMLSpanElement {
   span.append(bubble);
   span.tabIndex = 0;
   span.setAttribute("aria-label", "Martlet says something");
-  const speak = () => { bubble.textContent = randomQuote(); };
-  speak();
+  bubble.textContent = randomQuote();
+  const speak = () => {
+    const quote = randomQuote();
+    bubble.textContent = quote;
+    void earn("bird-whisperer");
+    heardQuote(quote);
+  };
   span.addEventListener("mouseenter", speak);
   span.addEventListener("focus", speak);
   return span;

@@ -7,6 +7,7 @@ import type { MeetupCategory, MeetupSummary } from "@/types/meetup";
 import type { LandmarkSummary } from "@/types/landmark";
 import { categories, categoryValues } from "@/components/feed/categories";
 import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
+import { openedLandmark, watchMapAngle } from "./map-achievements";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 
@@ -57,6 +58,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   useEffect(() => {
     if (!ref.current) return;
     const map = createCampusMap(ref.current);
+    watchMapAngle(map);
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -82,13 +84,16 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     if (!map) return;
     const markers = shownLandmarks.map((landmark) => {
       const { element, height } = landmarkMarker(landmark, 1.75);
+      const popup = new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH })
+        .setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href)));
+      popup.on("open", () => openedLandmark(landmark, landmarks.length));
       return new Marker({ element, anchor: "bottom" })
         .setLngLat([landmark.longitude, landmark.latitude])
-        .setPopup(new Popup({ offset: height + 4, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(landmarkPopupContent(landmark, (href) => router.push(href))))
+        .setPopup(popup)
         .addTo(map);
     });
     return () => markers.forEach((m) => m.remove());
-  }, [shownLandmarks, router]);
+  }, [shownLandmarks, landmarks.length, router]);
 
   // Runs after the marker effect above, and only when focusId changes, so changing
   // the category filter doesn't keep re-opening the popup.

@@ -17,6 +17,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0011 | [Advisory meetup polls and single-choice voting](0011-meetup-polls.md) | Proposed |
 | 0012 | [Landmark progress shown as a growing pixel-art tree](0012-progress-growth-tree.md) | Proposed |
 | 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Proposed |
+| 0014 | [Achievements for niche and hidden features](0014-achievements.md) | Proposed |
 
 ## Adding a new ADR
 

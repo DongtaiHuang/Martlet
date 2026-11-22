@@ -153,6 +153,22 @@
   .martlet-popup__quote { transition: none; }
 }
 
+/* Achievement toast: slides in from the right, stays, then fades out (ADR 0014).
+   The duration is set inline to match how long the toast is shown. */
+@keyframes martlet-toast {
+  0% { opacity: 0; transform: translateX(1.5rem); }
+  5%, 90% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-0.25rem); }
+}
+
+.martlet-toast {
+  animation: martlet-toast 6s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .martlet-toast { animation: none; }
+}
+
 .martlet-popup__tag {
   border-radius: 9999px;
   padding: 0.125rem 0.625rem;
