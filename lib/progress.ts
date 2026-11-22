@@ -15,7 +15,7 @@ export const FINAL_STAGE: TreeStage = 6;
 
 /**
  * Seed with nothing unlocked, full bloom only at 100%, and every unlock in between
- * moves the tree along (with the current 6 landmarks, each unlock is exactly one stage).
+ * contributes toward the next growth stage.
  */
 export function treeStage(unlocked: number, total: number): TreeStage {
   if (total <= 0 || unlocked <= 0) return 0;

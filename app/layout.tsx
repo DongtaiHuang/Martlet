@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { AchievementToaster } from "@/components/achievements/AchievementToaster";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -16,7 +17,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="bg-canvas text-ink">{children}</body>
+      <body className="bg-canvas text-ink">
+        {children}
+        <AchievementToaster />
+      </body>
     </html>
   );
 }

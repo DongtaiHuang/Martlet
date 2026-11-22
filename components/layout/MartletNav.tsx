@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Bird } from "lucide-react";
 import { AuthStatus } from "@/components/auth/AuthStatus";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { MartletNavLinks } from "./MartletNavLinks";
 import { ThemeSwitch } from "./ThemeSwitch";
 
@@ -14,7 +15,7 @@ export function MartletNav() {
           <span className="grid size-9 place-items-center rounded-xl bg-brand text-on-brand"><Bird aria-hidden="true" size={21} /></span>
           McGill Martlet
         </Link>
-        <div className="order-2 ml-auto flex min-h-10 flex-wrap items-center justify-end gap-2 xl:order-3 xl:ml-0"><AuthStatus /><ThemeSwitch /></div>
+        <div className="order-2 ml-auto flex min-h-10 flex-wrap items-center justify-end gap-2 xl:order-3 xl:ml-0"><NotificationBell /><AuthStatus /><ThemeSwitch /></div>
         <div className="order-3 w-full min-w-0 xl:order-2 xl:ml-auto xl:w-auto"><MartletNavLinks /></div>
       </div>
     </header>

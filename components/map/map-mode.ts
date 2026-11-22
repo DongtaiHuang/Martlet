@@ -2,7 +2,7 @@
 
 // Light/dark basemap handling shared by every map (ADR 0014).
 import { useEffect, type RefObject } from "react";
-import type { Map } from "maplibre-gl";
+import type { Map, StyleSwapOptions } from "maplibre-gl";
 import { useColorMode } from "@/lib/useColorMode";
 import { enhanceDarkBuildings } from "./dark-buildings";
 import { styleForMode } from "./map-style";
@@ -20,12 +20,13 @@ export function trackMapStyle(map: Map, url: string) {
 }
 
 /** Swap the basemap in place when the user changes light/dark mode; markers (DOM) are kept. */
-export function useMapColorMode(mapRef: RefObject<Map | null>) {
+export function useMapColorMode(mapRef: RefObject<Map | null>, options?: StyleSwapOptions) {
   const mode = useColorMode();
+  const diff = options?.diff;
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     const url = styleForMode(mode);
-    if (styleOf.get(map) !== url) { styleOf.set(map, url); map.setStyle(url); }
-  }, [mode, mapRef]);
+    if (styleOf.get(map) !== url) { styleOf.set(map, url); map.setStyle(url, { diff }); }
+  }, [mode, mapRef, diff]);
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Bird, LogIn, UserRound } from "lucide-react";
+import { ArrowRight, Bird, LogIn, Trophy, UserRound } from "lucide-react";
 import { CourseCodesForm } from "@/components/courses/CourseCodesForm";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
@@ -82,6 +82,15 @@ export default async function ProfilePage() {
               <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
             </Link>
           )}
+          {/* Everyone can open achievements; guests' are kept in the browser. */}
+          <Link href="/achievements" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-canvas px-4 py-3 hover:border-brand-line focus-visible:outline-2 focus-visible:outline-focus">
+            <Trophy aria-hidden="true" size={22} className="shrink-0 text-amber-600" />
+            <span className="min-w-0">
+              <span className="block text-sm font-bold">Achievements</span>
+              <span className="block text-xs text-ink-muted">Badges for finding Martlet’s niche and hidden features.</span>
+            </span>
+            <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
+          </Link>
           {state.kind === "signed-out" ? (
             <Link href="/login?next=/profile" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"><LogIn aria-hidden="true" size={16} /> Sign in</Link>
           ) : (

@@ -37,7 +37,7 @@ Constraints:
 - Each fruit is a link (larger hit area than the fruit itself). **Hover or keyboard focus** shows a ring and a preview card (photo, landmark, caption), CSS-only. **Click** opens `/landmarks/<id>#my-photo`, where the user's photo in the gallery is scrolled to and highlighted. Phones have no hover, so a tap opens the photo directly.
 
 ### Motion (CSS only, `app/globals.css`)
-- The leaves shift one pixel left and right (a pixel-art sway), falling leaves (red petals at full bloom) drop in steps, and the bird bobs.
+- Two layers of clouds drift at different speeds and the sky brightens gently. An occasional breeze crosses the field and shifts the canopy by a pixel. Falling leaves (red petals at full bloom) drop in steps, and the bird bobs.
 - All motion stops, and falling leaves are hidden, under `prefers-reduced-motion: reduce`.
 
 ### Previewing stages

@@ -3,6 +3,7 @@
 // The body colour looks random per landmark/meetup but is derived from its id, so the
 // same place always shows the same bird.
 
+import { earn, heardQuote } from "@/components/achievements/earn";
 import { randomQuote } from "./bird-quotes";
 
 const BIRD_COLORS = [
@@ -87,25 +88,43 @@ export function birdSvg(color: string, size = 34, muted = false): string {
 
 /**
  * The bird for popups. A muted (grey) bird is purely decorative; a coloured one says a
- * random McGill/Montreal quote in a speech bubble on hover or keyboard focus.
+ * random McGill/Montreal quote when hovered or activated.
  */
-export function birdIcon(color: string, muted = false): HTMLSpanElement {
-  const span = document.createElement("span");
-  span.className = "martlet-popup__bird";
-  span.innerHTML = birdSvg(color, 28, muted);
+export function birdIcon(color: string, muted = false): HTMLElement {
+  const bird = muted ? document.createElement("span") : document.createElement("button");
+  bird.className = "martlet-popup__bird";
+  bird.innerHTML = birdSvg(color, 28, muted);
   if (muted) {
-    span.setAttribute("aria-hidden", "true");
-    return span;
+    bird.setAttribute("aria-hidden", "true");
+    return bird;
   }
+  bird.setAttribute("type", "button");
+  bird.setAttribute("aria-label", "Talk to the martlet");
   const bubble = document.createElement("span");
   bubble.className = "martlet-popup__quote";
   bubble.setAttribute("role", "tooltip");
-  span.append(bubble);
-  span.tabIndex = 0;
-  span.setAttribute("aria-label", "Martlet says something");
-  const speak = () => { bubble.textContent = randomQuote(); };
-  speak();
-  span.addEventListener("mouseenter", speak);
-  span.addEventListener("focus", speak);
-  return span;
+  bird.append(bubble);
+  bubble.textContent = randomQuote();
+  const speak = () => {
+    const quote = randomQuote();
+    bubble.textContent = quote;
+    void earn("bird-whisperer");
+    heardQuote(quote);
+  };
+  // Opening a popup can focus the bird or place it under a stationary pointer.
+  // Wait for actual pointer movement, or explicit activation of the button.
+  let spokeOnHover = false;
+  bird.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch" || spokeOnHover) return;
+    spokeOnHover = true;
+    speak();
+  });
+  bird.addEventListener("pointerleave", () => { spokeOnHover = false; });
+  bird.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (!spokeOnHover) speak();
+    bird.classList.add("martlet-popup__bird--speaking");
+  });
+  bird.addEventListener("blur", () => { bird.classList.remove("martlet-popup__bird--speaking"); });
+  return bird;
 }

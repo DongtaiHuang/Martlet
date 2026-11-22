@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { heroPhotoLicense, heroSlides } from "./hero-slides";
 
@@ -20,7 +20,6 @@ function subscribeToMotionPreference(onChange: () => void) {
 export function HeroCarousel() {
   const [selection, setSelection] = useState({ current: 0, previous: -1 });
   const [imageReady, setImageReady] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const reducedMotion = useSyncExternalStore(
@@ -32,7 +31,7 @@ export function HeroCarousel() {
   const { current, previous } = selection;
   const next = (current + 1) % heroSlides.length;
   const slide = heroSlides[current];
-  const rotating = !paused && !hovered && !focused && !reducedMotion;
+  const rotating = !hovered && !focused && !reducedMotion;
 
   useEffect(() => {
     if (!rotating) return;
@@ -146,7 +145,6 @@ export function HeroCarousel() {
           <button type="button" aria-label="Next slide" className={controlClass} onClick={() => navigate(current + 1)}>
             <ChevronRight aria-hidden="true" size={20} />
           </button>
-       
         </div>
         <p aria-live={rotating ? "off" : "polite"} aria-atomic="true" className="sr-only">
           Slide {current + 1} of {heroSlides.length}. {slide.title}

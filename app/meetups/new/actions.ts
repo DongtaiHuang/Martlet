@@ -10,6 +10,7 @@ import { OTHER_LOCATION } from "@/lib/public-venues";
 import { COURSE_CODE_PATTERN } from "@/lib/course-codes";
 import { getCampusLocation } from "@/lib/locations";
 import { createMeetup, MeetupValidationError } from "@/lib/meetups";
+import { notifyMeetupCreated } from "@/lib/notifications";
 
 const meetupInput = z.object({
   title: z.string().trim().min(3, "Enter at least 3 characters.").max(80, "Use 80 characters or fewer."),
@@ -74,6 +75,12 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
       course_code,
     });
     id = meetup.id;
+    // Notifications are best-effort: a failure never blocks creation (ADR 0021).
+    try {
+      await notifyMeetupCreated(id);
+    } catch (error) {
+      console.error("Failed to send meetup notifications", error);
+    }
   } catch (error) {
     if (error instanceof MeetupValidationError && error.fieldErrors.course_code) {
       return { message: "Check the highlighted fields.", fields: { course_code: [error.fieldErrors.course_code] } };
