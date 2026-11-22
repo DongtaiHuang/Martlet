@@ -88,7 +88,7 @@ export default async function LandmarkPage({ params }: { params: Promise<{ id: s
             />
           </section>
 
-          <section aria-labelledby="unlock-heading" className="mt-7 border-t border-line pt-6">
+          <section id="edit-my-photo" aria-labelledby="unlock-heading" className="mt-7 border-t border-line pt-6">
             <h2 id="unlock-heading" className="text-lg font-bold">{landmark.unlocked ? "Your unlock" : "Unlock this landmark"}</h2>
             {getDataMode() === "mock" && (
               <p className="mt-2 rounded-xl border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">
