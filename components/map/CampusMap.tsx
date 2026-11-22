@@ -93,6 +93,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
   const markersRef = useRef(new globalThis.Map<string, Marker>());
   const router = useRouter();
   const [active, setActive] = useState<MeetupCategory | "all">("all");
+  const [mapProblem, setMapProblem] = useState("");
 
   const visible = useMemo(
     () => (active === "all" ? meetups : meetups.filter((m) => m.category === active)),
@@ -104,7 +105,19 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
 
   useEffect(() => {
     if (!ref.current) return;
-    const map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
+    // Surface why a map didn't appear (no WebGL, worker/style/tile failures) instead of a blank box.
+    const report = (msg: string) => queueMicrotask(() => setMapProblem(msg));
+    let map: Map;
+    try {
+      map = new Map({ container: ref.current, style: mapStyleUrl, center: CAMPUS_CENTER, zoom: 16 });
+    } catch (e) {
+      report(e instanceof Error ? e.message : "The map couldn’t start.");
+      return;
+    }
+    let loaded = false;
+    map.once("load", () => { loaded = true; setMapProblem(""); });
+    map.on("error", (e) => { if (!loaded) setMapProblem(e.error?.message || "The map couldn’t load."); });
+    const slow = setTimeout(() => { if (!loaded) setMapProblem((m) => m || "The map is taking too long to load."); }, 15_000);
     map.addControl(new NavigationControl(), "top-right");
     // ADR 0008: opt-in, one-shot "show my location". The position stays in the
     // browser (MapLibre draws a dot); it is never sent to our server or stored.
@@ -114,7 +127,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       fitBoundsOptions: { maxZoom: 16 },
     }), "top-right");
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
+    return () => { clearTimeout(slow); map.remove(); mapRef.current = null; };
   }, []);
 
   useEffect(() => {
@@ -174,7 +187,15 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
           </button>
         ))}
       </div>
-      <div ref={ref} aria-label="Map of McGill meetups" className="h-[65vh] min-h-96 w-full overflow-hidden rounded-2xl border border-neutral-200" />
+      <div className="relative">
+        <div ref={ref} aria-label="Map of McGill meetups" className="h-[65vh] min-h-96 w-full overflow-hidden rounded-2xl border border-neutral-200" />
+        {mapProblem && (
+          <div role="alert" className="absolute inset-x-3 top-3 rounded-xl border border-red-200 bg-white/95 p-3 text-sm text-red-900 shadow">
+            <strong>Map problem:</strong> {mapProblem}
+            <span className="mt-1 block text-xs text-stone-600">Try reloading. If it persists, your browser may block WebGL or background workers on this connection.</span>
+          </div>
+        )}
+      </div>
       {visible.length === 0 && <p className="mt-3 text-sm text-stone-600">No upcoming meetups in this category.</p>}
     </div>
   );

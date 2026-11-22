@@ -7,6 +7,9 @@ if (process.env.VERCEL_ENV === "production" && process.env.NEXT_PUBLIC_MAP_STYLE
 }
 
 const nextConfig: NextConfig = {
+  // Dev only: let other devices on the LAN (e.g. a phone) load dev assets.
+  // DEV_ALLOWED_ORIGINS=10.121.186.72 npm run dev -- -H 0.0.0.0 --experimental-https
+  allowedDevOrigins: process.env.DEV_ALLOWED_ORIGINS?.split(",").map((s) => s.trim()).filter(Boolean) ?? [],
   experimental: {
     serverActions: {
       // Landmark photos (ADR 0009) are resized in the browser to well under 1 MB; this is

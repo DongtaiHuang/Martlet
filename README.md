@@ -25,6 +25,16 @@ For local overrides, copy `.env.example` to `.env.local` and restart the develop
 
 Run checks with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
 
+### Testing on your phone
+
+Phones need HTTPS for the camera (`/avatar`), and Next.js blocks other devices by default. Find your computer's LAN IP (e.g. `ipconfig` → Wi-Fi IPv4) and run:
+
+```sh
+DEV_ALLOWED_ORIGINS=<your-ip> npm run dev -- -H 0.0.0.0 --experimental-https
+```
+
+Then open `https://<your-ip>:3000` on a phone on the same Wi-Fi and accept the self-signed certificate warning. Campus Wi-Fi often blocks device-to-device traffic; use a phone hotspot if the page doesn't load. If a map fails to start, `/explore` now shows the reason on screen.
+
 ## Routes
 
 | Route | Current behavior |
