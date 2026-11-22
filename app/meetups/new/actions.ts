@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { categoryValues } from "@/components/feed/categories";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
-import { getPublicVenue, OTHER_LOCATION } from "@/lib/public-venues";
+import { CUSTOM_LOCATION_ERROR, isCustomLocationText } from "@/lib/meetup-location";
+import { OTHER_LOCATION } from "@/lib/public-venues";
 import { COURSE_CODE_PATTERN } from "@/lib/course-codes";
 import { getCampusLocation } from "@/lib/locations";
 import { createMeetup, MeetupValidationError } from "@/lib/meetups";
@@ -18,7 +19,7 @@ const meetupInput = z.object({
     (id) => id === OTHER_LOCATION || Boolean(getCampusLocation(id)),
     "Choose an approved campus location or select Other.",
   ),
-  publicVenue: z.string(),
+  customLocation: z.string().trim(),
   startsAt: z.iso.datetime({ error: "Enter a valid date and time." })
     .refine((value) => Date.parse(value) > Date.now(), "Choose a start time in the future."),
   // Optional McGill course; checked below and by the database.
@@ -26,9 +27,9 @@ const meetupInput = z.object({
 }).refine((input) => !input.course_code || input.category === "study", {
   path: ["course_code"],
   message: "Only study meetups can have a course.",
-}).refine(({ location, publicVenue }) => location !== OTHER_LOCATION || Boolean(getPublicVenue(publicVenue)), {
-  path: ["publicVenue"],
-  message: "Choose a public venue.",
+}).refine(({ location, customLocation }) => location !== OTHER_LOCATION || isCustomLocationText(customLocation), {
+  path: ["customLocation"],
+  message: CUSTOM_LOCATION_ERROR,
 });
 
 export type CreateState = {
@@ -42,7 +43,7 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
     description: formData.get("description") ?? "",
     category: formData.get("category"),
     location: formData.get("location") ?? "",
-    publicVenue: formData.get("publicVenue") ?? "",
+    customLocation: formData.get("customLocation") ?? "",
     startsAt: formData.get("startsAt"),
     course_code: formData.get("course_code") || null,
   });
@@ -51,10 +52,10 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
     return { message: "Check the highlighted fields.", fields: z.flattenError(input.error).fieldErrors };
   }
 
-  const { title, description, category, location, publicVenue, startsAt, course_code } = input.data;
-  const venue = location === OTHER_LOCATION ? getPublicVenue(publicVenue) : undefined;
-  const place = location === OTHER_LOCATION ? venue : getCampusLocation(location);
-  if (!place) return { message: "Choose an approved meetup location." };
+  const { title, description, category, location, customLocation, startsAt, course_code } = input.data;
+  const custom = location === OTHER_LOCATION;
+  const place = getCampusLocation(location);
+  if (!custom && !place) return { message: "Choose an approved campus location." };
   let id: string;
   try {
     if (!(await getMeetupViewer())) {
@@ -65,10 +66,10 @@ export async function submitMeetup(_previous: CreateState, formData: FormData): 
       title,
       description,
       category,
-      ...(venue ? { public_venue_id: venue.id } : {}),
-      location_name: place.name,
-      latitude: place.latitude,
-      longitude: place.longitude,
+      ...(custom ? { location_type: "custom" as const } : {}),
+      location_name: place?.name ?? customLocation,
+      latitude: place?.latitude ?? null,
+      longitude: place?.longitude ?? null,
       starts_at: startsAt,
       course_code,
     });

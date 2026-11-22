@@ -11,6 +11,8 @@ import { landmarkMarker, landmarkPopupContent } from "./landmark-markers";
 import { POPUP_MAX_WIDTH, buildPopup } from "./popup-content";
 import { CAMPUS_CENTER, CAMPUS_MAP_FRAME, MARKER_COLORS, createCampusMap } from "./map-config";
 import { useMapColorMode } from "./map-mode";
+import { hasMeetupCoordinates } from "@/lib/meetup-location";
+import Link from "next/link";
 import { hasGoogleMaps } from "@/lib/google-maps";
 import { GoogleOverviewMap } from "./GoogleOverviewMap";
 
@@ -55,8 +57,10 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     return active === "all" ? meetups : meetups.filter((m) => m.category === active);
   }, [meetups, active, layer]);
   const shownLandmarks = useMemo(() => (layer === "meetups" ? NO_LANDMARKS : landmarks), [landmarks, layer]);
+  const mapped = useMemo(() => visible.filter(hasMeetupCoordinates), [visible]);
+  const unmapped = visible.filter((meetup) => !hasMeetupCoordinates(meetup));
   const googlePins = useMemo(() => hasGoogleMaps ? [
-    ...visible.map((meetup) => ({
+    ...mapped.map((meetup) => ({
       id: meetup.id, title: meetup.title, latitude: meetup.latitude, longitude: meetup.longitude,
       color: MARKER_COLORS[meetup.category],
       content: () => popupContent(meetup, (href) => router.push(href)),
@@ -66,7 +70,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       color: landmark.unlocked ? "#166534" : "#57534e",
       content: () => landmarkPopupContent(landmark, (href) => router.push(href)),
     })),
-  ] : [], [visible, shownLandmarks, router]);
+  ] : [], [mapped, shownLandmarks, router]);
   const present = useMemo(() => new Set(meetups.map((m) => m.category)), [meetups]);
   // The Explore map only lists upcoming meetups, so a cancelled/past/unknown id won't be found.
   const focusMissing = Boolean(focusId) && !meetups.some((m) => m.id === focusId);
@@ -82,7 +86,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
     const map = mapRef.current;
     if (!map) return;
     const byId = markersRef.current;
-    const markers = visible.map((meetup) => {
+    const markers = mapped.map((meetup) => {
       const marker = new Marker({ color: MARKER_COLORS[meetup.category] })
         .setLngLat([meetup.longitude, meetup.latitude])
         .setPopup(new Popup({ offset: 24, maxWidth: POPUP_MAX_WIDTH }).setDOMContent(popupContent(meetup, (href) => router.push(href))))
@@ -92,7 +96,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       return marker;
     });
     return () => { markers.forEach((m) => m.remove()); byId.clear(); };
-  }, [visible, router]);
+  }, [mapped, router]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -114,7 +118,7 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
       meetup.location_name === venue.name && meetup.latitude === venue.latitude && meetup.longitude === venue.longitude));
     if (!hasPublicMeetup) return;
     const bounds = new LngLatBounds(CAMPUS_CENTER, CAMPUS_CENTER);
-    meetups.forEach(({ longitude, latitude }) => bounds.extend([longitude, latitude]));
+    meetups.filter(hasMeetupCoordinates).forEach(({ longitude, latitude }) => bounds.extend([longitude, latitude]));
     map.fitBounds(bounds, { padding: 40, maxZoom: FOCUS_ZOOM, duration: 0 });
   }, [meetups, focusId]);
 
@@ -173,6 +177,19 @@ export function CampusMap({ meetups, focusId, landmarks = NO_LANDMARKS }: {
           React rewriting className would remove them and break the map's positioning. */}
       {hasGoogleMaps ? <GoogleOverviewMap pins={googlePins} focusId={focusId} className={CAMPUS_MAP_FRAME} /> : (
         <div ref={ref} aria-label="Map of McGill meetups and landmarks" className={CAMPUS_MAP_FRAME} />
+      )}
+      {unmapped.length > 0 && (
+        <section aria-labelledby="unmapped-meetups" className="mt-5">
+          <h2 id="unmapped-meetups" className="text-lg font-bold">Meetups without a map pin</h2>
+          <ul className="mt-2 grid gap-2">
+            {unmapped.map((meetup) => (
+              <li key={meetup.id} className={`rounded-xl border border-line bg-surface px-4 py-2 [overflow-wrap:anywhere] ${focusId === meetup.id ? "ring-2 ring-brand" : ""}`}>
+                <Link href={`/meetups/${encodeURIComponent(meetup.id)}`} className="inline-flex min-h-11 items-center font-semibold text-brand-ink underline">{meetup.title}</Link>
+                <p className="text-sm text-ink-muted">{meetup.location_name}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
       {layer !== "landmarks" && visible.length === 0 && <p className="mt-3 text-sm text-ink-muted">No upcoming meetups in this category.</p>}
     </div>

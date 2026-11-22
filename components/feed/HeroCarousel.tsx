@@ -146,15 +146,7 @@ export function HeroCarousel() {
           <button type="button" aria-label="Next slide" className={controlClass} onClick={() => navigate(current + 1)}>
             <ChevronRight aria-hidden="true" size={20} />
           </button>
-          <button
-            type="button"
-            aria-label={reducedMotion ? "Automatic rotation disabled by reduced motion" : paused ? "Play slideshow" : "Pause slideshow"}
-            className={controlClass}
-            disabled={reducedMotion}
-            onClick={() => setPaused((value) => !value)}
-          >
-            {paused || reducedMotion ? <Play aria-hidden="true" size={16} /> : <Pause aria-hidden="true" size={16} />}
-          </button>
+       
         </div>
         <p aria-live={rotating ? "off" : "polite"} aria-atomic="true" className="sr-only">
           Slide {current + 1} of {heroSlides.length}. {slide.title}

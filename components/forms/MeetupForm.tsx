@@ -9,7 +9,8 @@ import type { Course } from "@/lib/course-codes";
 import { futureLocalTimeToUtc } from "@/lib/local-date-time";
 import { useFutureLocalTime } from "./useFutureLocalTime";
 import { CAMPUS_LOCATIONS, getCampusLocation } from "@/lib/locations";
-import { getPublicVenue, OTHER_LOCATION, PUBLIC_VENUES } from "@/lib/public-venues";
+import { CUSTOM_LOCATION_MAX, UNMAPPED_LOCATION_NOTE } from "@/lib/meetup-location";
+import { OTHER_LOCATION } from "@/lib/public-venues";
 import { LocationPreview } from "./LocationPreview";
 import { GooglePlaceSearch } from "./GooglePlaceSearch";
 import { hasGoogleMaps } from "@/lib/google-maps";
@@ -28,9 +29,10 @@ export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
   const { minimum, refreshMinimum } = useFutureLocalTime();
   const [timeError, setTimeError] = useState(false);
   const [locationId, setLocationId] = useState("");
-  const [venueId, setVenueId] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
+  const [showPlaceSearch, setShowPlaceSearch] = useState(false);
   const offCampus = locationId === OTHER_LOCATION;
-  const location = offCampus ? getPublicVenue(venueId) : getCampusLocation(locationId);
+  const location = getCampusLocation(locationId);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,17 +87,30 @@ export function MeetupForm({ myCourses = [] }: { myCourses?: Course[] }) {
             <FieldError name="location" fields={state.fields} />
           </div>
         </div>
-        {offCampus && (hasGoogleMaps ? <GooglePlaceSearch /> : (
-          <p className="text-sm text-ink-muted">Place search requires Google Maps configuration. Choose an approved venue below.</p>
-        ))}
         {offCampus && (
           <div className="min-w-0">
-            <label htmlFor="publicVenue" className="font-semibold">Public venue in Montréal</label>
-            <select id="publicVenue" name="publicVenue" required value={venueId} onChange={(event) => setVenueId(event.target.value)} className={fieldStyle} {...fieldErrorProps("publicVenue")}>
-              <option value="" disabled>Choose a public venue</option>
-              {PUBLIC_VENUES.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
-            </select>
-            <FieldError name="publicVenue" fields={state.fields} />
+            <label htmlFor="customLocation" className="font-semibold">Where are you meeting?</label>
+            <input
+              id="customLocation" name="customLocation" required maxLength={CUSTOM_LOCATION_MAX}
+              value={customLocation}
+              onChange={(event) => { setCustomLocation(event.target.value); setShowPlaceSearch(false); }}
+              placeholder="e.g. Café Olimpico, Mount Royal Park, or a specific meeting spot"
+              className={fieldStyle}
+              aria-invalid={Boolean(state.fields?.customLocation)}
+              aria-describedby={state.fields?.customLocation ? "customLocation-hint customLocation-error" : "customLocation-hint"}
+            />
+            <p id="customLocation-hint" className="mt-1 text-sm text-ink-muted">Choose a public meeting spot and avoid sharing private residential addresses.</p>
+            <FieldError name="customLocation" fields={state.fields} />
+            <p className="mt-2 text-sm text-ink-muted">{UNMAPPED_LOCATION_NOTE}</p>
+            {hasGoogleMaps && (
+              <div className="mt-2">
+                <button type="button" aria-expanded={showPlaceSearch} onClick={() => setShowPlaceSearch(!showPlaceSearch)}
+                  className="min-h-11 text-sm font-semibold text-brand-ink underline">
+                  {showPlaceSearch ? "Hide Google Maps lookup" : "Look up a place in Google Maps"}
+                </button>
+                {showPlaceSearch && <GooglePlaceSearch />}
+              </div>
+            )}
           </div>
         )}
         {location && <LocationPreview location={location} />}

@@ -41,5 +41,12 @@ export function getMockMeetups(): MeetupSummary[] {
     { ...sample("demo-study", "COMP 302 group study", "study", 2, 65, "Jamie", 5, 12), course_code: "COMP 302" },
     sample("demo-sports", "Campus walk before dinner", "sports", 0, 120, "Sam", 2, 4),
     sample("demo-food", "Lunch after class?", "food", 3, 150, "Taylor", 4, 3),
+    {
+      ...sample("demo-custom", "Coffee in Mile End", "coffee", 0, 180, "Alex", 2, 0),
+      description: "Meet outside the café entrance.",
+      location_name: "Café Olimpico, Mile End",
+      latitude: null,
+      longitude: null,
+    },
   ];
 }

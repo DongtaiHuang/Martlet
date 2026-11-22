@@ -43,7 +43,7 @@ export function ProfileMeetupList({ title, icon: Icon, meetups, empty, historyRo
                       </span>
                     </span>
                   )}
-                  <span className="block text-xs text-ink-muted">
+                  <span className="block text-xs text-ink-muted [overflow-wrap:anywhere]">
                     <time dateTime={meetup.starts_at}>{dateFormat.format(new Date(meetup.starts_at))}</time> · {meetup.location_name}
                     {!historyRole && meetup.attendee_count !== undefined && ` · ${meetup.attendee_count} going`}
                   </span>

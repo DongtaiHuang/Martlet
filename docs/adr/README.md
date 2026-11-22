@@ -22,6 +22,8 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 
 | 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Proposed |
 
+| 0017 | [Custom meeting spots and polling retirement](0017-custom-meeting-spots.md) | Proposed |
+
 ## Adding a new ADR
 
 1. Copy [`template.md`](template.md) to `NNNN-short-title.md` using the next number.

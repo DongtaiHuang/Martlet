@@ -15,8 +15,8 @@ export interface Meetup {
   description: string;
   category: MeetupCategory;
   location_name: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   starts_at: string;
   status: MeetupStatus;
   created_at: string;
@@ -28,7 +28,7 @@ export type CreateMeetupInput = Pick<
   Meetup,
   "title" | "description" | "category" | "location_name" |
   "latitude" | "longitude" | "starts_at" | "course_code"
-> & { public_venue_id?: string };
+> & { public_venue_id?: string; location_type?: "catalog" | "custom" };
 
 export interface MeetupSummary extends Meetup {
   host_display_name: string;
