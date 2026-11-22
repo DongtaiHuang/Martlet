@@ -80,6 +80,32 @@ Errors to catch in Server Actions: `AuthRequiredError`, `MeetupValidationError` 
 
 Auth helpers: `getCurrentUser()` / `requireUser()` in `lib/supabase/auth.ts`; `<AuthStatus />` and `<SignOutButton />` in `components/auth/`.
 
+## Diagnose poll loading
+
+In the affected Supabase project, open **SQL Editor → New query** and run this read-only check.
+
+```sql
+select name, to_regclass('public.' || name) is not null as installed
+from unnest(array['meetup_polls','meetup_poll_options','meetup_poll_votes']) as t(name);
+
+select signature, fn is not null as installed,
+       case when fn is not null then has_function_privilege('authenticated', fn, 'EXECUTE') end as authenticated_can_execute,
+       pg_get_function_arguments(fn) as arguments
+from (
+  select signature, to_regprocedure('public.' || signature) as fn
+  from unnest(array[
+    'create_meetup_poll(uuid,text,text,timestamp with time zone,text[])',
+    'cast_meetup_poll_vote(uuid,uuid)',
+    'close_meetup_poll(uuid)',
+    'get_meetup_poll_results(uuid)'
+  ]) as f(signature)
+) as expected;
+```
+
+If all poll objects are absent and 001–006 are present, paste and run the full `007_meetup_polls.sql` file once in a new query. If only some exist or a grant is missing, have the database owner reconcile the partial schema before running more DDL. If the catalog and grants are correct but REST reports `PGRST202` or `PGRST205`, run `NOTIFY pgrst, 'reload schema';` and retry as a signed-in student. The read RPC expects the argument `p_meetup_id`.
+
+The development server logs a diagnostic category and safe error code. Production shows a generic error with a Retry button.
+
 ## Verify meetup polls
 
 Run `node --test tests/poll-validation.test.mjs` with Node.js 22 or newer. On a disposable local database with migrations 001–007 applied, run `tests/poll-database.test.sql` with SQL Editor or `psql -v ON_ERROR_STOP=1 -f tests/poll-database.test.sql`. The test creates synthetic fixtures inside a transaction and rolls them back.

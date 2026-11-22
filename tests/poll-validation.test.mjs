@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isPollOpen, localPollTimeToUtc, validatePoll, votePercentages } from "../lib/poll-validation.ts";
+import { isPollOpen, validatePoll, votePercentages } from "../lib/poll-validation.ts";
+
+import { localTimeToUtc } from "../lib/local-date-time.ts";
 
 const now = Date.parse("2026-01-01T12:00:00Z");
 const valid = { type: "activity", question: "What should we do?", closesAt: "2026-01-01T13:00:00Z", options: ["Coffee", "Games"] };
@@ -33,9 +35,9 @@ test("requires UTC future time choices and converts local inputs without accepti
   const oldTimeZone = process.env.TZ;
   try {
     process.env.TZ = "America/Toronto";
-    assert.equal(localPollTimeToUtc("2026-01-01T13:30"), "2026-01-01T18:30:00.000Z");
-    assert.equal(localPollTimeToUtc("2026-03-08T02:30"), "");
-    assert.equal(localPollTimeToUtc("2026-02-30T13:30"), "");
+    assert.equal(localTimeToUtc("2026-01-01T13:30"), "2026-01-01T18:30:00.000Z");
+    assert.equal(localTimeToUtc("2026-03-08T02:30"), "");
+    assert.equal(localTimeToUtc("2026-02-30T13:30"), "");
   } finally {
     if (oldTimeZone === undefined) delete process.env.TZ;
     else process.env.TZ = oldTimeZone;

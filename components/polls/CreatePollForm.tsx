@@ -3,7 +3,8 @@
 import { startTransition, useActionState, useState, type FormEvent } from "react";
 import { MeetupStartTime } from "@/app/meetups/[id]/MeetupStartTime";
 import { CAMPUS_LOCATIONS } from "@/lib/locations";
-import { localPollTimeToUtc } from "@/lib/poll-validation";
+import { formatLocalMinute, futureLocalTimeToUtc } from "@/lib/local-date-time";
+import { useFutureLocalTime } from "@/components/forms/useFutureLocalTime";
 import type { PollType } from "@/types/poll";
 import { submitPoll } from "./actions";
 
@@ -15,15 +16,32 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
   const [options, setOptions] = useState(["", ""]);
   const [state, dispatch, pending] = useActionState(submitPoll.bind(null, meetupId), {});
 
+  const { minimum, refreshMinimum } = useFutureLocalTime();
+  const maximumDeadline = minimum ? formatLocalMinute(Date.parse(startsAt)) : undefined;
+  const [timeError, setTimeError] = useState("");
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
     const data = new FormData(event.currentTarget);
-    data.set("closesAt", localPollTimeToUtc(String(data.get("closesAt") ?? "")));
-    if (type === "time") {
-      data.delete("option");
-      for (const choice of options) data.append("option", localPollTimeToUtc(choice));
+    refreshMinimum();
+    const now = Date.now();
+    const closesAt = futureLocalTimeToUtc(String(data.get("closesAt") ?? ""), now);
+    if (!closesAt || Date.parse(closesAt) > Date.parse(startsAt)) {
+      setTimeError("Choose a future voting deadline no later than the meetup start.");
+      return;
     }
+    data.set("closesAt", closesAt);
+    if (type === "time") {
+      const utcOptions = options.map((choice) => futureLocalTimeToUtc(choice, now));
+      if (utcOptions.some((choice) => !choice)) {
+        setTimeError("Choose a future date and time for each option.");
+        return;
+      }
+      data.delete("option");
+      for (const choice of utcOptions) data.append("option", choice);
+    }
+    setTimeError("");
     startTransition(() => dispatch(data));
   }
 
@@ -34,7 +52,7 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
   return (
     <details>
       <summary className="w-fit cursor-pointer rounded-lg px-1 py-2 font-bold text-red-800 focus-visible:outline-2 focus-visible:outline-red-700">Create a poll</summary>
-      <form action={dispatch} onSubmit={handleSubmit} className="mt-2">
+      <form action={dispatch} onSubmit={handleSubmit} onFocus={refreshMinimum} onChange={() => setTimeError("")} className="mt-2">
         <fieldset disabled={pending} className="min-w-0 space-y-4 disabled:opacity-70">
           <label className="block text-sm font-semibold">Poll type
             <select name="type" className={field} value={type} onChange={(event) => {
@@ -61,7 +79,7 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
                       {CAMPUS_LOCATIONS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
                     </select>
                   ) : (
-                    <input name="option" type={type === "time" ? "datetime-local" : "text"} className={field} value={choice} maxLength={80} onChange={(event) => updateChoice(index, event.target.value)} required />
+                    <input name="option" type={type === "time" ? "datetime-local" : "text"} min={type === "time" ? minimum : undefined} className={field} value={choice} maxLength={80} onChange={(event) => updateChoice(index, event.target.value)} required />
                   )}
                 </label>
                 {options.length > 2 && <button type="button" aria-label={`Remove choice ${index + 1}`} className={secondary} onClick={() => setOptions(options.filter((_, i) => i !== index))}>Remove</button>}
@@ -70,10 +88,10 @@ export function CreatePollForm({ meetupId, startsAt }: { meetupId: string; start
             {options.length < 5 && <button type="button" className={secondary} onClick={() => setOptions([...options, ""])}>Add choice</button>}
           </fieldset>
           <label className="block text-sm font-semibold">Voting closes
-            <input name="closesAt" type="datetime-local" aria-describedby="poll-deadline-hint" className={field} required />
+            <input name="closesAt" type="datetime-local" min={minimum} max={maximumDeadline} aria-describedby="poll-deadline-hint" className={field} required />
           </label>
           <p id="poll-deadline-hint" className="text-sm text-stone-600">Use your device’s local time. Close voting by the meetup start on <MeetupStartTime startsAt={startsAt} />.</p>
-          {state.error && <p role="alert" className="text-sm text-red-900">{state.error}</p>}
+          {(timeError || state.error) && <p role="alert" className="text-sm text-red-900">{timeError || state.error}</p>}
           <button type="submit" className="min-h-11 rounded-lg bg-red-800 px-4 text-sm font-bold text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
             {pending ? "Creating poll…" : "Publish poll"}
           </button>
