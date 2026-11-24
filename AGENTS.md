@@ -19,12 +19,12 @@ McGill campus meetup app (hackathon, 24h). Next.js 16 App Router, React 19, TS, 
 Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `ci:`, `refactor:`, `test:`. One logical change per commit, imperative subject ≤72 chars. Never commit `.env*` (except `.env.example`) or secrets.
 
 ## Branches & PRs
-- Branch from latest `main`; names per `docs/TEAM_PLAN.md` (`feature/social-feed`, `feature/meetup-creation`, `feature/supabase-auth`, `feature/map-interactions`) or `fix/…`, `docs/…`, `chore/…`.
+- Branch from latest `main`; name it `feat/…`, `fix/…`, `docs/…`, `chore/…`, `ci/…` or `refactor/…` after the change (for example `feat/meetup-photo-dump`).
 - Small PRs into `main`. Body: Summary, Testing (what you actually ran), Follow-ups.
-- Sync with `main` every 3–4h. Rebase only your own branch (`--force-with-lease`); never force-push shared branches or `main`.
+- Sync with `main` regularly (at least daily on long-running branches). Rebase only your own branch (`--force-with-lease`); never force-push shared branches or `main`.
 
 ## Ownership
-See `docs/TEAM_PLAN.md`. Don't edit another developer's files without coordinating; note it in the PR if you must.
+Areas and their owners are in `.github/CODEOWNERS`; GitHub requests their review automatically. Coordinate before large changes to an area you don't own and note it in the PR. Docs index: `docs/README.md`.
 
 ## Contracts & decisions
 - Keep signatures in `docs/CONTRACTS.md` and types in `types/meetup.ts` stable; components call `lib/` services, not Supabase directly.
@@ -34,4 +34,4 @@ See `docs/TEAM_PLAN.md`. Don't edit another developer's files without coordinati
 - No service-role key in `NEXT_PUBLIC_*` or client code.
 - Never accept `userId` from the browser; use the Supabase session.
 - RLS (`supabase/migrations/`) is the real authorization; UI checks are UX only.
-- Mapped meetup locations must come from the approved catalogs. Custom meetup locations store meeting instructions without coordinates (ADR 0017). The map's "show my location" stays in the browser; never send, store or share a user's position (ADR 0008).
+- Mapped meetup locations must come from the approved catalogs. Custom meetup locations store meeting instructions without coordinates (ADR 0022). The map's "show my location" stays in the browser; never send, store or share a user's position (ADR 0008).
