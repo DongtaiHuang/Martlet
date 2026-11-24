@@ -11,13 +11,15 @@ import { TrendLikeButton } from "./TrendLikeButton";
 
 const TYPE_META: Record<TrendType, {
   label: string;
+  /** Visible text of the entry's external link. */
+  linkLabel: string;
   icon: ComponentType<{ size?: number; "aria-hidden"?: boolean; className?: string }>;
   chip: string;
 }> = {
-  coffee: { label: "Coffee", icon: Coffee, chip: "bg-warn-muted text-warn-ink ring-1 ring-warn-line" },
-  study: { label: "Study", icon: BookOpen, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200 dark:bg-sky-400/15 dark:text-sky-200 dark:ring-sky-800" },
-  recipe: { label: "Recipe", icon: ChefHat, chip: "bg-lime-100 text-lime-950 ring-1 ring-lime-200 dark:bg-lime-400/15 dark:text-lime-200 dark:ring-lime-800" },
-  song: { label: "Song", icon: Music, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200 dark:bg-violet-400/15 dark:text-violet-200 dark:ring-violet-800" },
+  coffee: { linkLabel: "Open link", label: "Coffee", icon: Coffee, chip: "bg-warn-muted text-warn-ink ring-1 ring-warn-line" },
+  study: { linkLabel: "Open link", label: "Study", icon: BookOpen, chip: "bg-sky-100 text-sky-950 ring-1 ring-sky-200 dark:bg-sky-400/15 dark:text-sky-200 dark:ring-sky-800" },
+  recipe: { linkLabel: "View recipe", label: "Recipe", icon: ChefHat, chip: "bg-lime-100 text-lime-950 ring-1 ring-lime-200 dark:bg-lime-400/15 dark:text-lime-200 dark:ring-lime-800" },
+  song: { linkLabel: "Listen", label: "Song", icon: Music, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200 dark:bg-violet-400/15 dark:text-violet-200 dark:ring-violet-800" },
 };
 
 const TABS: { key: TrendType | null; label: string }[] = [
@@ -132,9 +134,10 @@ export async function TrendPanel({ view, activeType }: { view: FeedView; activeT
                               href={entry.link}
                               target="_blank"
                               rel="noopener noreferrer"
+                              aria-label={`${meta.linkLabel}: ${entry.title} (opens in a new tab)`}
                               className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-ink underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                             >
-                              Listen <ExternalLink aria-hidden="true" size={11} />
+                              {meta.linkLabel} <ExternalLink aria-hidden="true" size={11} />
                             </a>
                           )}
                         </div>
