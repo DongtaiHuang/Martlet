@@ -9,6 +9,7 @@ import { FLIGHT_SCORE_EVENT } from "./FlightLeaderboard";
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useColorMode } from "@/lib/useColorMode";
+import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook, type AvatarLook } from "@/components/avatar/look";
 
 // Logical playfield (scaled to fit the container).
 const W = 360, H = 600, GROUND = 70;
@@ -29,22 +30,52 @@ const PALETTE = {
   dark: { skyTop: "#0b1430", skyBottom: "#2a2340", mountain: "#1e2b2a", cross: "#ffe9a8", city: "#191726", cityWindow: "#ffd36b", ground: "#2f4a2a", path: "#5a4636", brick: "#4a3829", col: "#6b665f", colShade: "#4f4a44", banner: "#c42a2a", text: "#f3efec", star: "#ffffff" },
 };
 
-function drawMartlet(g: CanvasRenderingContext2D, x: number, y: number, tilt: number, wing: number) {
+/** Draws the student's martlet (#132): their plumage and accessories from the avatar studio.
+ *  Purely cosmetic: collisions use BIRD_R, so every look flies the same. */
+function drawMartlet(g: CanvasRenderingContext2D, x: number, y: number, tilt: number, wing: number, look: AvatarLook) {
+  const { body, wing: wingColor } = plumageOf(look);
+  const wearing = new Set(look.wearing);
   g.save(); g.translate(x, y); g.rotate(tilt);
   // forked tail
-  g.fillStyle = "#151d33";
+  g.fillStyle = wingColor;
   g.beginPath(); g.moveTo(-10, 2); g.lineTo(-30, -6); g.lineTo(-22, 3); g.lineTo(-31, 12); g.closePath(); g.fill();
+  // backpack, behind the body
+  if (wearing.has("backpack")) {
+    g.fillStyle = "#6b4f2a"; g.beginPath(); g.roundRect(-19, -11, 12, 15, 3); g.fill();
+    g.fillStyle = "#8a6a3d"; g.fillRect(-18, -4, 10, 3);
+  }
   // body + belly
-  g.fillStyle = "#1f2a44"; g.beginPath(); g.ellipse(0, 0, 17, 12, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = body; g.beginPath(); g.ellipse(0, 0, 17, 12, 0, 0, Math.PI * 2); g.fill();
   g.fillStyle = "#f7f3ea"; g.beginPath(); g.ellipse(4, 4, 11, 7, 0, 0, Math.PI * 2); g.fill();
+  // camera on the chest
+  if (wearing.has("camera")) {
+    g.fillStyle = "#2b2b2b"; g.beginPath(); g.roundRect(2, 4, 9, 7, 1.5); g.fill();
+    g.fillStyle = "#9fd4f5"; g.beginPath(); g.arc(6.5, 7.5, 2, 0, Math.PI * 2); g.fill();
+  }
   // wing (flaps)
-  g.fillStyle = "#151d33"; g.beginPath(); g.ellipse(-3, -2 + wing * 6, 11, 6, -0.4 + wing * 0.9, 0, Math.PI * 2); g.fill();
+  g.fillStyle = wingColor; g.beginPath(); g.ellipse(-3, -2 + wing * 6, 11, 6, -0.4 + wing * 0.9, 0, Math.PI * 2); g.fill();
   // head, red throat, eye, beak
-  g.fillStyle = "#1f2a44"; g.beginPath(); g.arc(12, -6, 9, 0, Math.PI * 2); g.fill();
+  g.fillStyle = body; g.beginPath(); g.arc(12, -6, 9, 0, Math.PI * 2); g.fill();
   g.fillStyle = "#a6192e"; g.beginPath(); g.ellipse(14, 1, 5, 3, 0, 0, Math.PI * 2); g.fill();
+  // McGill scarf around the neck, with a trailing end
+  if (wearing.has("scarf")) {
+    g.fillStyle = "#a6192e"; g.beginPath(); g.ellipse(9, 1, 7, 3.2, -0.3, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.moveTo(4, 2); g.lineTo(-4, 9 + wing * 2); g.lineTo(0, 10 + wing * 2); g.lineTo(7, 3); g.closePath(); g.fill();
+    g.fillStyle = "#ffffff"; g.fillRect(6, -0.5, 2, 3);
+  }
   g.fillStyle = "#fff"; g.beginPath(); g.arc(15, -8, 3.4, 0, Math.PI * 2); g.fill();
   g.fillStyle = "#111"; g.beginPath(); g.arc(16, -8, 1.8, 0, Math.PI * 2); g.fill();
   g.fillStyle = "#e3a835"; g.beginPath(); g.moveTo(20, -6); g.lineTo(28, -4); g.lineTo(20, -2); g.closePath(); g.fill();
+  // one hat at most
+  if (wearing.has("beanie")) {
+    g.fillStyle = "#a6192e"; g.beginPath(); g.arc(11, -12, 8, Math.PI, 0); g.fill();
+    g.fillStyle = "#ffffff"; g.fillRect(3, -13, 16, 3);
+    g.beginPath(); g.arc(11, -21, 2.6, 0, Math.PI * 2); g.fill();
+  } else if (wearing.has("gradcap")) {
+    g.fillStyle = "#151515"; g.fillRect(6, -17, 11, 4);
+    g.beginPath(); g.moveTo(1, -18); g.lineTo(12, -23); g.lineTo(23, -18); g.lineTo(12, -14); g.closePath(); g.fill();
+    g.strokeStyle = "#e3a835"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(12, -18.5); g.lineTo(20, -17); g.lineTo(20, -10); g.stroke();
+  }
   g.restore();
 }
 
@@ -79,10 +110,18 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
   const stateRef = useRef<State>("ready");
   const runRef = useRef<Promise<string | null> | null>(null);
   const modeRef = useRef(mode);
+  const lookRef = useRef<AvatarLook>(DEFAULT_LOOK);
 
   useEffect(() => { modeRef.current = mode; }, [mode]);
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { queueMicrotask(() => setBest(readBest())); }, []);
+  // The look saved by the avatar studio; follows changes made in another tab.
+  useEffect(() => {
+    lookRef.current = readLook() ?? DEFAULT_LOOK;
+    const onStorage = (event: StorageEvent) => { if (event.key === LOOK_KEY) lookRef.current = readLook() ?? DEFAULT_LOOK; };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -174,7 +213,7 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
         glow.addColorStop(0, "rgba(255,240,200,0.45)"); glow.addColorStop(1, "rgba(255,240,200,0)");
         g.fillStyle = glow; g.beginPath(); g.arc(BIRD_X + 4, bird.y, 34, 0, Math.PI * 2); g.fill();
       }
-      drawMartlet(g, BIRD_X, bird.y, tilt, wing);
+      drawMartlet(g, BIRD_X, bird.y, tilt, wing, lookRef.current);
       // score
       if (stateRef.current !== "ready") {
         g.font = "800 44px system-ui, sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = "rgba(0,0,0,.35)";

@@ -1,11 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Camera, Check, CircleStop, Lock, Play, Video } from "lucide-react";
 import type { Clip } from "@/components/avatar3d/face";
 import { useFaceTracker } from "@/components/avatar3d/useFaceTracker";
 import { ITEMS, PLUMAGES, pinCount, total, type ItemId, type PlumageId, type Progress } from "./items";
+import { readLook, saveLook } from "./look";
 
 // Three.js and the bird only load in the browser, on this page.
 const Martlet3D = dynamic(() => import("@/components/avatar3d/Martlet3D"), {
@@ -20,7 +21,8 @@ const subscribeMotion = (cb: () => void) => {
 };
 const getMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export function AvatarStudio({ progress, name }: { progress: Progress; name: string }) {
+/** `persist`: remember the look in this browser (off in preview mode, where everything is unlocked). */
+export function AvatarStudio({ progress, name, persist = true }: { progress: Progress; name: string; persist?: boolean }) {
   const unlockedItems = ITEMS.filter((i) => i.unlocked(progress));
   const [wearing, setWearing] = useState<Set<ItemId>>(() => new Set(unlockedItems.filter((i) => i.slot !== "hat").map((i) => i.id)));
   const [plumageId, setPlumageId] = useState<PlumageId>("classic");
@@ -31,17 +33,40 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
   const tracking = tracker.status === "live" || tracker.status === "recording";
   const plumage = PLUMAGES.find((p) => p.id === plumageId)!;
 
+  // Restore the saved look (only what is still unlocked), or save the default on a first visit,
+  // so Martlet Flight draws the same martlet (#132).
+  useEffect(() => {
+    if (!persist) return;
+    const saved = readLook();
+    queueMicrotask(() => {
+      if (!saved) return saveLook({ plumage: plumageId, wearing: [...wearing] });
+      const savedPlumage = PLUMAGES.find((p) => p.id === saved.plumage);
+      if (savedPlumage?.unlocked(progress)) setPlumageId(savedPlumage.id);
+      setWearing(new Set(saved.wearing.filter((id) => ITEMS.find((i) => i.id === id)?.unlocked(progress))));
+    });
+    // Only on mount: later changes are saved by the handlers below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function remember(nextPlumage: PlumageId, nextWearing: Set<ItemId>) {
+    if (persist) saveLook({ plumage: nextPlumage, wearing: [...nextWearing] });
+  }
+
+  function choosePlumage(id: PlumageId) {
+    setPlumageId(id);
+    remember(id, wearing);
+  }
+
   function toggle(id: ItemId) {
     const item = ITEMS.find((i) => i.id === id)!;
-    setWearing((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else {
-        if (item.slot === "hat") ITEMS.filter((i) => i.slot === "hat").forEach((i) => next.delete(i.id)); // one hat at a time
-        next.add(id);
-      }
-      return next;
-    });
+    const next = new Set(wearing);
+    if (next.has(id)) next.delete(id);
+    else {
+      if (item.slot === "hat") ITEMS.filter((i) => i.slot === "hat").forEach((i) => next.delete(i.id)); // one hat at a time
+      next.add(id);
+    }
+    setWearing(next);
+    remember(plumageId, next);
   }
 
   async function recordClip() {
@@ -119,7 +144,7 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
             {PLUMAGES.map((p) => {
               const locked = !p.unlocked(progress), on = plumageId === p.id;
               return (
-                <button key={p.id} type="button" disabled={locked} aria-pressed={on} onClick={() => setPlumageId(p.id)} className={chip(on, locked)} title={locked ? p.requirement : undefined}>
+                <button key={p.id} type="button" disabled={locked} aria-pressed={on} onClick={() => choosePlumage(p.id)} className={chip(on, locked)} title={locked ? p.requirement : undefined}>
                   <span className="size-4 shrink-0 rounded-full border border-white/60" style={{ background: p.body }} />
                   <span className="min-w-0">
                     <span className="block font-semibold">{p.label}</span>
@@ -131,6 +156,7 @@ export function AvatarStudio({ progress, name }: { progress: Progress; name: str
           </div>
         </section>
 
+        <p className="text-xs text-ink-subtle">{persist ? "Your look is saved in this browser and used in Martlet Flight." : "Preview looks aren't saved."}</p>
         <p className="text-xs text-ink-subtle">Landmark pins: {pinCount(progress)} of 5 · Hosted {progress.hosted} · Joined {progress.joined} · Landmarks {progress.landmarks}</p>
       </div>
     </div>
