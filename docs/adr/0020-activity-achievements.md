@@ -1,6 +1,6 @@
 # 0020. Activity achievements computed on read
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-22
 - **Builds on:** [0019](0019-achievements.md) (catalogue, `earn()`, `user_achievements`)
 

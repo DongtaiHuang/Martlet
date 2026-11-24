@@ -1,6 +1,6 @@
 # 0018. Open the Landmarks map with all pins in 3D
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Builds on:** [0013](0013-landmark-map-tower-pins.md) and [0014](0014-theme-tokens-and-dark-mode.md)
 

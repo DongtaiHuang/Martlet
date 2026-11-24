@@ -1,6 +1,6 @@
 # 0013. Landmarks map, tower pins that grow, and popup birds
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Builds on:** [0009](0009-landmark-photo-unlocks.md) (landmark map markers and preview card), [0006](0006-maplibre-configurable-style.md) (MapLibre), [0008](0008-client-side-locate-me.md) (locate-me stays in the browser)
 

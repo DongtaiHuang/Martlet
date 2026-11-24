@@ -1,6 +1,6 @@
 # 0024. Seasonal themes with decorative scenes
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-22
 - **Builds on:** [0014](0014-theme-tokens-and-dark-mode.md) (colour tokens and themes), [0019](0019-achievements.md) (achievements)
 

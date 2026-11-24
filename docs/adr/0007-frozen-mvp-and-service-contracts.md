@@ -13,7 +13,7 @@ Four developers work in parallel for 24 hours. Without a fixed scope and stable 
 - Commit shared contracts to `main` before branching: `types/meetup.ts`, `lib/locations.ts`, and the function signatures in `docs/CONTRACTS.md`.
 - Services start as mocks (`lib/mock-meetups.ts`); owners replace the internals without changing signatures. Components call services instead of making their own Supabase fetches.
 - UI components are presentational: e.g. `MeetupCard` receives `onPeck`/`onFlap` callbacks rather than performing mutations itself.
-- Each developer owns specific paths (see `docs/TEAM_PLAN.md`); editing another owner's file requires coordination.
+- Each developer owns specific paths (originally `docs/archive/TEAM_PLAN.md`, now `.github/CODEOWNERS`); editing another owner's file requires coordination.
 
 ## Consequences
 

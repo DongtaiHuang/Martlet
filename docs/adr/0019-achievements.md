@@ -1,6 +1,6 @@
 # 0019. Achievements for niche and hidden features
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Builds on:** [0003](0003-rls-authorization-boundary.md) (RLS), [0012](0012-progress-growth-tree.md) (tree), [0013](0013-landmark-map-tower-pins.md) (map, popup birds)
 

@@ -1,6 +1,6 @@
 # 0021. Persistent, color-coded notifications
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-22
 - **Builds on:** [0003](0003-rls-authorization-boundary.md) (RLS), [0007](0007-frozen-mvp-and-service-contracts.md) (RPC-only writes pattern)
 

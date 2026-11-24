@@ -1,3 +1,5 @@
+> **Archived.** This file records the 24-hour hackathon plan (November 2026). Ownership now lives in [`.github/CODEOWNERS`](../../.github/CODEOWNERS) and the roadmap in [`docs/ROADMAP.md`](../ROADMAP.md).
+
 # 24h execution plan — four developers
 
 ## Frozen MVP

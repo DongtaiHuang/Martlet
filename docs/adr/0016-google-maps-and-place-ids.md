@@ -1,8 +1,7 @@
 # 0016. Google Maps and place IDs
 
-## Status
-
-Proposed. Google map and search preview integration. Publishing searched places is pending.
+- **Status:** Accepted (Google map and search preview). Publishing searched places is still pending.
+- **Date:** 2026-11-21
 
 ## Decision
 

@@ -1,6 +1,6 @@
 # 0010. Martlet avatar with in-browser expression tracking
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-22
 - **Relates to:** [0007](0007-frozen-mvp-and-service-contracts.md) (adds a feature beyond the frozen MVP), issue #28 (achievements)
 

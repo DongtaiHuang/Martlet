@@ -1,3 +1,5 @@
+> **Archived.** This file records the original hackathon starter instructions (an overlay for `create-next-app`). They no longer apply: the repository is a complete app. To run it, follow the [README](../../README.md#run-locally).
+
 # McGill Martlet — Four-person 24-hour starter
 
 This is an **overlay** for the official Next.js `with-supabase` starter, not a complete standalone Next.js project. It intentionally provides a working **mock feed** and a demo map, with clear ownership boundaries so four people can build in parallel.

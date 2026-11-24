@@ -1,0 +1,99 @@
+# Code owners: GitHub requests a review from these people when a PR touches their area.
+# Based on who built each area (git history, November 2026). Every area has two owners,
+# so nobody has to review their own PR. The LAST matching rule wins, so keep the
+# general rules first and the specific ones below.
+
+# Default: repository owner and maintainer
+*                                   @DongtaiHuang @Blacklotus88888
+
+# Docs and decisions
+/docs/                              @DongtaiHuang @Blacklotus89898 @yoihneiy
+/README.md                          @DongtaiHuang @Blacklotus89898
+/AGENTS.md                          @DongtaiHuang @Blacklotus89898
+
+# Meetups: feed, creation, detail, editing, courses, venues
+/app/meetups/                       @DongtaiHuang @Blacklotus89898
+/components/feed/                   @DongtaiHuang @Blacklotus89898
+/components/forms/                  @DongtaiHuang @Blacklotus89898
+/components/courses/                @DongtaiHuang @Blacklotus89898
+/lib/meetup*.ts                     @DongtaiHuang @Blacklotus89898
+/lib/courses.ts                     @DongtaiHuang @Blacklotus89898
+/lib/course-codes.ts                @DongtaiHuang @Blacklotus89898
+/lib/locations.ts                   @DongtaiHuang @Blacklotus89898
+/lib/public-venues.ts               @DongtaiHuang @Blacklotus89898
+/lib/local-date-time.ts             @DongtaiHuang @Blacklotus89898
+/lib/mock-meetups.ts                @DongtaiHuang @Blacklotus89898
+/types/                             @DongtaiHuang @Blacklotus89898
+/components/feed/hero/              @He-Vincent @DongtaiHuang
+
+# Maps, landmarks, progress, achievements, seasons, Marty
+/app/explore/                       @yoihneiy @Blacklotus89898
+/components/map/                    @yoihneiy @Blacklotus89898
+/lib/google-maps.ts                 @yoihneiy @Blacklotus89898
+/app/landmarks/                     @yoihneiy @Blacklotus89898
+/components/landmarks/              @yoihneiy @Blacklotus89898
+/lib/landmark*.ts                   @yoihneiy @Blacklotus89898
+/lib/location-photos.ts             @yoihneiy @Blacklotus89898
+/lib/mock-landmarks.ts              @yoihneiy @Blacklotus89898
+/app/progress/                      @yoihneiy @Blacklotus89898
+/components/progress/               @yoihneiy @Blacklotus89898
+/lib/progress.ts                    @yoihneiy @Blacklotus89898
+/app/achievements/                  @yoihneiy @Blacklotus89898
+/components/achievements/           @yoihneiy @Blacklotus89898
+/lib/achievement*.ts                @yoihneiy @Blacklotus89898
+/lib/activity-*.ts                  @yoihneiy @Blacklotus89898
+/components/seasons/                @yoihneiy @Blacklotus89898
+/components/martlet/                @yoihneiy @He-Vincent
+
+# Layout, navigation, profile, Peck/Flap
+/components/layout/                 @Blacklotus89898 @yoihneiy
+/app/profile/                       @Blacklotus89898 @DongtaiHuang
+/components/profile/                @Blacklotus89898 @DongtaiHuang
+/lib/profile-history.ts             @Blacklotus89898 @DongtaiHuang
+/components/social/                 @Blacklotus89898 @DongtaiHuang
+/lib/social.ts                      @Blacklotus89898 @DongtaiHuang
+
+# Community: board, moderation, trends, notifications, news, guide
+/app/board/                         @Blacklotus89898 @DongtaiHuang
+/components/board/                  @Blacklotus89898 @DongtaiHuang
+/lib/board*.ts                      @Blacklotus89898 @DongtaiHuang
+/app/moderation/                    @Blacklotus89898 @DongtaiHuang
+/components/trends/                 @Blacklotus89898 @DongtaiHuang
+/lib/trend*.ts                      @Blacklotus89898 @DongtaiHuang
+/lib/mock-trends.ts                 @Blacklotus89898 @DongtaiHuang
+/app/notifications/                 @Blacklotus89898 @DongtaiHuang
+/components/notifications/          @Blacklotus89898 @DongtaiHuang
+/lib/notifications.ts               @Blacklotus89898 @DongtaiHuang
+/app/news/                          @Blacklotus89898 @DongtaiHuang
+/components/news/                   @Blacklotus89898 @DongtaiHuang
+/lib/mcgill-news.ts                 @Blacklotus89898 @DongtaiHuang
+/app/guide/                         @Blacklotus89898 @DongtaiHuang
+/components/guide/                  @Blacklotus89898 @DongtaiHuang
+/lib/guides.ts                      @Blacklotus89898 @DongtaiHuang
+
+# Avatar and Martlet Flight
+/app/avatar/                        @Blacklotus89898 @yoihneiy
+/components/avatar/                 @Blacklotus89898 @yoihneiy
+/components/avatar3d/               @Blacklotus89898 @yoihneiy
+/lib/avatar.ts                      @Blacklotus89898 @yoihneiy
+/app/play/                          @Blacklotus89898 @yoihneiy
+/components/game/                   @Blacklotus89898 @yoihneiy
+/lib/flight-scores.ts               @Blacklotus89898 @yoihneiy
+
+# Security-critical: database, RLS, auth, session handling (ADR 0003)
+/supabase/                          @Blacklotus89898 @DongtaiHuang
+/lib/supabase/                      @Blacklotus89898 @DongtaiHuang
+/app/auth/                          @Blacklotus89898 @DongtaiHuang
+/app/login/                         @Blacklotus89898 @DongtaiHuang
+/app/signup/                        @Blacklotus89898 @DongtaiHuang
+/proxy.ts                           @Blacklotus89898 @DongtaiHuang
+/tests/                             @Blacklotus89898 @DongtaiHuang
+
+# CI, build and dependencies
+/.github/                           @Blacklotus89898 @DongtaiHuang
+/Dockerfile                         @Blacklotus89898 @DongtaiHuang
+/compose.yaml                       @Blacklotus89898 @DongtaiHuang
+/scripts/                           @Blacklotus89898 @DongtaiHuang
+/package.json                       @Blacklotus89898 @DongtaiHuang
+/package-lock.json                  @Blacklotus89898 @DongtaiHuang
+/next.config.ts                     @Blacklotus89898 @DongtaiHuang
