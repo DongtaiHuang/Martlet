@@ -15,12 +15,12 @@ insert into auth.users (id) values ('00000000-0000-4000-8000-000000000001'), ('0
 -- Fixture: a study meetup with a real course code, starting in 90 minutes.
 do $$
 declare
-  code text;
+  fixture_code text;
 begin
-  select code into strict code from public.courses limit 1;
+  select c.code into strict fixture_code from public.courses c limit 1;
   insert into public.meetups (id, host_id, title, category, course_code, location_name, latitude, longitude, starts_at)
   values ('00000000-0000-4000-8000-000000000011', '00000000-0000-4000-8000-000000000001',
-    'Study session', 'study', code,
+    'Study session', 'study', fixture_code,
     (select name from public.campus_locations where id = 'redpath-library'),
     (select latitude from public.campus_locations where id = 'redpath-library'),
     (select longitude from public.campus_locations where id = 'redpath-library'),
