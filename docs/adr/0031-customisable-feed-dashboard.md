@@ -1,6 +1,6 @@
 # 0031. Customisable feed dashboard
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-24
 - **Issue:** #46
 
@@ -25,5 +25,5 @@ The feed page shows a photo carousel, the meetup (or landmark) feed, and a sideb
 
 - No new tables or permissions, and no layout flash.
 - The layout doesn't follow a student across devices; syncing it to the profile later needs an RPC that uses the session user.
-- New widgets (Groups, Spots, a progress-tree card) only need an entry in `WIDGETS` and a slot in the page.
+- New widgets (Groups, Spots, a progress-tree card; weather in ADR 0032) only need an entry in `WIDGETS` and a slot in the page.
 - On phones the sidebar is below the feed, so Customize is further down the page.

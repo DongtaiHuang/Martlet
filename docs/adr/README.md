@@ -34,7 +34,8 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0028 | [CI test gates for production](0028-ci-test-gates.md) | Accepted |
 | 0029 | [Custom themes from three colours](0029-custom-colour-themes.md) | Accepted |
 | 0030 | [Tree species and levels after full bloom](0030-tree-species-and-bloom-levels.md) | Accepted |
-| 0031 | [Customisable feed dashboard](0031-customisable-feed-dashboard.md) | Proposed |
+| 0031 | [Customisable feed dashboard](0031-customisable-feed-dashboard.md) | Accepted |
+| 0032 | [Campus weather from Open-Meteo](0032-campus-weather.md) | Proposed |
 
 ## Adding a new ADR
 
