@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { ArrowRight, FlaskConical, Gamepad2, LogIn } from "lucide-react";
 import type { LandmarkSummary } from "@/types/landmark";
@@ -12,6 +13,8 @@ import { NewsPreview } from "@/components/news/NewsPreview";
 import { FlightLeaderboard } from "@/components/game/FlightLeaderboard";
 import { MartletFlightLoader } from "@/components/game/MartletFlightLoader";
 import { MartletNav } from "@/components/layout/MartletNav";
+import { DashboardWidgets } from "@/components/feed/DashboardWidgets";
+import { DASHBOARD_COOKIE, parseLayout, visibleWidgets, type WidgetId } from "@/lib/dashboard";
 import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
 import { listMyCourses } from "@/lib/courses";
 import { listLandmarks } from "@/lib/landmarks";
@@ -115,12 +118,37 @@ export default async function MeetupsPage({
   const view: FeedView = params.view === "landmarks" ? "landmarks" : "meetups";
   const trendParam = Array.isArray(params.trend) ? params.trend[0] : params.trend;
   const trend: TrendType | null = isValidTrendType(trendParam) ? trendParam : null;
+  // The student's widget order (issue #46, ADR 0031). Only visible widgets are rendered, so
+  // hidden ones don't fetch anything.
+  const layout = parseLayout((await cookies()).get(DASHBOARD_COOKIE)?.value);
+  const shown = new Set(visibleWidgets(layout));
+  const widgets: Record<WidgetId, () => React.ReactNode> = {
+    trends: () => (
+      // key: show the loading state again when switching trend tabs
+      <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
+        <TrendPanel view={view} activeType={trend} />
+      </Suspense>
+    ),
+    daily: () => <DailyCard />,
+    news: () => <Suspense fallback={null}><NewsPreview /></Suspense>,
+    flight: () => (
+      <section aria-labelledby="flight-heading" className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h2 id="flight-heading" className="flex items-center gap-2 text-lg font-bold text-ink"><Gamepad2 aria-hidden="true" size={18} className="text-brand-ink" />Martlet Flight</h2>
+          <Link href="/play" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-ink hover:underline">Full screen <ArrowRight aria-hidden="true" size={14} /></Link>
+        </div>
+        <MartletFlightLoader embedded />
+        <FlightLeaderboard limit={3} compact />
+      </section>
+    ),
+  };
+  const slots = Object.fromEntries([...shown].map((id) => [id, widgets[id]()]));
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <MartletNav />
       <main className="mx-auto max-w-6xl px-4 pt-5 pb-12 sm:px-8 sm:pt-8">
-        <HeroCarousel />
-        <div className="mt-8 gap-10 sm:mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_340px]">
+        {layout.hero && <HeroCarousel />}
+        <div className={`${layout.hero ? "mt-8 sm:mt-10" : ""} gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_340px]`}>
           <section aria-labelledby="feed-heading">
             <h2 id="feed-heading" className="sr-only">{view === "landmarks" ? "Landmarks" : "Upcoming meetups"}</h2>
             <FeedViewToggle view={view} />
@@ -129,21 +157,8 @@ export default async function MeetupsPage({
               {view === "landmarks" ? <FeedLandmarks /> : <UpcomingMeetups />}
             </Suspense>
           </section>
-          <aside aria-labelledby="trend-heading" className="mt-10 lg:mt-0">
-            {/* key: show the loading state again when switching trend tabs */}
-            <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
-              <TrendPanel view={view} activeType={trend} />
-            </Suspense>
-            <DailyCard />
-            <Suspense fallback={null}><NewsPreview /></Suspense>
-            <section aria-labelledby="flight-heading" className="mt-6 rounded-2xl border border-line bg-surface p-4 shadow-sm">
-              <div className="mb-3 flex items-baseline justify-between gap-3">
-                <h2 id="flight-heading" className="flex items-center gap-2 text-lg font-bold text-ink"><Gamepad2 aria-hidden="true" size={18} className="text-brand-ink" />Martlet Flight</h2>
-                <Link href="/play" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-ink hover:underline">Full screen <ArrowRight aria-hidden="true" size={14} /></Link>
-              </div>
-              <MartletFlightLoader embedded />
-              <FlightLeaderboard limit={3} compact />
-            </section>
+          <aside aria-label="Campus widgets" className="mt-10 lg:mt-0">
+            <DashboardWidgets initial={layout} slots={slots} />
           </aside>
         </div>
       </main>

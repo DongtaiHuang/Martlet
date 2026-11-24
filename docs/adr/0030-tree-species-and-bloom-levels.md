@@ -1,6 +1,6 @@
 # 0030. Tree species and levels after full bloom
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-24
 - **Extends:** [0012](0012-progress-growth-tree.md) (one tree design, seven stages)
 - **Issue:** #133
