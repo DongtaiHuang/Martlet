@@ -125,3 +125,35 @@ The original `007_meetup_polls.sql` is historical. The application no longer cal
 ## Google Places rollout
 
 Google search is an optional preview only; it does not write provider content or select the custom-location text. Campus publishing still uses canonical coordinates, while custom publishing uses text-only meeting instructions. Before enabling Google place publishing, verify the hosted migration history and catalog with the database owner. The course and poll branches both have 007 files, and the course catalog and off-campus branches both have 008 files. Identify each by full filename and applied database objects. Reconcile filename collisions before running the files through a version-based migration tool. Preserve applied migration files. A future Places write migration must use a new identity after the course and location migrations.
+
+
+## Unified moderation release (018)
+
+The Campus Board already supports reporting and moderator review through migration 017. Migration `018_unified_moderation.sql` adds **meetup and landmark-photo reporting**, moderated visibility, and a unified audit-backed moderator decision RPC. It preserves existing board reports, meetup attendance, landmark unlocks and stored photos. The first moderators still must be assigned manually through `profiles.is_moderator` by a trusted database administrator.
+
+**Rollout order (required):**
+
+1. Have the database owner verify that migrations 006, 015, 017 and their dependencies exist. Take a current database backup/snapshot before applying schema changes. Review 018 in its entirety.
+2. Apply `018_unified_moderation.sql` **once** in a test database, then in the authorized hosted Supabase project. Do not reset existing board report data, delete user content, or apply the migration blindly twice.
+3. Verify signed-in users can report other students' visible meetups and photos; owners cannot self-report; non-unlockers cannot report or see private landmark photos. Three unique reports auto-hide the target. Verify moderators can review and restore, remove, or dismiss while other students cannot.
+4. Confirm guest and signed-in meetup reads, feed/map filtering, and direct detail requests hide moderated meetups; validate Peck and Flap are rejected on hidden meetups.
+5. Confirm the photo bucket remains private and signing a URL for a hidden photo fails for non-owner, non-moderator accounts. Previously-issued signed URLs may remain valid until their expiry (currently up to an hour), so minimize that TTL or rotate assets if an urgent takedown is required.
+6. Deploy the matching Next.js application only after migration 018 succeeds. When the migration is absent, report/review actions will fail; do not show misleading success messages.
+
+**Verify moderator role:**
+
+```sql
+select u.id, u.email, p.is_moderator
+from auth.users u join public.profiles p on p.id = u.id
+where lower(u.email) = lower('YOUR_APPROVED_EMAIL');
+```
+
+Only a database administrator may promote a verified account:
+
+```sql
+update public.profiles p set is_moderator = true
+from auth.users u where p.id=u.id and lower(u.email)=lower('YOUR_APPROVED_EMAIL')
+returning p.id, p.is_moderator;
+```
+
+Moderator route: `/moderation`. Decisions are stored in `moderation_decisions`; normal members cannot read decision notes. **Meetup/landmark removal is a soft hide**, not a user ban, landmark unlock deletion, or file deletion. The schema deliberately does not grant broad UPDATE/DELETE access to user roles. Rollback requires a reviewed migration and recovery plan, not a database reset.

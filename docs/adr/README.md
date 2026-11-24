@@ -28,6 +28,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0022 | [Custom meeting spots and polling retirement](0022-custom-meeting-spots.md) | Proposed |
 | 0023 | [Hosts edit their meetups through a checked database function](0023-host-meetup-editing.md) | Proposed |
 | 0024 | [Seasonal themes with decorative scenes](0024-seasonal-themes-and-scenes.md) | Proposed |
+| 0028 | [Unified moderation for community content](0028-unified-community-moderation.md) | Proposed |
 
 ## Adding a new ADR
 

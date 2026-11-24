@@ -8,6 +8,7 @@ import { Expand, ImageOff, RefreshCw, Smartphone, Sparkles } from "lucide-react"
 import type { LandmarkPhoto } from "@/types/landmark";
 import { LandmarkPhotoViewer, VIEWER_TRANSITION_NAME } from "./LandmarkPhotoViewer";
 import { useShakeReveal } from "./useShakeReveal";
+import { ReportButton } from "@/components/moderation/ReportButton";
 
 const EDIT_THRESHOLD_MS = 60_000;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -112,6 +113,11 @@ export function LandmarkGallery({ photos, landmarkName, landmarkId }: { photos: 
                   </div>
                 )}
               </div>
+              {!photo.is_mine && photo.photo_url && (
+                <div className="mt-2 flex justify-end">
+                  <ReportButton type="landmark_photo" id={photo.user_id} landmarkId={landmarkId} />
+                </div>
+              )}
             </li>
           );
         })}
