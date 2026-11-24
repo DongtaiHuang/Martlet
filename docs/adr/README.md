@@ -32,6 +32,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0026 | [Martlet Flight leaderboard](0026-flight-leaderboard.md) | Accepted |
 | 0027 | [Community board and moderation](0027-community-board-and-moderation.md) | Accepted |
 | 0028 | [CI test gates for production](0028-ci-test-gates.md) | Accepted |
+| 0029 | [Custom themes from three colours](0029-custom-colour-themes.md) | Proposed |
 
 ## Adding a new ADR
 
