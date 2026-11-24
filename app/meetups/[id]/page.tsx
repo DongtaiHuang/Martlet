@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, CheckCircle2, GraduationCap, MapPin, Pencil, UserRound } from "lucide-react";
 import { MeetupCategoryBadge } from "@/components/feed/MeetupCategoryBadge";
@@ -14,6 +15,7 @@ import { findCampusLocationForMeetup } from "@/lib/locations";
 import { hasMeetupCoordinates, UNMAPPED_LOCATION_NOTE } from "@/lib/meetup-location";
 import { getMeetup } from "@/lib/meetups";
 import { MeetupReactions } from "./MeetupReactions";
+import { MeetupWeather } from "@/components/weather/MeetupWeather";
 import { MeetupStartTime } from "./MeetupStartTime";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +61,8 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
           <dl className="mt-5 grid gap-4 rounded-xl bg-canvas p-4 [overflow-wrap:anywhere]">
             <div><dt className="relative pl-7 text-sm font-bold"><UserRound aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Host</dt><dd className="pl-7 text-sm text-ink-2">{meetup.host_display_name}</dd></div>
             <div><dt className="relative pl-7 text-sm font-bold"><CalendarDays aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Starts</dt><dd className="pl-7 text-sm text-ink-2"><MeetupStartTime startsAt={meetup.starts_at} /></dd></div>
+            {/* Campus forecast for the start time (issue #138); nothing past the 7-day forecast. */}
+            {upcoming && <Suspense fallback={null}><MeetupWeather startsAt={meetup.starts_at} /></Suspense>}
             <div><dt className="relative pl-7 text-sm font-bold"><MapPin aria-hidden="true" size={18} className="absolute top-0 left-0 text-brand-ink" />Meetup location</dt><dd className="pl-7 text-sm text-ink-2">
               {/* Explore only lists upcoming meetups, so only link to it while this one is upcoming. */}
               {upcoming && hasMeetupCoordinates(meetup) ? (
