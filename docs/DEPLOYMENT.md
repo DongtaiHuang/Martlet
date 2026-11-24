@@ -50,21 +50,34 @@ Keep the existing email confirmation policy. If confirmation is enabled, configu
 
 ## Build, deploy, and verify
 
-Run on Node.js 22.13 or later in the 22.x line:
+Run on Node.js 22.18 or later in the 22.x line (22.18 runs the TypeScript-importing tests without flags):
 
 ```sh
 npm ci
 npx tsc --noEmit
 npm run lint
+npm test
 npm run check:contrast
 npm run build
 ```
+
+CI also applies every migration to a disposable Supabase database and runs `tests/*.sql`, and runs the browser tests against a demo build. A migration that is green in CI has been applied, in filename order, to a fresh database. Production still needs the owner to apply it after a backup.
 
 1. Check the release PR’s Preview and CI. After review and merge, watch Vercel’s Deployments tab for the Git-triggered Production build of `main` and verify its source commit. For an environment-only change, redeploy the intended `main` build from Vercel.
 2. Open the stable HTTPS URL from a signed-out browser outside the developer machine. Confirm signup and login load, protected routes send visitors to login, and the screens have no demo banner.
 3. Use two approved accounts on desktop and mobile. Verify signup, confirmation, login, refresh, logout, and return to the requested protected page. Create campus, custom-location, and Coffee + Study meetups with a course. Verify host edit and cancellation, non-host rejection, Peck, Flap, leave, feed filters, and profile history. Check that anonymous and non-owner users lack access to private records and protected writes.
 4. In Explore, landmarks, and the location previews, check tile loading, attribution, zoom, category filtering, and that text-only places have no map pin. Verify landmark unlocks, upload, gallery, zoom, replacement, and private Storage permissions.
 5. Check trends, achievements, notifications, themes, footer, flying Martlet, Martlet Flight, and avatar tracking. Review the browser console, network panel, and Vercel runtime logs. Record the verified URL in the README after these checks.
+
+## Repository and platform settings (admin only)
+
+These live outside the code, so CI can't enforce them. A repository admin or project owner sets them once:
+
+1. **Protect `main`** (GitHub → Settings → Rules → Rulesets, target `main`): require a pull request with 1 approval, require the status checks *Type-check, lint, build*, *Migrations + SQL tests (disposable Supabase)*, *Docker image (build + smoke test)* and *CodeQL (javascript-typescript)*, block force pushes and deletion.
+2. **Security** (Settings → Code security): enable Dependabot alerts and security updates, secret scanning and push protection. Code scanning results come from `.github/workflows/codeql.yml`.
+3. **Separate databases:** point Vercel **Preview** at a staging Supabase project, never production. Production keeps its own keys.
+4. **Backups:** confirm Supabase daily backups (or point-in-time recovery) on the production project, and take a manual backup before applying any migration.
+5. **Monitoring:** add an uptime check on the production `/meetups` URL and error tracking for the Next.js server (for example Sentry). Both need an account owned by the team.
 
 ## Troubleshooting and rollback
 

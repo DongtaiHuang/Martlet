@@ -159,7 +159,7 @@ A visitor opens a Next.js page. Server-side services fetch the content that user
 
 ## Run locally
 
-**Requirements:** Node.js **22.13+ (22.x)**, npm, and an internet connection for map tiles.
+**Requirements:** Node.js **22.18+ (22.x)**, npm, and an internet connection for map tiles.
 
 ```bash
 git clone https://github.com/DongtaiHuang/Martlet.git
@@ -201,11 +201,24 @@ For setup details, see [Supabase setup](docs/SUPABASE_SETUP.md).
 ```bash
 npx tsc --noEmit
 npm run lint
+npm test                 # unit tests (tests/*.test.mjs)
 npm run check:contrast
 npm run build
 ```
 
-Additional targeted browser and SQL tests live in [tests/](tests/). Database tests require an authorized test environment.
+CI runs these on every pull request, plus two more suites you can run locally:
+
+```bash
+# Browser tests against a demo-mode build (no secrets). One-time: npx playwright install chromium
+npm run build && npm run start      # in one terminal
+npm run test:e2e                    # in another (APP_URL defaults to http://localhost:3000)
+
+# All migrations + SQL tests on a DISPOSABLE local Supabase (Docker + Supabase CLI).
+# Run `supabase init` and `supabase start` in an empty folder outside this repo, then:
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres npm run test:db
+```
+
+`test:db` refuses non-local URLs. Never run it, or the SQL in `tests/`, against a shared or production database.
 
 ## Deploying & releases
 
