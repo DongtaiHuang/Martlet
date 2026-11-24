@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { ImageOff } from "lucide-react";
-import { TREE_STAGES, type TreeStage } from "@/lib/progress";
-import { CLOUD_LAYERS, GRID_H, GRID_W, PALETTES, SKY_PATHS, pixelScene, type PixelPalette, type PixelPath } from "./pixel-tree";
+import { BLOOM_LEVELS, SPECIES_INFO, TREE_STAGES, type BloomLevel, type TreeSpecies, type TreeStage } from "@/lib/progress";
+import { CLOUD_LAYERS, GRID_H, GRID_W, SKY_PATHS, pixelScene, treeColors, type PixelPalette, type PixelPath } from "./pixel-tree";
 
 // Pixel-art progress tree: a tiny seedling alone in a wide open field that grows (7 stages)
 // into a tree filling the sky. Each of the user's landmark photos hangs on it as a fruit:
@@ -27,13 +27,18 @@ interface GrowthTreeProps {
   palette?: PixelPalette;
   /** The user's photos, in unlock order; each becomes one fruit. */
   fruits?: TreeFruit[];
+  /** Chosen species (ADR 0030). */
+  species?: TreeSpecies;
+  /** Level after full bloom (0-3); ignored before full bloom. */
+  bloom?: BloomLevel;
 }
 
 const NO_FRUIT: TreeFruit[] = [];
 
-export function GrowthTree({ stage, unlocked, total, preview = false, palette = "color", fruits = NO_FRUIT }: GrowthTreeProps) {
-  const scene = pixelScene(stage, fruits.length);
-  const colors = PALETTES[palette];
+export function GrowthTree({ stage, unlocked, total, preview = false, palette = "color", fruits = NO_FRUIT, species = "classic", bloom = 0 }: GrowthTreeProps) {
+  const scene = pixelScene(stage, fruits.length, species, bloom);
+  const colors = treeColors(palette, species);
+  const name = `${SPECIES_INFO[species].label} ${stage === 6 ? BLOOM_LEVELS[bloom] : TREE_STAGES[stage]}`.toLowerCase();
   const paths = (list: PixelPath[]) => list.map((p) => <path key={p.color} d={p.d} fill={colors[p.color]} />);
   const shownFruit = scene.fruitSpots.map((spot, i) => ({ spot, fruit: fruits[i] }));
 
@@ -44,8 +49,8 @@ export function GrowthTree({ stage, unlocked, total, preview = false, palette = 
         shapeRendering="crispEdges"
         role="img"
         aria-label={preview
-          ? `Preview of the ${TREE_STAGES[stage]} stage`
-          : `Your tree: ${TREE_STAGES[stage]} (${unlocked} of ${total} landmarks unlocked)`}
+          ? `Preview: ${name}`
+          : `Your tree: ${name} (${unlocked} of ${total} landmarks unlocked)`}
         className="martlet-tree block h-auto w-full overflow-hidden rounded-xl"
       >
         {paths(SKY_PATHS)}
