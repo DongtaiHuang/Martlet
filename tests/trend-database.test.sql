@@ -56,6 +56,16 @@ begin
   end if;
 end $$;
 
+-- Every fixture shares the transaction's now(), so give them distinct creation times
+-- (in creation order) for the newest-first tie-break.
+reset role;
+update public.trend_entries set created_at = now() - case title
+  when 'Le James flat white' then interval '4 minutes'
+  when 'Overnight oats' then interval '3 minutes'
+  when 'Redpath 6th floor' then interval '2 minutes'
+  else interval '1 minute' end;
+set local role authenticated;
+
 -- Ranking: 2 likes, then 1, then ties newest-first (song after coffee in creation order).
 do $$
 declare

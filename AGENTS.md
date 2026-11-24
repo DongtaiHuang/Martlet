@@ -13,7 +13,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 McGill campus meetup app (hackathon, 24h). Next.js 16 App Router, React 19, TS, Tailwind v4, Supabase, MapLibre. Keep changes small and focused; don't refactor beyond the task.
 
 ## Before you push
-`npm ci` once, then `npx tsc --noEmit && npm run lint && npm run build` (same as CI). Don't merge with CI red.
+`npm ci` once, then `npx tsc --noEmit && npm run lint && npm test && npm run build` (CI also runs the browser and database tests; see README "Quality checks"). Don't merge with CI red. Every migration needs a SQL test in `tests/` that passes `npm run test:db` on a fresh database.
 
 ## Commits
 Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `ci:`, `refactor:`, `test:`. One logical change per commit, imperative subject ≤72 chars. Never commit `.env*` (except `.env.example`) or secrets.
