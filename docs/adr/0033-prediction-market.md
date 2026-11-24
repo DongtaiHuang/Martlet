@@ -13,7 +13,7 @@ Students want to forecast campus events ("Will Redpath stay open 24/7 during fin
 - **Play money only.** Martlet points can't be bought, cashed out, transferred or exchanged for anything of value, and there are no prizes. Every student starts with 1000 points and is topped back up to 1000 once a week, so nobody is permanently out.
 - **Yes/no markets.** Each has a question (10–140 characters), resolution details, and a closing time between 1 hour and 180 days away.
 - **Moderated.** Students propose markets (3 a day); moderators (ADR 0027) approve or reject them. A moderator's own market opens at once. Moderators resolve markets YES, NO or cancelled, and a moderator who holds a position in a market can't resolve it.
-- **Pricing: LMSR** (logarithmic market scoring rule) with liquidity `b = 100`. There's always a price, no order book or matching is needed, and the house's worst-case loss per market is `b·ln 2 ≈ 69` points. A YES share pays 1 point if YES wins; the YES price is the market's probability.
+- **Pricing: LMSR** (logarithmic market scoring rule) with liquidity `b = 300`. A 100-point buy moves a new market from 50% to about 64%, so one student can't swing it alone. There's always a price, no order book or matching is needed, and the house's worst-case loss per market is `b·ln 2 ≈ 208` points. A YES share pays 1 point if YES wins; the YES price is the market's probability.
 - **Trades:**
   - Buys are 1–500 whole points; sales pay back whole points, rounded down, so rounding can't create points.
   - At most 20 trades a minute per student.

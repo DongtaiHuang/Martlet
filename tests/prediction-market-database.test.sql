@@ -104,7 +104,7 @@ end $$;
 do $$
 declare h jsonb := public.get_market_history((select id from ids where name = 'a'));
 begin
-  perform pg_temp.assert(jsonb_array_length(h) = 5 + 1, 'history has the opening point and 5 trades: ' || h::text);
+  perform pg_temp.assert(jsonb_array_length(h) = 1 + 4, 'history has the opening point and 4 trades: ' || h::text);
   perform pg_temp.assert((h->0->>'p')::float = 0.5, 'opens at 50%');
   perform pg_temp.assert(not (h::text like '%user%'), 'history has no user ids');
 end $$;

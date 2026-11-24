@@ -26,7 +26,7 @@ create table public.markets (
   status text not null default 'pending' check (status in ('pending', 'open', 'rejected', 'resolved', 'cancelled')),
   outcome text check (outcome in ('yes', 'no')),
   -- LMSR state: liquidity b and outstanding YES / NO shares.
-  liquidity double precision not null default 100 check (liquidity between 10 and 10000),
+  liquidity double precision not null default 300 check (liquidity between 10 and 10000),
   q_yes double precision not null default 0,
   q_no double precision not null default 0,
   volume integer not null default 0 check (volume >= 0),
