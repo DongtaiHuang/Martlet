@@ -16,7 +16,7 @@ jobs:
   check:
     name: Type-check, lint, build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -34,11 +34,52 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests
+        run: npm test
+
       - name: Theme contrast (WCAG AA, ADR 0014)
         run: npm run check:contrast
 
       - name: Build
         run: npm run build
+
+      # The build runs in demo mode (no Supabase settings), so no secrets are needed.
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests (demo mode)
+        run: |
+          npm run start -- --port 3000 > next.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://localhost:3000/meetups -o /dev/null && break; sleep 2; done
+          APP_URL=http://localhost:3000 npm run test:e2e
+
+      - name: Server log on failure
+        if: failure()
+        run: cat next.log || true
+
+  database:
+    name: Migrations + SQL tests (disposable Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.3.0
+
+      # A throwaway Supabase stack (Postgres, Auth and Storage schemas) with no migrations
+      # of its own; scripts/test-database.sh then applies ours in order and runs tests/*.sql.
+      - name: Start disposable Supabase
+        working-directory: ${{ runner.temp }}
+        run: |
+          supabase init --force
+          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,mailpit,postgres-meta,supavisor
+
+      - name: Apply all migrations and run SQL tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: npm run test:db
 
   docker:
     name: Docker image (build + smoke test)
