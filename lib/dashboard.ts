@@ -1,10 +1,11 @@
 // Customisable feed dashboard (issue #46, ADR 0031). Pure functions, safe on server and client.
 // The layout lives in a cookie so the server renders the student's order from the first paint.
 
-export const WIDGETS = ["trends", "daily", "news", "flight"] as const;
+export const WIDGETS = ["weather", "trends", "daily", "news", "flight"] as const;
 export type WidgetId = (typeof WIDGETS)[number];
 
 export const WIDGET_INFO: Record<WidgetId, { label: string; description: string }> = {
+  weather: { label: "Campus weather", description: "Now, the next hours and five days" },
   trends: { label: "Trending on campus", description: "Most-liked coffee, study spots, recipes and songs" },
   daily: { label: "Today at McGill", description: "A daily fact and tip" },
   news: { label: "McGill News", description: "Latest headlines" },
@@ -31,7 +32,7 @@ export function serializeLayout(layout: DashboardLayout): string {
 }
 
 /** Reads an untrusted cookie value. Unknown or repeated ids are dropped, and widgets missing from
- *  it (e.g. added in a later release) are appended in their default position, shown. */
+ *  it (e.g. added in a later release) are appended at the end, shown. */
 export function parseLayout(raw: string | undefined | null): DashboardLayout {
   if (!raw || raw.length > 200) return { ...DEFAULT_LAYOUT, order: [...DEFAULT_LAYOUT.order] };
   const [first, ...rest] = raw.split(".");

@@ -15,6 +15,7 @@ import { MartletFlightLoader } from "@/components/game/MartletFlightLoader";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DashboardWidgets } from "@/components/feed/DashboardWidgets";
 import { DASHBOARD_COOKIE, parseLayout, visibleWidgets, type WidgetId } from "@/lib/dashboard";
+import { WeatherWidget, WeatherWidgetLoading } from "@/components/weather/WeatherWidget";
 import { TrendPanel, TrendPanelLoading } from "@/components/trends/TrendPanel";
 import { listMyCourses } from "@/lib/courses";
 import { listLandmarks } from "@/lib/landmarks";
@@ -123,6 +124,7 @@ export default async function MeetupsPage({
   const layout = parseLayout((await cookies()).get(DASHBOARD_COOKIE)?.value);
   const shown = new Set(visibleWidgets(layout));
   const widgets: Record<WidgetId, () => React.ReactNode> = {
+    weather: () => <Suspense fallback={<WeatherWidgetLoading />}><WeatherWidget /></Suspense>,
     trends: () => (
       // key: show the loading state again when switching trend tabs
       <Suspense key={trend ?? "all"} fallback={<TrendPanelLoading />}>
