@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
-import { useColorMode, useModePreference, useThemePreference } from "@/lib/useColorMode";
-import { THEMES, THEME_INFO, type ModePreference } from "@/lib/theme";
+import { useColorMode, useCustomTheme, useModePreference, useThemePreference } from "@/lib/useColorMode";
+import { CUSTOM_THEME, THEMES, THEME_INFO, type ModePreference, type ThemeId } from "@/lib/theme";
 
 const OPTIONS: { value: ModePreference; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Light", icon: Sun },
@@ -16,6 +16,9 @@ const OPTIONS: { value: ModePreference; label: string; icon: typeof Sun }[] = [
 export function ThemeSwitch({ account }: { account?: ReactNode }) {
   const [pref, setPref] = useModePreference();
   const [theme, setTheme] = useThemePreference();
+  const [customColors] = useCustomTheme();
+  // "Your colours" appears once the student has made one in Profile → Appearance (ADR 0029).
+  const themeIds: ThemeId[] = customColors ? [...THEMES, CUSTOM_THEME] : [...THEMES];
   const mode = useColorMode();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -61,7 +64,7 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
             ))}
           </div>
           <div role="radiogroup" aria-label="Theme">
-          {THEMES.map((id) => {
+          {themeIds.map((id) => {
             const on = theme === id;
             return (
               <button key={id} type="button" role="radio" aria-checked={on} onClick={() => { setTheme(id); setOpen(false); }}
