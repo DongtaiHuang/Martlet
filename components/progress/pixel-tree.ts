@@ -1,7 +1,8 @@
-import type { TreeStage } from "@/lib/progress";
+import type { BloomLevel, TreeSpecies, TreeStage } from "@/lib/progress";
 
 // Black-and-white pixel-art scene for the progress tree: one tree, centred in a wide open
-// field under a big sky. Everything is painted on a coarse grid (1 unit = 1 "pixel") and
+// field under a big sky. The tree can be one of six species (ADR 0030), each with its own
+// canopy shapes and colours, and keeps changing after full bloom (bloom levels 1-3). Everything is painted on a coarse grid (1 unit = 1 "pixel") and
 // shaded with ordered (Bayer) dithering, so the output is deterministic. The grid is then
 // turned into one SVG path per colour (row runs), which keeps the markup small.
 
@@ -77,6 +78,21 @@ const COLOR: Record<keyof typeof BW, string> = {
 
 export const PALETTES = { color: COLOR, bw: BW } as const;
 export type PixelPalette = keyof typeof PALETTES;
+
+/** Per-species colours (colour palette only; black and white keeps its greys and shows the shape).
+ *  Photo fruit stays red on every species. */
+const SPECIES_COLORS: Record<TreeSpecies, Partial<Record<keyof typeof BW, string>>> = {
+  classic: {},
+  sakura: { leaf0: "#a8506f", leaf1: "#d97f9f", leaf2: "#f2adc3", leaf3: "#ffdbe6", blossom: "#ffffff", wood: "#3b2420", woodLight: "#5a3a31" },
+  maple: { leaf0: "#7c2d12", leaf1: "#b9471a", leaf2: "#e8892a", leaf3: "#f8c445", blossom: "#fff1c2" },
+  pine: { leaf0: "#0f3322", leaf1: "#1c4d33", leaf2: "#2b6a44", leaf3: "#4f8a5c", blossom: "#8b5a2b" },
+  willow: { leaf0: "#3d5f22", leaf1: "#5f8a2e", leaf2: "#8cb547", leaf3: "#c3dc7a", blossom: "#f4f7c9" },
+  sequoia: { leaf0: "#1c3b26", leaf1: "#2c5a35", leaf2: "#457a44", leaf3: "#6f9c5a", blossom: "#a3532e", wood: "#6b2f1c", woodLight: "#9a4a2c" },
+};
+
+export function treeColors(palette: PixelPalette, species: TreeSpecies): Record<keyof typeof BW, string> {
+  return palette === "color" ? { ...COLOR, ...SPECIES_COLORS[species] } : BW;
+}
 
 export type PixelColor = keyof typeof BW;
 type Grid = (PixelColor | undefined)[];
@@ -170,7 +186,7 @@ function paintClouds(clouds: typeof CLOUDS): Grid {
   return g;
 }
 
-function paintLandscape(crown: number): Grid {
+function paintLandscape(crown: number, wildflowers = false): Grid {
   const g = newGrid();
   // Distant hills just above the horizon.
   for (let x = 0; x < GRID_W; x++) {
@@ -199,6 +215,14 @@ function paintLandscape(crown: number): Grid {
   } else {
     for (let x = BASE_X - 2; x <= BASE_X + 2; x++) set(g, x, BASE_Y, "mound");
     set(g, BASE_X - 1, BASE_Y - 1, "mound"); set(g, BASE_X, BASE_Y - 1, "mound"); set(g, BASE_X + 1, BASE_Y - 1, "mound");
+  }
+  // Wildflower meadow (bloom level 2+): a ring of flowers around the trunk.
+  if (wildflowers && crown > 0) {
+    for (let x = Math.round(BASE_X - crown * 1.4); x <= BASE_X + crown * 1.4; x++) {
+      for (let y = BASE_Y - 1; y <= BASE_Y + 3; y++) {
+        if (Math.abs(x - BASE_X) > 2 && hash(x, y, 83) < 0.22) set(g, x, y, "flower");
+      }
+    }
   }
   // Foreground band of flowering bushes along the bottom edge.
   for (let x = 0; x < GRID_W; x++) {
@@ -235,6 +259,77 @@ const TREE_SPEC: Record<3 | 4 | 5 | 6, { height: number; crown: number; clusters
 
 const LEAF_LEVELS = ["leaf0", "leaf1", "leaf2", "leaf3"] as const;
 
+/** One canopy shape: an ellipse, or a triangle (pine tiers) with its apex `ry` above `y`. */
+interface Blob { x: number; y: number; rx: number; ry: number; tri?: boolean }
+/** Everything the painter needs for one species at one stage. */
+interface Crown {
+  blobs: Blob[];
+  cy: number;          // crown centre row, used for shading and fruit
+  R: number;           // crown radius
+  forkY: number;       // where branches leave the trunk
+  trunk: number;       // trunk width
+  branches: boolean;   // limbs out to each blob
+  topY: number;        // the trunk's highest point
+  strands: boolean;    // willow: hanging strands under the crown
+  shadow: number;      // half-width of the shadow on the grass
+}
+
+function crownFor(species: TreeSpecies, stage: 3 | 4 | 5 | 6): Crown {
+  const { height, crown: R, clusters, trunk } = TREE_SPEC[stage];
+  const cx = BASE_X, top = BASE_Y - height;
+  const classic = (sx: number, sy: number, sr: number, cy: number): Blob[] =>
+    CLUSTERS.slice(0, clusters).map((c) => ({ x: cx + c.dx * R * sx, y: cy + c.dy * R * sy, rx: c.r * R * sr, ry: c.r * R * sr }));
+  const base = { trunk, branches: true, strands: false, forkY: BASE_Y - Math.round(height * 0.22) };
+
+  switch (species) {
+    case "sakura": { // wide, flat, spreading crown
+      const cy = top + R * 0.85;
+      return { ...base, cy, R, topY: cy, shadow: R * 1.25,
+        blobs: classic(1.3, 0.6, 1, cy).map((b) => ({ ...b, rx: b.rx * 1.15, ry: b.ry * 0.8 })) };
+    }
+    case "maple": { // dense, round
+      const cy = top + R;
+      return { ...base, cy, R, topY: cy, shadow: R, blobs: classic(0.85, 0.85, 1.12, cy) };
+    }
+    case "willow": { // low dome with strands hanging below
+      const cy = top + R * 0.9;
+      return { ...base, cy, R, topY: cy, strands: true, shadow: R * 1.1,
+        blobs: classic(1.05, 0.65, 1, cy).map((b) => ({ ...b, ry: b.ry * 0.85 })) };
+    }
+    case "pine": { // stacked triangular tiers on a straight trunk
+      const tiers = stage - 1, bottom = BASE_Y - height * 0.22, span = bottom - top;
+      const blobs: Blob[] = Array.from({ length: tiers }, (_, t) => {
+        const f = tiers === 1 ? 1 : t / (tiers - 1); // 0 = top tier, 1 = bottom tier
+        const ry = (span / tiers) * 0.95;
+        return { x: cx, y: top + ry + (span - 2 * ry) * f + ry * 0.4, rx: R * (0.35 + 0.5 * f), ry, tri: true };
+      });
+      return { ...base, blobs, cy: top + span * 0.55, R: R * 0.75, branches: false, topY: top, shadow: R * 0.8 };
+    }
+    case "sequoia": { // long bare red trunk, narrow column of clumps up top
+      const cy = top + height * 0.33;
+      const n = Math.max(3, clusters - 1);
+      const blobs: Blob[] = Array.from({ length: n }, (_, k) => ({
+        x: cx + (hash(k, stage, 51) - 0.5) * R * 0.5,
+        y: top + R * 0.35 + (height * 0.55 - R * 0.35) * (k / (n - 1)),
+        rx: R * (0.42 + 0.12 * (k / (n - 1))), ry: R * 0.4,
+      }));
+      return { ...base, blobs, cy, R: R * 0.7, trunk: trunk + 1, branches: false, topY: top + 1,
+        forkY: BASE_Y - Math.round(height * 0.38), shadow: R * 0.6 };
+    }
+    default: {
+      const cy = top + R;
+      return { ...base, cy, R, topY: cy, shadow: R, blobs: classic(1, 1, 1, cy) };
+    }
+  }
+}
+
+function inBlob(b: Blob, x: number, y: number, noise: number): boolean {
+  if (!b.tri) return Math.hypot((x - b.x) / b.rx, (y - b.y) / b.ry) <= 1 + noise / Math.max(b.rx, b.ry);
+  const apex = b.y - b.ry, bottom = b.y + b.ry;
+  if (y < apex - 0.5 || y > bottom + 0.5) return false;
+  return Math.abs(x - b.x) <= b.rx * ((y - apex) / (2 * b.ry)) + noise * 0.6;
+}
+
 function paintSmallPlant(stage: 0 | 1 | 2, wood: Grid, foliage: Grid) {
   const x = BASE_X, y = BASE_Y - 1;
   if (stage === 0) {
@@ -255,11 +350,10 @@ function paintSmallPlant(stage: 0 | 1 | 2, wood: Grid, foliage: Grid) {
   set(foliage, x, y - 8, "leaf3"); set(foliage, x - 1, y - 6, "leaf1");
 }
 
-function paintTree(stage: 3 | 4 | 5 | 6, wood: Grid, foliage: Grid): PixelLeaf[] {
-  const { height, crown: R, clusters, trunk } = TREE_SPEC[stage];
-  const cx = BASE_X, cy = BASE_Y - height + R;
-  const used = CLUSTERS.slice(0, clusters).map((c) => ({ x: cx + c.dx * R, y: cy + c.dy * R, r: c.r * R }));
-  const forkY = BASE_Y - Math.round(height * 0.22);
+function paintTree(stage: 3 | 4 | 5 | 6, species: TreeSpecies, bloom: BloomLevel, wood: Grid, foliage: Grid): { leaves: PixelLeaf[]; crown: Crown } {
+  const crown = crownFor(species, stage);
+  const { blobs, cy, R, forkY, trunk } = crown;
+  const cx = BASE_X;
 
   // Trunk with a lit left edge and a little root flare.
   for (let y = forkY; y <= BASE_Y; y++) {
@@ -268,30 +362,47 @@ function paintTree(stage: 3 | 4 | 5 | 6, wood: Grid, foliage: Grid): PixelLeaf[]
     const x1 = Math.max(x0 + 1, Math.round(cx + half));
     for (let x = x0; x < x1; x++) set(wood, x, y, x === x0 && x1 - x0 > 1 ? "woodLight" : "wood");
   }
-  // Branches from the fork out to the clusters.
-  for (const c of used.slice(1, 7)) {
-    line(wood, cx, forkY, c.x, c.y + c.r * 0.35, "wood");
-    if (stage >= 5) line(wood, cx + (c.x < cx ? -1 : 1), forkY, c.x, c.y + c.r * 0.45, "wood"); // thicker limbs
+  // Branches from the fork out to the clusters (broadleaf trees), or a straight leader.
+  if (crown.branches) {
+    for (const b of blobs.slice(1, 7)) {
+      line(wood, cx, forkY, b.x, b.y + b.ry * 0.35, "wood");
+      if (stage >= 5) line(wood, cx + (b.x < cx ? -1 : 1), forkY, b.x, b.y + b.ry * 0.45, "wood"); // thicker limbs
+    }
   }
-  line(wood, cx, forkY, cx, cy, "wood");
+  line(wood, cx, forkY, cx, crown.topY, "wood");
 
-  // Canopy: union of noisy circles, shaded from the upper left, dithered into 4 greys.
+  // Canopy: union of noisy shapes, shaded from the upper left, dithered into 4 tones.
   const owner: number[] = new Array(GRID_W * GRID_H).fill(-1);
-  used.forEach((c, i) => {
-    for (let y = Math.floor(c.y - c.r - 1); y <= c.y + c.r + 1; y++) {
-      for (let x = Math.floor(c.x - c.r - 1); x <= c.x + c.r + 1; x++) {
+  blobs.forEach((b, i) => {
+    for (let y = Math.floor(b.y - b.ry - 1); y <= b.y + b.ry + 1; y++) {
+      for (let x = Math.floor(b.x - b.rx - 1); x <= b.x + b.rx + 1; x++) {
         if (x < 0 || x >= GRID_W || y < 0 || y >= GRID_H) continue;
-        if (Math.hypot(x - c.x, y - c.y) <= c.r + (hash(x, y, 7) - 0.5) * 1.6) owner[y * GRID_W + x] = i;
+        if (inBlob(b, x, y, (hash(x, y, 7) - 0.5) * 1.6)) owner[y * GRID_W + x] = i;
       }
     }
   });
+  // Willow strands: hang from the underside of the crown, in leaf colours, with small gaps.
+  if (crown.strands) {
+    for (let x = 0; x < GRID_W; x++) {
+      let low = -1;
+      for (let y = GRID_H - 1; y >= 0; y--) if (owner[y * GRID_W + x] >= 0) { low = y; break; }
+      if (low < 0 || hash(x, 0, 61) < 0.35 || Math.abs(x - cx) <= trunk) continue;
+      const length = Math.round(R * (0.5 + hash(x, 1, 67) * 0.6));
+      for (let y = low + 1; y <= Math.min(BASE_Y - 2, low + length); y++) {
+        if (hash(x, y, 71) < 0.12) continue;
+        owner[y * GRID_W + x] = -2; // strand pixel, painted below
+      }
+    }
+  }
   const inCanopy = (x: number, y: number) => x >= 0 && x < GRID_W && y >= 0 && y < GRID_H && owner[y * GRID_W + x] >= 0;
+  const blossomRate = stage === 6 ? (bloom >= 3 ? 0.07 : 0.035) : 0;
   for (let y = 0; y < GRID_H; y++) {
     for (let x = 0; x < GRID_W; x++) {
       const i = owner[y * GRID_W + x];
+      if (i === -2) { set(foliage, x, y, (x + y) % 3 === 0 ? "leaf1" : "leaf2"); continue; }
       if (i < 0) continue;
-      const c = used[i];
-      const local = 1 - Math.hypot(x - (c.x - c.r * 0.35), y - (c.y - c.r * 0.35)) / (c.r * 1.45);
+      const b = blobs[i], r = (b.rx + b.ry) / 2;
+      const local = 1 - Math.hypot(x - (b.x - r * 0.35), y - (b.y - r * 0.35)) / (r * 1.45);
       const global = 0.5 - ((x - cx) / R) * 0.12 - ((y - cy) / R) * 0.2;
       const clump = hash(Math.floor(x / 2), Math.floor(y / 2), 17) - 0.5; // 2x2 leaf clumps
       const value = 0.55 * local + 0.45 * global + clump * 0.22;
@@ -299,26 +410,26 @@ function paintTree(stage: 3 | 4 | 5 | 6, wood: Grid, foliage: Grid): PixelLeaf[]
       if (!inCanopy(x, y + 1) || !inCanopy(x + 1, y)) level = Math.max(0, level - 1); // shadow edge
       if (!inCanopy(x, y + 1) && !inCanopy(x + 1, y)) level = 0;
       set(foliage, x, y, LEAF_LEVELS[level]);
-      if (stage === 6 && level >= 1 && level <= 2 && hash(x, y, 23) < 0.035) set(foliage, x, y, "blossom");
+      if (level >= 1 && level <= 2 && hash(x, y, 23) < blossomRate) set(foliage, x, y, "blossom");
     }
   }
 
-  // Falling leaves start in the lower canopy and drift to the ground.
+  // Falling leaves (petals for sakura) start in the lower canopy and drift to the ground.
   const count = stage === 6 ? 7 : stage === 5 ? 5 : stage === 4 ? 3 : 1;
   const leaves: PixelLeaf[] = [];
   for (let k = 0; k < count; k++) {
-    const c = used[(k * 2 + 1) % used.length];
-    const x = Math.round(c.x + (hash(k, 1, 31) - 0.5) * c.r);
-    const y = Math.round(c.y + c.r * 0.5);
+    const b = blobs[(k * 2 + 1) % blobs.length];
+    const x = Math.round(b.x + (hash(k, 1, 31) - 0.5) * b.rx);
+    const y = Math.round(b.y + b.ry * 0.5);
     leaves.push({
       x, y,
       fall: BASE_Y - y,
       drift: Math.round((hash(k, 2, 37) - 0.5) * 12),
       delay: Math.round(hash(k, 3, 41) * 70) / 10,
-      color: stage === 6 && k % 2 === 1 ? "blossom" : k % 2 ? "leaf1" : "leaf2",
+      color: species === "sakura" ? (k % 2 ? "leaf3" : "leaf2") : stage === 6 && k % 2 === 1 ? "blossom" : k % 2 ? "leaf1" : "leaf2",
     });
   }
-  return leaves;
+  return { leaves, crown };
 }
 
 // --- Grid -> SVG paths --------------------------------------------------------------------
@@ -342,9 +453,13 @@ function toPaths(g: Grid): PixelPath[] {
 }
 
 const BIRD = ["X...X", ".X.X.", "..X.."];
-function birdPaths(): PixelPath[] {
+/** Full bloom has one bird; songbird tree (bloom 1) a second, ancient tree (bloom 3) a third. */
+const BIRD_SPOTS = [[80, 13], [30, 10], [97, 19]] as const;
+function birdPaths(count: number): PixelPath[] {
   const g = newGrid();
-  BIRD.forEach((row, dy) => [...row].forEach((ch, dx) => { if (ch === "X") set(g, 80 + dx, 13 + dy, "ink"); }));
+  for (const [bx, by] of BIRD_SPOTS.slice(0, count)) {
+    BIRD.forEach((row, dy) => [...row].forEach((ch, dx) => { if (ch === "X") set(g, bx + dx, by + dy, "ink"); }));
+  }
   return toPaths(g);
 }
 
@@ -353,15 +468,14 @@ function birdPaths(): PixelPath[] {
  * on trees, on the leaves of small plants. Farthest-point sampling spreads them out, and the
  * order is stable, so fruit i (the user's i-th unlock) keeps its place as more are added.
  */
-function pickFruitSpots(stage: TreeStage, foliage: Grid, count: number): FruitSpot[] {
+function pickFruitSpots(stage: TreeStage, foliage: Grid, count: number, crown: Crown | null): FruitSpot[] {
   if (count <= 0 || stage === 0) return [];
   const size = stage >= 5 ? 3 : stage >= 3 ? 2 : 1;
   const leafy = (x: number, y: number) => (foliage[y * GRID_W + x] ?? "").startsWith("leaf");
   let minY = 0;
   let start: [number, number] = [BASE_X - 3, BASE_Y];
-  if (stage >= 3) {
-    const { height, crown: R } = TREE_SPEC[stage as 3 | 4 | 5 | 6];
-    const cy = BASE_Y - height + R;
+  if (crown) {
+    const { cy, R } = crown;
     minY = cy - R * 0.15;
     start = [BASE_X - R * 0.7, cy + R * 0.55];
   }
@@ -409,27 +523,27 @@ const cache = new Map<string, PixelScene>();
 export const SKY_PATHS = toPaths(paintSky());
 export const CLOUD_LAYERS = [toPaths(paintClouds(CLOUDS.slice(2))), toPaths(paintClouds(CLOUDS.slice(0, 2)))];
 
-export function pixelScene(stage: TreeStage, fruitCount = 0): PixelScene {
-  const key = `${stage}:${fruitCount}`;
+export function pixelScene(stage: TreeStage, fruitCount = 0, species: TreeSpecies = "classic", bloom: BloomLevel = 0): PixelScene {
+  if (stage !== 6) bloom = 0; // levels after full bloom only
+  const key = `${species}:${stage}:${fruitCount}:${bloom}`;
   const cached = cache.get(key);
   if (cached) return cached;
   const wood = newGrid();
   const foliage = newGrid();
   let falling: PixelLeaf[] = [];
+  let crown: Crown | null = null;
   if (stage <= 2) paintSmallPlant(stage as 0 | 1 | 2, wood, foliage);
-  else falling = paintTree(stage as 3 | 4 | 5 | 6, wood, foliage);
-  const crown = stage >= 3 ? TREE_SPEC[stage as 3 | 4 | 5 | 6].crown : 0;
-  const fruitSpots = pickFruitSpots(stage, foliage, fruitCount);
+  else ({ leaves: falling, crown } = paintTree(stage as 3 | 4 | 5 | 6, species, bloom, wood, foliage));
+  const fruitSpots = pickFruitSpots(stage, foliage, fruitCount, crown);
   const scene: PixelScene = {
-    landscape: toPaths(paintLandscape(crown)),
+    landscape: toPaths(paintLandscape(crown?.shadow ?? 0, bloom >= 2)),
     wood: toPaths(wood),
     foliage: toPaths(foliage),
     fruit: toPaths(paintFruit(fruitSpots)),
     fruitSpots,
     falling,
-    bird: stage === 6 ? birdPaths() : null,
+    bird: stage === 6 ? birdPaths(bloom >= 3 ? 3 : bloom >= 1 ? 2 : 1) : null,
   };
   cache.set(key, scene);
   return scene;
 }
-

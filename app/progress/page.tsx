@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowUpRight, CheckCircle2, Eye, LockKeyhole } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { EarnOnMount } from "@/components/achievements/EarnOnMount";
@@ -8,7 +9,12 @@ import { GrowthTree, type TreeFruit } from "@/components/progress/GrowthTree";
 import { loadActivityCounts } from "@/lib/activity-counts";
 import { satisfiedActivityAchievements } from "@/lib/activity-achievements";
 import { listLandmarks, listMyUnlocks } from "@/lib/landmarks";
-import { TREE_STAGES, treeStage, unlocksToNextStage, type TreeStage } from "@/lib/progress";
+import {
+  BLOOM_LEVELS, BLOOM_THRESHOLDS, bloomLevel, meetupsToNextBloom, parseSpecies, SPECIES_COOKIE, SPECIES_INFO, TREE_SPECIES,
+  TREE_STAGES, treeStage, unlocksToNextStage, type BloomLevel, type TreeStage,
+} from "@/lib/progress";
+import { treeColors } from "@/components/progress/pixel-tree";
+import { chooseSpecies } from "./actions";
 import { getDataMode } from "@/lib/supabase/env";
 
 export const metadata: Metadata = { title: "Progress · McGill Martlet" };
@@ -17,9 +23,12 @@ export const dynamic = "force-dynamic";
 export default async function ProgressPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stage?: string | string[] }>;
+  searchParams: Promise<{ stage?: string | string[]; bloom?: string | string[] }>;
 }) {
-  const [landmarks, myUnlocks, { stage: stageParam }] = await Promise.all([listLandmarks(), listMyUnlocks(), searchParams]);
+  const [landmarks, myUnlocks, { stage: stageParam, bloom: bloomParam }, cookieStore, activityCounts] = await Promise.all([
+    listLandmarks(), listMyUnlocks(), searchParams, cookies(), loadActivityCounts(),
+  ]);
+  const species = parseSpecies(cookieStore.get(SPECIES_COOKIE)?.value);
   // Each photo the user has added hangs on the tree as a fruit linking back to it.
   const fruits: TreeFruit[] = myUnlocks.map((unlock) => ({
     landmarkId: unlock.landmark_id,
@@ -38,10 +47,19 @@ export default async function ProgressPage({
   const previewing = requested !== null && requested !== realStage;
   const stage = previewing ? requested : realStage;
 
+  // After full bloom the tree keeps growing with meetups hosted + joined (ADR 0030).
+  const meetups = (activityCounts?.hosted ?? 0) + (activityCounts?.joined ?? 0);
+  const realBloom: BloomLevel = realStage === 6 ? bloomLevel(meetups) : 0;
+  const requestedBloom = typeof bloomParam === "string" && /^[0-3]$/.test(bloomParam) ? (Number(bloomParam) as BloomLevel) : null;
+  const bloom: BloomLevel = stage === 6 ? (requestedBloom ?? (previewing ? 0 : realBloom)) : 0;
+  const previewingBloom = stage === 6 && bloom !== realBloom;
+  const showingPreview = previewing || previewingBloom;
+  const stageName = stage === 6 ? BLOOM_LEVELS[bloom] : TREE_STAGES[stage];
+  const toNextBloom = meetupsToNextBloom(meetups);
+
   const toNext = unlocksToNextStage(unlocked, total);
   const percent = total > 0 ? Math.round((unlocked / total) * 100) : 0;
   // Activity ladders (ADR 0020): earn any that this visit satisfies.
-  const activityCounts = await loadActivityCounts();
   const earnedActivity = activityCounts ? satisfiedActivityAchievements(activityCounts) : [];
 
   return (
@@ -69,17 +87,17 @@ export default async function ProgressPage({
           </div>
         </section>
 
-        {previewing && <EarnOnMount id="time-traveller" />}
-        {previewing && (
+        {showingPreview && <EarnOnMount id="time-traveller" />}
+        {showingPreview && (
           <p role="status" className="mt-4 flex items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
             <Eye aria-hidden="true" size={16} className="shrink-0" />
             <span className="min-w-0 flex-1">
-              Previewing <strong>{TREE_STAGES[stage]}</strong>. Your real progress hasn&apos;t changed.{" "}
+              Previewing <strong>{stageName}</strong>. Your real progress hasn&apos;t changed.{" "}
               <Link href="/progress" scroll={false} className="font-bold whitespace-nowrap underline">Back to your tree</Link>
             </span>
           </p>
         )}
-        {getDataMode() === "mock" && !previewing && (
+        {getDataMode() === "mock" && !showingPreview && (
           <p className="mt-4 rounded-xl border border-warn-line bg-warn-soft p-3 text-sm text-warn-ink">
             Demo mode: unlocking needs Supabase, so your tree is still a seed.
           </p>
@@ -87,14 +105,16 @@ export default async function ProgressPage({
 
         <section aria-labelledby="tree-heading" className="mt-6 rounded-2xl border border-line bg-surface p-5 text-center shadow-sm sm:p-8">
           <div className="rounded-xl border border-line">
-            <GrowthTree stage={stage} unlocked={unlocked} total={total} preview={previewing} fruits={fruits} />
+            <GrowthTree stage={stage} unlocked={unlocked} total={total} preview={showingPreview} fruits={fruits} species={species} bloom={bloom} />
           </div>
-          <h2 id="tree-heading" className="mt-3 text-2xl font-extrabold tracking-tight">{TREE_STAGES[stage]}</h2>
+          <h2 id="tree-heading" className="mt-3 text-2xl font-extrabold tracking-tight">{stageName}</h2>
           <p className="mt-1 text-ink-muted">
-            {previewing
-              ? `This is what your tree looks like at the ${TREE_STAGES[stage].toLowerCase()} stage.`
+            {showingPreview
+              ? `This is what your ${SPECIES_INFO[species].label.toLowerCase()} looks like as a ${stageName.toLowerCase()}.`
               : toNext === null
-              ? "Every landmark unlocked. Your tree is in full bloom!"
+              ? toNextBloom === null
+                ? "Every landmark unlocked and plenty of meetups: your tree is ancient!"
+                : `Every landmark unlocked. Join or host ${toNextBloom} more ${toNextBloom === 1 ? "meetup" : "meetups"} to grow into a ${BLOOM_LEVELS[bloom + 1].toLowerCase()}.`
               : `Unlock ${toNext} more ${toNext === 1 ? "landmark" : "landmarks"} to ${stage + 1 === TREE_STAGES.length - 1
                 ? "reach full bloom"
                 : `grow into a ${TREE_STAGES[stage + 1].toLowerCase()}`}.`}
@@ -130,6 +150,56 @@ export default async function ProgressPage({
               );
             })}
           </ol>
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-ink-subtle">After full bloom: grows with meetups</p>
+          <ol aria-label="Levels after full bloom" className="mt-2 flex flex-wrap justify-center gap-1.5">
+            {BLOOM_LEVELS.slice(1).map((name, index) => {
+              const level = (index + 1) as BloomLevel;
+              const shown = stage === 6 && bloom === level;
+              const reached = realStage === 6 && realBloom >= level;
+              const mine = realStage === 6 && realBloom === level;
+              return (
+                <li key={name}>
+                  <Link
+                    href={mine ? "/progress" : `/progress?stage=6&bloom=${level}`}
+                    scroll={false}
+                    aria-current={shown ? "step" : undefined}
+                    aria-label={`${name}, ${BLOOM_THRESHOLDS[level]} meetups${mine ? " (your level)" : reached ? " (reached)" : ""}${shown && showingPreview ? ", previewing" : ""}`}
+                    className={`inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
+                      shown ? "bg-emerald-700 text-white" : reached ? "bg-ok-soft text-ok-ink hover:bg-emerald-200" : "bg-surface-muted text-ink-muted hover:bg-line"
+                    } ${mine && !shown ? "ring-2 ring-emerald-600" : ""}`}
+                  >
+                    {name} · {BLOOM_THRESHOLDS[level]}
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        {/* Species picker (issue #133, ADR 0030): a form, so it works without JavaScript. */}
+        <section aria-labelledby="species-heading" className="mt-6 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+          <h2 id="species-heading" className="text-lg font-bold">Choose your tree</h2>
+          <p className="mt-1 text-sm text-ink-muted">Same progress, different tree. Saved on this device.</p>
+          <form action={chooseSpecies} className="mt-3 grid gap-2 sm:grid-cols-3">
+            {TREE_SPECIES.map((id) => {
+              const on = id === species;
+              const swatch = treeColors("color", id);
+              return (
+                <button
+                  key={id} type="submit" name="species" value={id} aria-pressed={on}
+                  className={`flex min-h-12 items-center gap-2.5 rounded-xl border px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${on ? "border-brand bg-brand-soft" : "border-line hover:border-line-strong"}`}
+                >
+                  <span aria-hidden="true" className="flex size-7 shrink-0 overflow-hidden rounded-full border border-line">
+                    <span className="w-1/2" style={{ background: swatch.leaf2 }} /><span className="w-1/2" style={{ background: swatch.wood }} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-bold text-ink">{SPECIES_INFO[id].label}</span>
+                    <span className="block text-xs text-ink-muted">{SPECIES_INFO[id].description}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </form>
         </section>
 
         <section aria-labelledby="landmarks-heading" className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface">
