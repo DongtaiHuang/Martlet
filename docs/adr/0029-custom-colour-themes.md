@@ -1,6 +1,6 @@
 # 0029. Custom themes from three colours
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-24
 - **Amends:** [0014](0014-theme-tokens-and-dark-mode.md) (themes were fixed CSS token sets only)
 - **Issue:** #131
