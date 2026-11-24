@@ -1,6 +1,6 @@
 # 0009. Landmark photo unlocks with visit check-ins
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Amends:** [0007](0007-frozen-mvp-and-service-contracts.md) (brings deferred "photo unlocking" into scope), [0008](0008-client-side-locate-me.md) (a one-shot position is sent to the server, never stored)
 

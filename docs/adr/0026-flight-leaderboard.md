@@ -1,7 +1,7 @@
-# ADR 0026: Martlet Flight leaderboard
+# 0026. Martlet Flight leaderboard
 
-- Status: Accepted
-- Date: 2026-11-22
+- **Status:** Accepted
+- **Date:** 2026-11-22
 
 ## Context
 Students want to compare Martlet Flight scores. The game runs in the browser, so any score it reports could be faked.

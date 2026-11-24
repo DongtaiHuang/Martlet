@@ -1,6 +1,6 @@
 # 0017. Like-ranked trends side panel
 
-- **Status:** Proposed
+- **Status:** Accepted
 
 ## Context
 

@@ -1,6 +1,6 @@
 # 0014. Colour tokens, themes and dark mode
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-22
 - **Issue:** #50
 

@@ -1,6 +1,6 @@
 # 0023. Hosts edit their meetups through a checked database function
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-22
 - **Issue:** #73
 - **Amends:** [0003](0003-rls-authorization-boundary.md) (hosts could previously only cancel), [0021](0021-notifications.md) (adds the `meetup_updated` notification)

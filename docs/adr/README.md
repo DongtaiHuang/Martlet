@@ -11,23 +11,27 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0005 | [Peck/Flap participation and reaction model](0005-peck-flap-model.md) | Accepted |
 | 0006 | [MapLibre with a configurable style](0006-maplibre-configurable-style.md) | Accepted |
 | 0007 | [Frozen MVP scope and mock-first service contracts](0007-frozen-mvp-and-service-contracts.md) | Accepted |
-| 0008 | [Client-side "show my location" on the map](0008-client-side-locate-me.md) | Proposed |
-| 0009 | [Landmark photo unlocks with visit check-ins](0009-landmark-photo-unlocks.md) | Proposed |
-| 0010 | [Martlet avatar with in-browser expression tracking](0010-martlet-avatar-expression-tracking.md) | Proposed |
+| 0008 | [Client-side "show my location" on the map](0008-client-side-locate-me.md) | Accepted |
+| 0009 | [Landmark photo unlocks with visit check-ins](0009-landmark-photo-unlocks.md) | Accepted |
+| 0010 | [Martlet avatar with in-browser expression tracking](0010-martlet-avatar-expression-tracking.md) | Accepted |
 | 0011 | [Advisory meetup polls and single-choice voting](0011-meetup-polls.md) | Superseded by 0022 |
-| 0012 | [Landmark progress shown as a growing pixel-art tree](0012-progress-growth-tree.md) | Proposed |
-| 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Proposed |
-| 0014 | [Colour tokens, themes and dark mode](0014-theme-tokens-and-dark-mode.md) | Proposed |
-| 0015 | [Approved public venues for off-campus meetups](0015-public-meetup-venues.md) | Proposed |
-| 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Proposed |
-| 0017 | [Like-ranked trends side panel](0017-trends-side-panel.md) | Proposed |
-| 0018 | [Open the Landmarks map with all pins in 3D](0018-landmarks-overview.md) | Proposed |
-| 0019 | [Achievements for niche and hidden features](0019-achievements.md) | Proposed |
-| 0020 | [Activity achievements computed on read](0020-activity-achievements.md) | Proposed |
-| 0021 | [Persistent, color-coded notifications](0021-notifications.md) | Proposed |
-| 0022 | [Custom meeting spots and polling retirement](0022-custom-meeting-spots.md) | Proposed |
-| 0023 | [Hosts edit their meetups through a checked database function](0023-host-meetup-editing.md) | Proposed |
-| 0024 | [Seasonal themes with decorative scenes](0024-seasonal-themes-and-scenes.md) | Proposed |
+| 0012 | [Landmark progress shown as a growing pixel-art tree](0012-progress-growth-tree.md) | Accepted |
+| 0013 | [Landmarks map, tower pins that grow, and popup birds](0013-landmark-map-tower-pins.md) | Accepted |
+| 0014 | [Colour tokens, themes and dark mode](0014-theme-tokens-and-dark-mode.md) | Accepted |
+| 0015 | [Approved public venues for off-campus meetups](0015-public-meetup-venues.md) | Accepted |
+| 0016 | [Google Maps and place IDs](0016-google-maps-and-place-ids.md) | Accepted (publishing searched places pending) |
+| 0017 | [Like-ranked trends side panel](0017-trends-side-panel.md) | Accepted |
+| 0018 | [Open the Landmarks map with all pins in 3D](0018-landmarks-overview.md) | Accepted |
+| 0019 | [Achievements for niche and hidden features](0019-achievements.md) | Accepted |
+| 0020 | [Activity achievements computed on read](0020-activity-achievements.md) | Accepted |
+| 0021 | [Persistent, color-coded notifications](0021-notifications.md) | Accepted |
+| 0022 | [Custom meeting spots and polling retirement](0022-custom-meeting-spots.md) | Accepted |
+| 0023 | [Hosts edit their meetups through a checked database function](0023-host-meetup-editing.md) | Accepted |
+| 0024 | [Seasonal themes with decorative scenes](0024-seasonal-themes-and-scenes.md) | Accepted |
+| 0025 | [Guest browsing](0025-guest-browsing.md) | Accepted |
+| 0026 | [Martlet Flight leaderboard](0026-flight-leaderboard.md) | Accepted |
+| 0027 | [Community board and moderation](0027-community-board-and-moderation.md) | Accepted |
+| 0028 | [CI test gates for production](0028-ci-test-gates.md) | Accepted |
 
 ## Adding a new ADR
 

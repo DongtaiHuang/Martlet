@@ -1,8 +1,8 @@
-# ADR 0027: Community board and moderation
+# 0027. Community board and moderation
 
-- Status: Accepted
-- Date: 2026-11-22
-- Issues: #45 (moderation), #44 (tips, Q&A, skillshare), #48 (freelance, partly)
+- **Status:** Accepted
+- **Date:** 2026-11-22
+- **Issues:** #45 (moderation), #44 (tips, Q&A, skillshare), #48 (freelance, partly)
 
 ## Context
 Students asked for memes ("McGill shitposts"), tips, Q&A and a way to offer skills or freelance help. User content needs a way to report and remove harmful posts first (#45).

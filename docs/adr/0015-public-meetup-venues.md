@@ -1,8 +1,8 @@
 # 0015. Approved public venues for off-campus meetups
 
-## Status
-
-Proposed. Supersedes the campus-only meetup location rule in ADR 0004.
+- **Status:** Accepted
+- **Date:** 2026-11-21
+- **Supersedes:** the campus-only meetup location rule in [0004](0004-approved-campus-locations.md)
 
 ## Decision
 

@@ -1,6 +1,6 @@
 # 0028. CI test gates for production
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-23
 
 ## Context

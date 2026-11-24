@@ -1,6 +1,6 @@
 # 0008. Client-side "show my location" on the map
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Amends:** [0004](0004-approved-campus-locations.md)
 

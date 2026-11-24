@@ -1,7 +1,7 @@
-# ADR 0025: Guest browsing
+# 0025. Guest browsing
 
-- Status: Accepted
-- Date: 2026-11-22
+- **Status:** Accepted
+- **Date:** 2026-11-22
 
 ## Context
 Every page needed sign-in, so a visitor without a McGill account saw nothing but a login form. We want people to see what's happening on campus first. Joining, liking, posting and unlocking still need an account.

@@ -1,6 +1,6 @@
 # 0011. Advisory meetup polls and single-choice voting
 
-- **Status:** Proposed
+- **Status:** Superseded by [0022](0022-custom-meeting-spots.md) (poll UI retired; existing poll data is kept)
 
 ## Context
 

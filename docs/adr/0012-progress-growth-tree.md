@@ -1,6 +1,6 @@
 # 0012. Landmark progress shown as a growing pixel-art tree
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Builds on:** [0009](0009-landmark-photo-unlocks.md) (landmark unlocks; this is its "profile progress" follow-up)
 

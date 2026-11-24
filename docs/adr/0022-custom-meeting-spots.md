@@ -1,8 +1,8 @@
-# 0017. Custom meeting spots and polling retirement
+# 0022. Custom meeting spots and polling retirement
 
-## Status
-
-Proposed. Updates ADRs 0015 and 0016 for meetup creation and retires the poll UI described in ADR 0011.
+- **Status:** Accepted
+- **Date:** 2026-11-21
+- **Updates:** [0015](0015-public-meetup-venues.md) and [0016](0016-google-maps-and-place-ids.md) for meetup creation; retires the poll UI from [0011](0011-meetup-polls.md)
 
 ## Decision
 
