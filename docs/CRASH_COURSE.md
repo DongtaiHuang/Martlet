@@ -2,7 +2,7 @@
 
 A guided tour of how McGill Martlet works, written for **non-developers** (designers, PMs, judges, teammates new to code) and **beginner developers**. You don't need to know any programming to read Parts 1–3. Parts 4–7 go file by file and function by function.
 
-> **Status:** written against `main` plus [PR #23](https://github.com/DongtaiHuang/Martlet/pull/23) (Peck/Flap on feed cards, profile with hosted/joined meetups). The display-name form (`app/profile/actions.ts`, `components/profile/DisplayNameForm.tsx`) is still in progress and not merged yet.
+> **Scope:** this guide explains the **MVP** (meetups, Peck/Flap, the map, accounts and RLS) as of 21 November 2026, and that core still works the way it describes. Features added later are covered by their ADRs instead: landmarks and photo unlocks (0009, 0013, 0018), avatar (0010), progress tree (0012), themes (0014, 0024), venues and custom spots (0015, 0016, 0022), trends (0017), achievements (0019, 0020), notifications (0021), meetup editing (0023), guest browsing (0025), Martlet Flight (0026), the Campus Board and moderation (0027) and CI (0028). For the current migration list, see [SUPABASE_SETUP.md](SUPABASE_SETUP.md#2-apply-migrations-in-order).
 
 > **How to read the diagrams:** they're written in [Mermaid](https://mermaid.js.org). GitHub, VS Code (with a Mermaid extension) and most Markdown viewers draw them as pictures automatically.
 
@@ -651,7 +651,7 @@ Error classes: `MockModeError`, `MeetupValidationError` (carries `fieldErrors` p
 
 | File | Kind | Does |
 | --- | --- | --- |
-| `migrations/001–005_*.sql` | 🗄️ | See [6.2](#62-migrations-the-databases-history). Run in order in the Supabase SQL editor. |
+| `migrations/*.sql` | 🗄️ | See [6.2](#62-migrations-the-databases-history) for the first five; the full ordered list is in [SUPABASE_SETUP.md](SUPABASE_SETUP.md#2-apply-migrations-in-order). |
 | `seed.mjs` | 🛠️ | Signs in as two test accounts and creates 7 demo meetups with cross pecks/flaps. Goes through RLS like a real user. Safe to re-run. |
 | `verify.mjs` | 🛠️ | Automated security check with two accounts: prints PASS/FAIL for things like "B can't cancel A's meetup". |
 
@@ -659,11 +659,13 @@ Error classes: `MockModeError`, `MeetupValidationError` (carries `fieldErrors` p
 
 | File | Read it for |
 | --- | --- |
-| `TEAM_PLAN.md` | Who owns what, MVP scope, hour-by-hour plan, demo script. |
+| `README.md` | Index of all the docs. |
+| `ROADMAP.md` | What's next, later and deferred. |
+| `archive/TEAM_PLAN.md` | The original hackathon plan (historical). |
 | `CONTRACTS.md` | The frozen function signatures and data rules. |
 | `SUPABASE_SETUP.md` | Creating the database and switching to live mode. |
 | `DEPLOYMENT.md` | Vercel and map style setup. |
-| `adr/` | *Why* decisions were made. 0002 stack, 0003 RLS, 0004 approved places, 0005 Peck/Flap, 0006 MapLibre, 0007 frozen MVP, 0008 "show my location", 0009 landmark photo unlocks (proposed). |
+| `adr/` | *Why* decisions were made. 0002 stack, 0003 RLS, 0004 approved places, 0005 Peck/Flap, 0006 MapLibre, 0007 frozen MVP, 0008 "show my location", 0009 landmark photo unlocks, and more; see the [ADR index](adr/README.md). |
 
 ---
 

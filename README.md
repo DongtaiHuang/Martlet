@@ -148,7 +148,7 @@ components/      Reusable UI: feed, forms, maps, social, landmarks, avatar, game
 lib/             Supabase services, validation, business logic, shared utilities
 types/           Shared TypeScript contracts
 supabase/        SQL migrations, database tests, verification helpers
-docs/            Deployment, setup, ADRs, team notes, screenshots
+docs/            Docs index, setup, deployment, roadmap, ADRs, screenshots
 tests/           Unit, browser, and SQL regression checks
 public/          Public assets
 ```
@@ -190,9 +190,9 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR-PUBLISHABLE-KEY
 
 Then restart the development server. The database also requires the applicable migrations, grants, RLS policies, and Storage configuration; adding keys alone does not initialize the schema.
 
-MapLibre uses OpenFreeMap by default. Optional mapping settings include \`NEXT_PUBLIC_MAP_STYLE_URL\`, \`NEXT_PUBLIC_MAP_STYLE_URL_DARK\`, \`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY\`, and \`NEXT_PUBLIC_GOOGLE_MAP_ID\`.
+MapLibre uses OpenFreeMap by default. Optional mapping settings include `NEXT_PUBLIC_MAP_STYLE_URL`, `NEXT_PUBLIC_MAP_STYLE_URL_DARK`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, and `NEXT_PUBLIC_GOOGLE_MAP_ID`.
 
-**Never commit \`.env.local\`, passwords, database credentials, or Supabase secret/service-role keys.**
+**Never commit `.env.local`, passwords, database credentials, or Supabase secret/service-role keys.**
 
 For setup details, see [Supabase setup](docs/SUPABASE_SETUP.md).
 
@@ -222,7 +222,7 @@ DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres npm run tes
 
 ## Deploying & releases
 
-The production deployment uses [Vercel](https://vercel.com/) with the \`main\` branch. Configure the appropriate Supabase environment variables and callback URLs for your production domain before enabling live sign-in.
+The production deployment uses [Vercel](https://vercel.com/) with the `main` branch. Configure the appropriate Supabase environment variables and callback URLs for your production domain before enabling live sign-in.
 
 - [Deployment and rollback guide](docs/DEPLOYMENT.md)
 - [Supabase configuration and migration guide](docs/SUPABASE_SETUP.md)
@@ -233,7 +233,13 @@ The production deployment uses [Vercel](https://vercel.com/) with the \`main\` b
 
 Martlet was developed collaboratively by a student team. Contributions, UI improvements, bug reports, and suggestions are welcome through [GitHub Issues](https://github.com/DongtaiHuang/Martlet/issues).
 
-For code changes: branch from the latest \`main\`, keep PRs focused, run the project checks, and open a pull request for review. Please do not commit private environment files or user data.
+For code changes:
+
+1. Pick an issue from the [roadmap](docs/ROADMAP.md) and comment on it so nobody duplicates the work.
+2. Branch from the latest `main` and follow [AGENTS.md](AGENTS.md): Conventional Commits, small PRs, and the security rules.
+3. Run the [quality checks](#quality-checks) before you push. CI runs them plus the browser and database tests, and GitHub requests a review from the area's [code owners](.github/CODEOWNERS).
+
+Please do not commit private environment files or user data. All project docs are indexed in [docs/README.md](docs/README.md).
 
 ## Project status & notes
 
