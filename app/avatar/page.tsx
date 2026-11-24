@@ -26,7 +26,7 @@ export default async function AvatarPage({ searchParams }: { searchParams: Promi
           <p className="mt-4 rounded-xl border border-warn-line bg-warn-soft px-3 py-2 text-sm text-warn-ink"><strong>Preview:</strong> sample achievement counts, so every unlock can be tried.</p>
         )}
         <div className="mt-6">
-          {data ? <AvatarStudio progress={data.progress} name={data.name} /> : (
+          {data ? <AvatarStudio progress={data.progress} name={data.name} persist={preview !== "1"} /> : (
             <p className="rounded-2xl border border-line bg-surface p-5"><Link href="/login?next=/avatar" className="font-bold text-brand-ink hover:underline">Sign in</Link> to see your martlet.</p>
           )}
         </div>
