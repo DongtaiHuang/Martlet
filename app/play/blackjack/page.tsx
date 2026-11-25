@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Info, Users } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { BlackjackTable } from "@/components/blackjack/BlackjackTable";
 import { getBlackjackTable, isBlackjackPreview } from "@/lib/blackjack";
@@ -35,6 +35,9 @@ export default async function BlackjackPage() {
         )}
 
         <BlackjackTable initial={table?.hand ?? null} balance={table?.balance ?? 1000} practice={practice} />
+        <Link href="/play/blackjack/tables" className="mt-4 flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-surface p-4 font-semibold text-ink shadow-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">
+          <Users aria-hidden="true" size={18} className="text-emerald-700 dark:text-emerald-300" /> Play with others at a live table <span className="ml-auto text-sm text-ink-muted">Up to 5 players</span>
+        </Link>
 
         {table && table.today.hands > 0 && (
           <p className="mt-3 text-center text-sm text-ink-muted">

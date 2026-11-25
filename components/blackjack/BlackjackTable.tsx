@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Coins } from "lucide-react";
 import { dealAction, handAction, type BlackjackResponse } from "@/app/play/blackjack/actions";
+import { PlayingCard } from "./PlayingCard";
 import {
   cardInfo, handValue, MAX_BET, MIN_BET, practiceAction, practiceDeal, practiceView, RESULT_TEXT, shuffledDeck,
   type HandState, type PracticeHand,
@@ -22,33 +23,8 @@ const fullyShown = (h: HandState | null): Shown => ({
   dealerTurn: false,
 });
 
-function PlayingCard({ card, down, from }: { card: number | null; down: boolean; from: "dealer" | "player" }) {
-  const c = card === null ? null : cardInfo(card);
-  const faceDown = down || !c;
-  return (
-    <div
-      role="img" aria-label={faceDown ? "Face-down card" : c.name}
-      className="bj-card bj-deal h-24 w-16 shrink-0 sm:h-28 sm:w-20"
-      style={{ "--bj-from-x": from === "dealer" ? "140px" : "120px" } as React.CSSProperties}
-    >
-      <div className="bj-card-inner relative size-full" data-down={faceDown}>
-        <div className={`bj-face absolute inset-0 rounded-lg border border-neutral-300 bg-white shadow-md ${c?.red ? "text-red-700" : "text-neutral-900"}`}>
-          {c && (
-            <>
-              <span aria-hidden="true" className="absolute top-1 left-1.5 text-sm leading-none font-bold sm:text-base">{c.rank}<br />{c.suit}</span>
-              <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl">{c.suit}</span>
-              <span aria-hidden="true" className="absolute right-1.5 bottom-1 rotate-180 text-sm leading-none font-bold sm:text-base">{c.rank}<br />{c.suit}</span>
-            </>
-          )}
-        </div>
-        <div className="bj-face bj-back absolute inset-0 rounded-lg border-2 border-white/80 bg-brand bg-[repeating-linear-gradient(45deg,transparent_0_6px,rgb(255_255_255/0.18)_6px_8px)] shadow-md" />
-      </div>
-    </div>
-  );
-}
-
 /** The balance counts up or down to its new value. */
-function AnimatedNumber({ value }: { value: number }) {
+export function AnimatedNumber({ value }: { value: number }) {
   const [shown, setShown] = useState(value);
   const from = useRef(value);
   useEffect(() => {
