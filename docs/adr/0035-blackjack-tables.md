@@ -1,6 +1,6 @@
 # 0035. Multiplayer blackjack tables
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-25
 - **Issue:** #146
 
