@@ -116,6 +116,14 @@ Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during fi
 
 **Explore:** [Predictions](https://martlet-brown.vercel.app/markets)
 
+### 🪙 Martlet Coin: a trading sim
+
+**MLT** is a simulated coin with one shared price that moves every minute: a random market, nudged by campus activity and by everyone's buying and selling. Buy and sell it with Martlet points, follow the chart (1 hour, 1 day, 7 days), track your profit and climb the **Top traders** board.
+
+**It's a game, not crypto:** no blockchain, no wallets, no real money.
+
+**Explore:** [Martlet Coin](https://martlet-brown.vercel.app/coin)
+
 ### 🎮 Games
 
 - **Martlet Flight:** a flap-to-fly mini-game starring the bird you designed, with a leaderboard for signed-in players.
@@ -149,6 +157,7 @@ Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during fi
 | Upload landmark photos and unlock galleries | — | ✅ |
 | Post and interact on Campus Board | — | ✅ |
 | Forecast on Predictions | — | ✅ |
+| Trade Martlet Coin | — | ✅ |
 | Save account-linked progress and leaderboard scores | — | ✅ |
 
 For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests.

@@ -46,6 +46,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 22 | `018_prediction_market.sql` | Play-money prediction market: wallets, markets, LMSR trading, moderator approval and resolution (ADR 0033) | After `017` (uses its moderator role). Run once |
 | 23 | `019_blackjack.sql` | Blackjack with Martlet points: server-dealt hands, payouts to the market wallets (ADR 0034) | After `018` (uses its wallets). Run once |
 | 24 | `020_blackjack_tables.sql` | Multiplayer blackjack tables: seats, rounds, turn timers, Realtime publication of `bj_tables` (ADR 0035) | After `019`. Run once. Needs Realtime enabled on the project (on by default) |
+| 25 | `021_martlet_coin.sql` | Martlet Coin trading sim: shared minute-by-minute price, trades with Martlet points (ADR 0036) | After `018` (uses its wallets). Run once |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

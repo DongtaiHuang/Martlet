@@ -38,7 +38,8 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0032 | [Campus weather from Open-Meteo](0032-campus-weather.md) | Accepted |
 | 0033 | [Play-money prediction market](0033-prediction-market.md) | Accepted |
 | 0034 | [Blackjack with Martlet points](0034-blackjack.md) | Accepted |
-| 0035 | [Multiplayer blackjack tables](0035-blackjack-tables.md) | Proposed |
+| 0035 | [Multiplayer blackjack tables](0035-blackjack-tables.md) | Accepted |
+| 0036 | [Martlet Coin trading sim](0036-martlet-coin.md) | Proposed |
 
 ## Adding a new ADR
 
