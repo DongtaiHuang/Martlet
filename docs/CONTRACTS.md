@@ -53,6 +53,38 @@ Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-val
 - Coffee and study entries may reference an approved `CAMPUS_LOCATIONS` id; recipes and songs are address-free. Links must be empty or start with `https://`.
 - Errors: `TrendError`; `AuthRequiredError` and `MockModeError` are reused from `lib/meetups.ts`. Mutations run through the RPCs in `supabase/migrations/010_trends.sql`.
 
+## Prediction markets — `lib/markets.ts` (issue #139, ADR 0033)
+
+```typescript
+listMarkets(view: "open" | "settled"): Promise<Market[] | null>
+getMarket(id: string): Promise<MarketPage | null>        // market, history, position, balance, moderator
+getBalance(): Promise<number | null>
+getMarketLeaderboard(limit?: number): Promise<Leaderboard | null>
+listMyProposals(): Promise<Market[]>
+listPendingMarkets(): Promise<Market[]>                   // moderators; RLS returns nothing to others
+proposeMarket(input: { question: string; details: string; closesAt: string }): Promise<string>
+tradeMarket(id: string, side: Side, action: "buy" | "sell", amount: number): Promise<TradeResult>
+reviewMarket(id: string, approve: boolean): Promise<void>
+resolveMarket(id: string, outcome: "yes" | "no" | "cancelled"): Promise<number>
+```
+
+Server-only. `null` means signed out or migration 018 not applied; preview mode returns `lib/mock-markets.ts`. Writes throw `MarketError` with a message safe to show. Pricing math for previews is in `lib/market-math.ts` (client-safe); the database (`trade_market`) is the source of truth. Points are play money only.
+
+## Blackjack — `lib/blackjack.ts` (ADR 0034)
+
+```typescript
+getBlackjackTable(): Promise<BlackjackTable | null>       // hand in play, today's record, balance
+dealHand(bet: number): Promise<HandState>
+playHand(id: string, action: "hit" | "stand" | "double"): Promise<HandState>
+```
+
+Server-only; the database deals and pays (migration 019) and never returns the deck or the hole card while a hand is in play. `null` means the practice table (signed out, preview mode or migration missing). Rules, card names and the practice engine are in `lib/blackjack-engine.ts` (client-safe). Errors: `BlackjackError`.
+
+## Weather and feed layout
+
+- `lib/weather.ts` (issue #138, ADR 0032): `getCampusWeather(): Promise<Forecast | null>` fetches Open-Meteo for the fixed campus coordinates, cached 15 minutes; `null` when unreachable. Pure helpers: `parseForecast`, `forecastAt`, `upcomingHours`, `weatherTip`, `describeWeather`.
+- `lib/dashboard.ts` (issue #46, ADR 0031): `parseLayout(cookie)` / `serializeLayout(layout)` for the `martlet.dashboard` cookie, plus `moveWidget`, `toggleWidget`, `visibleWidgets`. A new feed widget is an entry in `WIDGETS` and a slot in `app/meetups/page.tsx`.
+
 ## Data interpretation
 
 - Meetups store one to three unique categories in selection order. Other stands alone. The legacy `category` is the first value and controls the card accent and map marker. Study can be anywhere in the list for course selection and filtering.

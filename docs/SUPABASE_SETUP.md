@@ -54,6 +54,17 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 
 **Sign-in not available?** In local mock mode (without both `NEXT_PUBLIC_SUPABASE_*` variables), the nav still exposes `/login` and `/signup` for discovery, but account creation and meetup publishing are disabled until the Supabase configuration and migrations are applied. Restart `npm run dev` after changing `.env.local`.
 
+### Moderators
+
+Moderators are the app's only elevated role (ADR 0027). They handle reported board posts and approve and settle prediction markets (ADR 0033). There is no separate admin role: project owners act through the Supabase dashboard. Students can't make themselves moderators, so set the flag in the **SQL Editor**:
+
+```sql
+update public.profiles set is_moderator = true
+where id = (select id from auth.users where email = 'moderator@mail.mcgill.ca');
+```
+
+Use `false` to remove the role. A moderator who has traded in a market can't settle it, so have at least two moderators once Predictions is in use.
+
 ## 3. Configure Auth
 
 **Authentication → URL Configuration**
