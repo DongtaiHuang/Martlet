@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Club } from "lucide-react";
+import { CarFront, Club } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { MartletFlightLoader } from "@/components/game/MartletFlightLoader";
 import { FlightLeaderboard } from "@/components/game/FlightLeaderboard";
@@ -16,7 +16,10 @@ export default function PlayPage() {
         <MartletFlightLoader />
         <p className="mt-4 text-center text-xs text-ink-subtle">Space / ↑ / tap to flap · P to pause · signed-in scores go on the leaderboard</p>
         <FlightLeaderboard limit={10} />
-        <Link href="/play/blackjack" className="mt-6 flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-surface p-4 font-semibold text-ink shadow-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">
+        <Link href="/play/drift" className="mt-6 flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-surface p-4 font-semibold text-ink shadow-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">
+          <CarFront aria-hidden="true" size={18} className="text-sky-600 dark:text-sky-300" /> Martlet Drift <span className="ml-auto text-sm text-ink-muted">90-second drift run</span>
+        </Link>
+        <Link href="/play/blackjack" className="mt-3 flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-surface p-4 font-semibold text-ink shadow-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">
           <Club aria-hidden="true" size={18} className="text-emerald-700 dark:text-emerald-300" /> Try your luck at blackjack <span className="ml-auto text-sm text-ink-muted">Martlet points</span>
         </Link>
       </main>
