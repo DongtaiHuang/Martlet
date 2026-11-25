@@ -34,7 +34,7 @@ Martlet is an **independent student project**, not an official McGill University
 | Step | What you do | What happens |
 | :--: | --- | --- |
 | **1** | **Discover** | Browse upcoming meetups on the [feed](https://martlet-brown.vercel.app/meetups) or find them geographically on [Explore](https://martlet-brown.vercel.app/explore). |
-| **2** | **Pick your thing** | Filter by Coffee, Study, Food, Sports, Gaming, or Other. Meetups can belong to up to **three categories**. |
+| **2** | **Pick your thing** | Filter by Coffee, Study, Food, Sports, Gaming, Skillshare, or Other. Meetups can belong to up to **three categories**. |
 | **3** | **Peck or Flap** | **Peck** means *I'm going*; **Flap** means *I like this*. Join other students' plans or show support. |
 | **4** | **Host something** | Choose a time and meeting place, add details, and publish your own meetup. Organizers can edit or cancel eligible upcoming meetups. |
 | **5** | **Explore & collect** | Visit landmark challenges, upload your photo to unlock others' shared memories, and grow your Martlet progress tree. |
@@ -57,7 +57,7 @@ Imagine you have a gap between lectures and want to meet people before revising 
 
 ### 📅 Meetups: make plans in minutes
 
-- **Create and discover** spontaneous student meetups across six categories.
+- **Create and discover** spontaneous student meetups across seven categories.
 - **Mix categories:** up to three per event (for example, Coffee + Study or Food + Gaming); Other is selected on its own.
 - **Choose a place:** use the McGill campus location catalog or enter a custom off-campus meeting place. Text-only locations are not given an inaccurate map pin.
 - **Join and react:** Peck/unpeck to attend or leave; Flap/unflap to like or unlike.

@@ -48,6 +48,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 24 | `020_blackjack_tables.sql` | Multiplayer blackjack tables: seats, rounds, turn timers, Realtime publication of `bj_tables` (ADR 0035) | After `019`. Run once. Needs Realtime enabled on the project (on by default) |
 | 25 | `021_martlet_coin.sql` | Martlet Coin trading sim: shared minute-by-minute price, trades with Martlet points (ADR 0036) | After `018` (uses its wallets). Run once |
 | 26 | `022_drift_scores.sql` | Martlet Drift leaderboard with server-timed runs (ADR 0037) | Run once |
+| 27 | `023_skillshare_category.sql` | Adds the Skillshare (`skills`) meetup category (issue #118) | Apply before deploying the app that offers it |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

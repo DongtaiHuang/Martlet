@@ -42,7 +42,7 @@ export function PostCard({ post, full = false }: { post: BoardPost; full?: boole
         )}
         {post.kind === "question" && post.accepted_comment_id && <span className="inline-flex items-center gap-1 text-xs font-semibold text-ok-ink"><CheckCircle2 aria-hidden="true" size={14} /> Answered</span>}
         {post.kind === "skill" && (
-          <Link href={`/meetups/new?title=${encodeURIComponent(`Skillshare: ${post.title}`.slice(0, 100))}`} className="inline-flex min-h-11 items-center rounded-xl px-2 text-sm font-semibold text-brand-ink hover:underline">Host it as a meetup</Link>
+          <Link href={`/meetups/new?category=skills&title=${encodeURIComponent(`Skillshare: ${post.title}`.slice(0, 80))}`} className="inline-flex min-h-11 items-center rounded-xl px-2 text-sm font-semibold text-brand-ink hover:underline">Host it as a meetup</Link>
         )}
         <span className="ml-auto">{!post.is_mine && <ReportButton type="post" id={post.id} />}</span>
       </div>
