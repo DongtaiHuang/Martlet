@@ -35,11 +35,12 @@ export interface MeetupFormInitial {
   course: Course | null;
 }
 
-export function MeetupForm({ myCourses = [], edit }: { myCourses?: Course[]; edit?: { meetupId: string; initial: MeetupFormInitial } }) {
+/** `preset` pre-fills a new meetup, e.g. from a Campus Board skill post (issue #118). */
+export function MeetupForm({ myCourses = [], edit, preset }: { myCourses?: Course[]; edit?: { meetupId: string; initial: MeetupFormInitial }; preset?: { title?: string; categories?: MeetupCategory[] } }) {
   const action = useMemo(() => (edit ? submitMeetupEdit.bind(null, edit.meetupId) : submitMeetup), [edit]);
   const [state, dispatch, pending] = useActionState(action, {});
   const initial = edit?.initial;
-  const [categories, setCategories] = useState<MeetupCategory[]>(initial?.categories ?? []);
+  const [categories, setCategories] = useState<MeetupCategory[]>(initial?.categories ?? preset?.categories ?? []);
   const [initialCourse, setInitialCourse] = useState(initial?.course ?? null);
   const startsAtRef = useRef<HTMLInputElement>(null);
   // Show the saved start time in the visitor's own time zone (only known in the browser).
@@ -81,7 +82,7 @@ export function MeetupForm({ myCourses = [], edit }: { myCourses?: Course[]; edi
       <fieldset disabled={pending} className="min-w-0 space-y-5 disabled:opacity-70">
         <div>
           <label htmlFor="title" className="font-semibold">Title</label>
-          <input id="title" name="title" required maxLength={80} defaultValue={initial?.title} placeholder="Coffee between classes" className={fieldStyle} {...fieldErrorProps("title")} />
+          <input id="title" name="title" required maxLength={80} defaultValue={initial?.title ?? preset?.title} placeholder="Coffee between classes" className={fieldStyle} {...fieldErrorProps("title")} />
           <FieldError name="title" fields={state.fields} />
         </div>
         <div>

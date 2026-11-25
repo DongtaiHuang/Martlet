@@ -11,6 +11,7 @@ const descriptions: Record<MeetupCategory, string> = {
   food: "Meals and snacks together",
   sports: "Games, workouts, and walks",
   gaming: "Video and tabletop games",
+  skills: "Teach or learn a skill: guitar, LaTeX, résumés…",
   other: "Something different",
 };
 

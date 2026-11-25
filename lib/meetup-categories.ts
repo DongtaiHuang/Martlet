@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const MEETUP_CATEGORIES = ["coffee", "study", "food", "sports", "gaming", "other"] as const;
+export const MEETUP_CATEGORIES = ["coffee", "study", "food", "sports", "gaming", "skills", "other"] as const;
 export type MeetupCategory = typeof MEETUP_CATEGORIES[number];
 export const MAX_MEETUP_CATEGORIES = 3;
 

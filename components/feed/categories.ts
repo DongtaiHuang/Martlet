@@ -1,4 +1,4 @@
-import { BookOpen, Coffee, Dumbbell, Gamepad2, Shapes, Utensils } from "lucide-react";
+import { BookOpen, Coffee, Dumbbell, Gamepad2, Presentation, Shapes, Utensils } from "lucide-react";
 import type { MeetupCategory } from "@/types/meetup";
 import { MEETUP_CATEGORIES } from "@/lib/meetup-categories";
 
@@ -8,6 +8,7 @@ export const categories = {
   food: { label: "Food", icon: Utensils, color: "bg-orange-100 text-orange-900 dark:bg-orange-400/15 dark:text-orange-200", accent: "border-t-orange-400" },
   sports: { label: "Sports", icon: Dumbbell, color: "bg-ok-soft text-ok-ink dark:bg-emerald-400/15 dark:text-emerald-200", accent: "border-t-emerald-400" },
   gaming: { label: "Gaming", icon: Gamepad2, color: "bg-violet-100 text-violet-800 dark:bg-violet-400/15 dark:text-violet-200", accent: "border-t-violet-400" },
+  skills: { label: "Skillshare", icon: Presentation, color: "bg-cyan-100 text-cyan-900 dark:bg-cyan-400/15 dark:text-cyan-200", accent: "border-t-cyan-500" },
   other: { label: "Other", icon: Shapes, color: "bg-surface-muted text-ink-soft", accent: "border-t-stone-400" },
 } satisfies Record<MeetupCategory, { label: string; icon: typeof Coffee; color: string; accent: string }>;
 

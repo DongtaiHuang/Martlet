@@ -9,7 +9,7 @@ setWorkerUrl(`/maplibre-gl-worker.mjs?v=${getVersion()}`);
 
 export const MARKER_COLORS: Record<MeetupCategory, string> = {
   coffee: "#b45309", study: "#4338ca", food: "#c2410c",
-  sports: "#047857", gaming: "#6d28d9", other: "#57534e",
+  sports: "#047857", gaming: "#6d28d9", skills: "#0e7490", other: "#57534e",
 };
 
 export const CAMPUS_CENTER: [number, number] = [-73.577, 45.5045];

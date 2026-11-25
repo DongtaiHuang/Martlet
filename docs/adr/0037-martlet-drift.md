@@ -1,6 +1,6 @@
 # 0037. Martlet Drift
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-25
 - **Issue:** #149
 

@@ -4,11 +4,16 @@ import { MeetupForm } from "@/components/forms/MeetupForm";
 import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { listMyCourses } from "@/lib/courses";
+import { MEETUP_CATEGORIES, type MeetupCategory } from "@/lib/meetup-categories";
 import { getDataMode } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
-export default async function CreateMeetupPage() {
+export default async function CreateMeetupPage({ searchParams }: { searchParams: Promise<{ title?: string | string[]; category?: string | string[] }> }) {
+  // Optional pre-fill, e.g. "Host it as a meetup" on a Campus Board skill post (issue #118).
+  const { title, category } = await searchParams;
+  const presetTitle = typeof title === "string" ? title.trim().slice(0, 80) : undefined;
+  const presetCategory = typeof category === "string" && (MEETUP_CATEGORIES as readonly string[]).includes(category) ? [category as MeetupCategory] : undefined;
   const viewer = await getMeetupViewer();
   const isMockMode = getDataMode() === "mock";
   // Quick picks for the course field; if courses aren't set up, the search box still shows.
@@ -34,7 +39,7 @@ export default async function CreateMeetupPage() {
             )}
           </div>
         )}
-        <div className="mt-5"><MeetupForm myCourses={myCourses} /></div>
+        <div className="mt-5"><MeetupForm myCourses={myCourses} preset={{ title: presetTitle || undefined, categories: presetCategory }} /></div>
       </main>
     </div>
   );
