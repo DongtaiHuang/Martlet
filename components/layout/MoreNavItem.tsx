@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { BookOpen, Ellipsis, Gamepad2, MessagesSquare, Newspaper, ShieldCheck, Sprout, Trophy } from "lucide-react";
+import { BookOpen, Ellipsis, Gamepad2, MessagesSquare, Newspaper, ShieldCheck, Sprout, TrendingUp, Trophy } from "lucide-react";
 
 /** Pages without their own tab (issue #119). Progress has a tab on larger screens, so it only appears here on phones. */
 const items = [
   { href: "/progress", label: "Progress", icon: Sprout, tone: "text-ok-ink", phoneOnly: true },
   { href: "/board", label: "Campus board", icon: MessagesSquare, tone: "text-brand-ink" },
+  { href: "/markets", label: "Predictions", icon: TrendingUp, tone: "text-emerald-700 dark:text-emerald-300" },
   { href: "/achievements", label: "Achievements", icon: Trophy, tone: "text-amber-500" },
   { href: "/play", label: "Martlet Flight", icon: Gamepad2, tone: "text-sky-600 dark:text-sky-300" },
   { href: "/news", label: "McGill News", icon: Newspaper, tone: "text-ink-muted" },
   { href: "/guide", label: "Student guide", icon: BookOpen, tone: "text-ink-muted" },
 ] as const;
 
-export const MORE_PATHS = ["/board", "/achievements", "/play", "/news", "/guide", "/moderation"];
+export const MORE_PATHS = ["/board", "/markets", "/achievements", "/play", "/news", "/guide", "/moderation"];
 
 /**
  * "More" in the nav: a button that opens a short menu of the remaining pages.
