@@ -1,6 +1,6 @@
 # 0033. Play-money prediction market
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-24
 - **Issue:** #139
 
