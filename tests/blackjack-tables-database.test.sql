@@ -23,7 +23,8 @@ $$;
 create function pg_temp.as_user(n integer) returns void language sql as $$
   select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-00000000030' || n, true);
 $$;
-create function pg_temp.bal(n integer) returns integer language sql as $$
+-- Runs as the test owner, so it can read any wallet (players can only read their own).
+create function pg_temp.bal(n integer) returns integer language sql security definer as $$
   select balance from public.market_wallets where user_id = ('00000000-0000-4000-8000-00000000030' || n)::uuid;
 $$;
 
