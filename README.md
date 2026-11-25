@@ -48,6 +48,7 @@ Imagine you have a gap between lectures and want to meet people before revising 
 3. Pick an approved campus building (with a photo and map preview), or choose **Other** and type a public meeting spot.
 4. Set a future date and time, then publish.
 5. Classmates can discover the meetup, **Peck** to join, and **Flap** to like it. The host can update its details before it starts.
+6. Once it starts, the host and everyone going share photos in the meetup's **photo album** and can download them (one by one or all as a ZIP). The album is private to them and deleted 7 days after the start.
 
 ![Interactive multi-category meetup picker](docs/screenshots/meetup-categories/desktop.png)
 
@@ -156,12 +157,13 @@ Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during fi
 | Create/edit meetups | — | ✅ |
 | Peck and Flap | — | ✅ |
 | Upload landmark photos and unlock galleries | — | ✅ |
+| Share and download meetup album photos (host and people going) | — | ✅ |
 | Post and interact on Campus Board | — | ✅ |
 | Forecast on Predictions | — | ✅ |
 | Trade Martlet Coin | — | ✅ |
 | Save account-linked progress and leaderboard scores | — | ✅ |
 
-For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests. Old meetups are deleted automatically: 30 days after they start, or 7 days if cancelled, along with their Pecks, polls and notifications (ADR 0038).
+For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests. Old meetups are deleted automatically: 30 days after they start, or 7 days if cancelled, along with their Pecks, polls and notifications (ADR 0038). Meetup album photos are visible only to the host and people going, and disappear 7 days after the start (ADR 0039).
 
 **Moderators** are the only elevated role in the app. They review reported board posts and approve and settle prediction markets. The project owner sets them in the database ([how](docs/SUPABASE_SETUP.md#moderators)).
 

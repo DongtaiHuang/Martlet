@@ -28,6 +28,8 @@ export default async function ModerationPage() {
                   {r.target_type} · {r.count} {r.count === 1 ? "report" : "reports"} · now {r.status}
                 </p>
                 <p className="mt-1 text-ink [overflow-wrap:anywhere]">{r.preview}</p>
+                {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
+                {r.image_url && <img src={r.image_url} alt="Reported photo" className="mt-2 max-h-64 rounded-xl object-contain" />}
                 <p className="mt-2 text-sm text-ink-2"><strong>Reasons:</strong> {r.reasons.map((x) => REPORT_REASONS[x as ReportReason] ?? x).join(", ")}</p>
                 {r.notes.length > 0 && <ul className="mt-1 list-disc pl-5 text-sm text-ink-muted">{r.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
                 <ModerationActions type={r.target_type} id={r.target_id} />

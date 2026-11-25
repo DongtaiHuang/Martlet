@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   BOARD_KINDS, BoardError, REPORT_REASONS, acceptBoardAnswer, addBoardComment, createBoardPost, moderateContent,
-  removeMyBoardContent, reportContent, setBoardVote, type BoardKind, type ReportReason,
+  removeMyBoardContent, REPORT_TARGETS, reportContent, setBoardVote, type BoardKind, type ReportReason, type ReportTarget,
 } from "@/lib/board";
 import { AuthRequiredError } from "@/lib/supabase/auth";
 
@@ -82,8 +82,8 @@ export async function removeAction(type: "post" | "comment", id: string, postId:
   revalidatePath(`/board/${postId}`);
 }
 
-export async function reportAction(type: "post" | "comment", id: string, reason: string, note: string): Promise<string> {
-  if (!UUID.test(id) || (type !== "post" && type !== "comment") || !(reason in REPORT_REASONS)) return "Couldn't send that report.";
+export async function reportAction(type: ReportTarget, id: string, reason: string, note: string): Promise<string> {
+  if (!UUID.test(id) || !REPORT_TARGETS.includes(type) || !(reason in REPORT_REASONS)) return "Couldn't send that report.";
   try {
     const r = await reportContent(type, id, reason as ReportReason, note.slice(0, 300));
     if (r === "already") return "You've already reported this. Thanks!";
@@ -93,8 +93,8 @@ export async function reportAction(type: "post" | "comment", id: string, reason:
   }
 }
 
-export async function moderateAction(type: "post" | "comment", id: string, action: "restore" | "remove" | "dismiss"): Promise<void> {
-  if (!UUID.test(id)) return;
+export async function moderateAction(type: ReportTarget, id: string, action: "restore" | "remove" | "dismiss"): Promise<void> {
+  if (!UUID.test(id) || !REPORT_TARGETS.includes(type)) return;
   await moderateContent(type, id, action);
   revalidatePath("/moderation");
   revalidatePath("/board");

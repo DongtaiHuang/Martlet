@@ -32,7 +32,7 @@ export function VoteButton({ postId, votes, voted }: { postId: string; votes: nu
 }
 
 /** Report with a reason; uses a native <dialog> for focus handling. */
-export function ReportButton({ type, id }: { type: "post" | "comment"; id: string }) {
+export function ReportButton({ type, id }: { type: "post" | "comment" | "photo"; id: string }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -54,7 +54,7 @@ export function ReportButton({ type, id }: { type: "post" | "comment"; id: strin
             start(async () => setMessage(await reportAction(type, id, String(f.get("reason")), String(f.get("note") ?? ""))));
           }}>
             <h2 id={`report-${id}`} className="text-lg font-bold">Report this {type}</h2>
-            <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the author. Three reports hide it until a moderator checks.</p>
+            <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the {type === "photo" ? "person who shared it" : "author"}. Three reports hide it until a moderator checks.</p>
             <fieldset className="mt-3 grid gap-1">
               <legend className="sr-only">Reason</legend>
               {Object.entries(REPORT_REASONS).map(([value, label], i) => (

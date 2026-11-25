@@ -16,7 +16,9 @@ export type BoardPost = {
   accepted_comment_id: string | null;
 };
 export type BoardComment = { id: string; body: string; created_at: string; author_name: string; is_mine: boolean; status: string };
-export type OpenReport = { target_type: "post" | "comment"; target_id: string; reasons: string[]; notes: string[]; count: number; first_at: string; preview: string; status: string };
+export const REPORT_TARGETS = ["post", "comment", "photo"] as const;
+export type ReportTarget = (typeof REPORT_TARGETS)[number];
+export type OpenReport = { target_type: ReportTarget; target_id: string; reasons: string[]; notes: string[]; count: number; first_at: string; preview: string; status: string; image_url?: string };
 
 export class BoardError extends Error {}
 
@@ -145,7 +147,7 @@ export async function removeMyBoardContent(type: "post" | "comment", id: string)
   if (error) rpcError(error);
 }
 
-export async function reportContent(type: "post" | "comment", id: string, reason: ReportReason, note: string): Promise<"reported" | "hidden" | "already"> {
+export async function reportContent(type: ReportTarget, id: string, reason: ReportReason, note: string): Promise<"reported" | "hidden" | "already"> {
   await requireUser();
   const { data, error } = await (await createClient()).rpc("report_content", { p_type: type, p_id: id, p_reason: reason, p_note: note });
   if (error) rpcError(error);
@@ -176,17 +178,28 @@ export async function listOpenReports(): Promise<OpenReport[]> {
   const list = [...groups.values()];
   const postIds = list.filter((g) => g.target_type === "post").map((g) => g.target_id);
   const commentIds = list.filter((g) => g.target_type === "comment").map((g) => g.target_id);
-  const [posts, comments] = await Promise.all([
+  const photoIds = list.filter((g) => g.target_type === "photo").map((g) => g.target_id);
+  const [posts, comments, photos] = await Promise.all([
     postIds.length ? s.supabase.from("board_posts").select("id, title, body, status").in("id", postIds) : Promise.resolve({ data: [] }),
     commentIds.length ? s.supabase.from("board_comments").select("id, body, status").in("id", commentIds) : Promise.resolve({ data: [] }),
+    photoIds.length ? s.supabase.from("meetup_photos").select("id, meetup_id, status, meetup:meetups(title)").in("id", photoIds) : Promise.resolve({ data: [] }),
   ]);
-  const byId = new Map<string, { preview: string; status: string }>();
+  const byId = new Map<string, { preview: string; status: string; image_url?: string }>();
+  // Meetup photos (ADR 0039): RLS shows moderators live photos only; closed albums read as deleted.
+  const photoRows = (photos.data ?? []) as { id: string; meetup_id: string; status: string; meetup: { title: string } | { title: string }[] | null }[];
+  if (photoRows.length) {
+    const { data: urls } = await s.supabase.storage.from("meetup-photos").createSignedUrls(photoRows.map((p) => `${p.meetup_id}/${p.id}.jpg`), 600);
+    photoRows.forEach((p, i) => {
+      const meetup = first(p.meetup);
+      byId.set(p.id, { preview: `Photo in the meetup “${meetup?.title ?? "unknown"}”`, status: p.status, image_url: urls?.[i]?.signedUrl ?? undefined });
+    });
+  }
   for (const p of (posts.data ?? []) as { id: string; title: string; body: string; status: string }[]) byId.set(p.id, { preview: `${p.title} — ${p.body}`.slice(0, 240), status: p.status });
   for (const c of (comments.data ?? []) as { id: string; body: string; status: string }[]) byId.set(c.id, { preview: c.body.slice(0, 240), status: c.status });
   return list.map((g) => ({ ...g, ...(byId.get(g.target_id) ?? { preview: "(deleted)", status: "removed" }) })).sort((a, b) => b.count - a.count);
 }
 
-export async function moderateContent(type: "post" | "comment", id: string, action: "restore" | "remove" | "dismiss") {
+export async function moderateContent(type: ReportTarget, id: string, action: "restore" | "remove" | "dismiss") {
   await requireUser();
   const { error } = await (await createClient()).rpc("moderate_content", { p_type: type, p_id: id, p_action: action });
   if (error) rpcError(error);
