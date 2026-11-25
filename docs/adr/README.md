@@ -35,8 +35,9 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0029 | [Custom themes from three colours](0029-custom-colour-themes.md) | Accepted |
 | 0030 | [Tree species and levels after full bloom](0030-tree-species-and-bloom-levels.md) | Accepted |
 | 0031 | [Customisable feed dashboard](0031-customisable-feed-dashboard.md) | Accepted |
-| 0032 | [Campus weather from Open-Meteo](0032-campus-weather.md) | Proposed |
-| 0033 | [Play-money prediction market](0033-prediction-market.md) | Proposed |
+| 0032 | [Campus weather from Open-Meteo](0032-campus-weather.md) | Accepted |
+| 0033 | [Play-money prediction market](0033-prediction-market.md) | Accepted |
+| 0034 | [Blackjack with Martlet points](0034-blackjack.md) | Proposed |
 
 ## Adding a new ADR
 

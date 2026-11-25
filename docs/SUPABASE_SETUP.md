@@ -44,6 +44,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 20 | `016_flight_leaderboard.sql` | Martlet Flight leaderboard with server-timed runs (ADR 0026) | |
 | 21 | `017_community_board.sql` | Campus Board (memes, tips, Q&A, skill listings), reports and moderation (ADR 0027) | Set moderators by hand with `profiles.is_moderator` |
 | 22 | `018_prediction_market.sql` | Play-money prediction market: wallets, markets, LMSR trading, moderator approval and resolution (ADR 0033) | After `017` (uses its moderator role). Run once |
+| 23 | `019_blackjack.sql` | Blackjack with Martlet points: server-dealt hands, payouts to the market wallets (ADR 0034) | After `018` (uses its wallets). Run once |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

@@ -1,6 +1,6 @@
 # 0032. Campus weather from Open-Meteo
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-24
 - **Issue:** #138
 

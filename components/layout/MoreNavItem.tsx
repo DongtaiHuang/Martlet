@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { BookOpen, Ellipsis, Gamepad2, MessagesSquare, Newspaper, ShieldCheck, Sprout, TrendingUp, Trophy } from "lucide-react";
+import { BookOpen, Club, Ellipsis, Gamepad2, MessagesSquare, Newspaper, ShieldCheck, Sprout, TrendingUp, Trophy } from "lucide-react";
 
 /** Pages without their own tab (issue #119). Progress has a tab on larger screens, so it only appears here on phones. */
 const items = [
@@ -12,6 +12,7 @@ const items = [
   { href: "/markets", label: "Predictions", icon: TrendingUp, tone: "text-emerald-700 dark:text-emerald-300" },
   { href: "/achievements", label: "Achievements", icon: Trophy, tone: "text-amber-500" },
   { href: "/play", label: "Martlet Flight", icon: Gamepad2, tone: "text-sky-600 dark:text-sky-300" },
+  { href: "/play/blackjack", label: "Blackjack", icon: Club, tone: "text-emerald-700 dark:text-emerald-300" },
   { href: "/news", label: "McGill News", icon: Newspaper, tone: "text-ink-muted" },
   { href: "/guide", label: "Student guide", icon: BookOpen, tone: "text-ink-muted" },
 ] as const;
@@ -80,7 +81,9 @@ export function MoreNavItem({ className, active, moderator = false }: { classNam
         >
           <ul className="space-y-0.5">
             {links.map(({ href, label, icon: Icon, tone, ...rest }) => {
-              const current = pathname === href || pathname.startsWith(`${href}/`);
+              // The closest match only: /play/blackjack marks Blackjack, not Martlet Flight too.
+              const matches = (h: string) => pathname === h || pathname.startsWith(`${h}/`);
+              const current = matches(href) && !links.some((other) => other.href.length > href.length && matches(other.href));
               return (
                 <li key={href} className={"phoneOnly" in rest ? "sm:hidden" : undefined}>
                   <Link
