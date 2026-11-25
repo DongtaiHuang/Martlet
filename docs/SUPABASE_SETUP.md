@@ -43,6 +43,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 19 | `015_guest_browsing.sql` | Read-only guest view of meetups and landmarks through one summary function (ADR 0025) | Landmark photos stay members-only |
 | 20 | `016_flight_leaderboard.sql` | Martlet Flight leaderboard with server-timed runs (ADR 0026) | |
 | 21 | `017_community_board.sql` | Campus Board (memes, tips, Q&A, skill listings), reports and moderation (ADR 0027) | Set moderators by hand with `profiles.is_moderator` |
+| 22 | `018_prediction_market.sql` | Play-money prediction market: wallets, markets, LMSR trading, moderator approval and resolution (ADR 0033) | After `017` (uses its moderator role). Run once |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

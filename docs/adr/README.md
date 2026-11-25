@@ -36,6 +36,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0030 | [Tree species and levels after full bloom](0030-tree-species-and-bloom-levels.md) | Accepted |
 | 0031 | [Customisable feed dashboard](0031-customisable-feed-dashboard.md) | Accepted |
 | 0032 | [Campus weather from Open-Meteo](0032-campus-weather.md) | Proposed |
+| 0033 | [Play-money prediction market](0033-prediction-market.md) | Proposed |
 
 ## Adding a new ADR
 
