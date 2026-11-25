@@ -1,6 +1,6 @@
 # 0036. Martlet Coin trading sim
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-25
 - **Issue:** #148
 
