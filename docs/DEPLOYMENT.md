@@ -23,7 +23,7 @@ Google Maps needs an authorized billing project, Maps JavaScript API, and Places
 
 ## Supabase readiness
 
-Use the database owner’s **SQL Editor** to compare installed objects with the [Supabase migration guide](SUPABASE_SETUP.md). Identify migrations by full filename because several prefixes are shared. Confirm profiles, courses, meetup and reaction tables, campus and venue catalogs, landmarks and unlocks, achievements, notifications, trends, and the private `landmark-photos` bucket with their expected grants and policies.
+Use the database owner’s **SQL Editor** to compare installed objects with the [Supabase migration guide](SUPABASE_SETUP.md). Identify migrations by full filename because several prefixes are shared. Confirm profiles, courses, meetup and reaction tables, campus and venue catalogs, landmarks and unlocks, achievements, notifications, trends, the Flight leaderboard, the Campus Board and reports, prediction markets, blackjack, and the private `landmark-photos` and `board-images` buckets with their expected grants and policies.
 
 Run these read-only queries for the recent meetup changes:
 
@@ -40,6 +40,16 @@ where conrelid = to_regclass('public.meetups')
 
 select to_regprocedure('public.update_my_meetup(uuid,jsonb)') as edit_rpc;
 select id, public from storage.buckets where id = 'landmark-photos';
+```
+
+And for the later features (each line should return a name, not null):
+
+```sql
+select to_regclass('public.flight_scores') as flight_016,
+       to_regclass('public.board_posts') as board_017,
+       to_regprocedure('public.trade_market(uuid,text,text,double precision)') as markets_018,
+       to_regprocedure('public.blackjack_deal(integer)') as blackjack_019;
+select count(*) as moderators from public.profiles where is_moderator;
 ```
 
 If an object is missing, get team approval and apply only its missing migrations and prerequisites. In particular, `012_custom_meetup_locations.sql` requires the approved venue and course migrations, `013_meetup_editing.sql` requires 011 and 012, and `014_meetup_categories.sql` requires 013. Confirm that the edit RPC uses the category array after 014.
@@ -67,7 +77,9 @@ CI also applies every migration to a disposable Supabase database and runs `test
 2. Open the stable HTTPS URL from a signed-out browser outside the developer machine. Confirm signup and login load, protected routes send visitors to login, and the screens have no demo banner.
 3. Use two approved accounts on desktop and mobile. Verify signup, confirmation, login, refresh, logout, and return to the requested protected page. Create campus, custom-location, and Coffee + Study meetups with a course. Verify host edit and cancellation, non-host rejection, Peck, Flap, leave, feed filters, and profile history. Check that anonymous and non-owner users lack access to private records and protected writes.
 4. In Explore, landmarks, and the location previews, check tile loading, attribution, zoom, category filtering, and that text-only places have no map pin. Verify landmark unlocks, upload, gallery, zoom, replacement, and private Storage permissions.
-5. Check trends, achievements, notifications, themes, footer, flying Martlet, Martlet Flight, and avatar tracking. Review the browser console, network panel, and Vercel runtime logs. Record the verified URL in the README after these checks.
+5. Check trends, achievements, notifications, themes (including your own colours), the feed's Customize mode, campus weather and a meetup forecast, the progress tree species, footer, flying Martlet, Martlet Flight, and avatar tracking.
+6. With a moderator and a student account: propose a market, approve it, trade Yes and No, check the chart and balances, and settle it from a moderator who didn't trade. Play a few blackjack hands, including a double down, and reload mid-hand to check it resumes.
+7. Review the browser console, network panel, and Vercel runtime logs. Record the verified URL in the README after these checks.
 
 ## Repository and platform settings (admin only)
 

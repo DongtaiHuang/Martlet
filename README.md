@@ -103,16 +103,38 @@ Posts support community votes and comments. Signed-in users can report content; 
 
 **Explore:** [Campus Board](https://martlet-brown.vercel.app/board)
 
+### 🔮 Predictions: forecast campus life
+
+Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during finals?") and trade on the answer with **Martlet points**:
+
+- Every student gets 1000 points, topped back up to 1000 each week.
+- Each market's price is the crowd's probability, shown on a **chart over time**. Buy or sell Yes or No; a preview shows your shares and how the price would move.
+- Students propose markets; **moderators** approve them and settle them Yes, No or cancelled (refunded).
+- **Top forecasters** ranks points won on settled markets.
+
+**It's a game:** Martlet points have no cash value and can't be bought, cashed out or traded for anything.
+
+**Explore:** [Predictions](https://martlet-brown.vercel.app/markets)
+
+### 🎮 Games
+
+- **Martlet Flight:** a flap-to-fly mini-game starring the bird you designed, with a leaderboard for signed-in players.
+- **Blackjack:** play against the dealer with your Martlet points. The server deals every hand, so results can't be faked. Guests get a practice table.
+
+**Explore:** [Martlet Flight](https://martlet-brown.vercel.app/play) · [Blackjack](https://martlet-brown.vercel.app/play/blackjack)
+
 ### 🌱 Make Martlet your own
 
 - **Student profile:** display name, course preferences, hosted and joined meetups, and activity history.
 - **Achievements:** discover badges earned through exploration and engagement.
 - **Your Martlet:** customize a 3D bird avatar; some accessories and colors unlock as you participate. Optional camera-based expression tracking is supported.
-- **Martlet Flight:** a casual flap-to-fly mini-game with a leaderboard for signed-in players.
-- **Personalization:** theme choices, seasonal styling, and playful campus animations.
+- **Your progress tree:** pick a species (classic, sakura, pine, maple, willow or sequoia). After full bloom it keeps growing with the meetups you join and host.
+- **Your feed:** press **Customize** to drag the side widgets into your order, hide the ones you don't use, or hide the photo carousel. Saved on your device.
+- **Your colours:** choose a preset theme, or build your own from three colours (primary, secondary, tertiary). Martlet adjusts shades where needed so text stays readable in light and dark mode.
+- **Campus weather:** current conditions, the next hours and five days for downtown campus, plus the forecast on each upcoming meetup with a tip when it matters ("Very cold: dress warm").
 - **Campus extras:** trending topics, a daily quote and joke, a searchable student guide, and links to McGill News.
 
-**Explore:** [Profile](https://martlet-brown.vercel.app/profile) · [Achievements](https://martlet-brown.vercel.app/achievements) · [Avatar](https://martlet-brown.vercel.app/avatar) · [Martlet Flight](https://martlet-brown.vercel.app/play) · [Student guide](https://martlet-brown.vercel.app/guide) · [McGill News](https://martlet-brown.vercel.app/news)
+**Explore:** [Profile](https://martlet-brown.vercel.app/profile) · [Achievements](https://martlet-brown.vercel.app/achievements) · [Avatar](https://martlet-brown.vercel.app/avatar) · [Progress tree](https://martlet-brown.vercel.app/progress) · [Student guide](https://martlet-brown.vercel.app/guide) · [McGill News](https://martlet-brown.vercel.app/news)
 
 ## Guest browsing vs. student accounts
 
@@ -121,13 +143,17 @@ Posts support community votes and comments. Signed-in users can report content; 
 | Browse public meetup summaries and maps | ✅ | ✅ |
 | Browse the landmark catalog | ✅ | ✅ |
 | Play Martlet Flight | ✅ | ✅ |
+| Play blackjack | Practice chips | ✅ Martlet points |
 | Create/edit meetups | — | ✅ |
 | Peck and Flap | — | ✅ |
 | Upload landmark photos and unlock galleries | — | ✅ |
 | Post and interact on Campus Board | — | ✅ |
+| Forecast on Predictions | — | ✅ |
 | Save account-linked progress and leaderboard scores | — | ✅ |
 
 For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests.
+
+**Moderators** are the only elevated role in the app. They review reported board posts and approve and settle prediction markets. The project owner sets them in the database ([how](docs/SUPABASE_SETUP.md#moderators)).
 
 ## Tech stack
 
@@ -138,13 +164,14 @@ For privacy, guest meetup summaries are limited and custom meeting instructions 
 | **Backend & identity** | Supabase (PostgreSQL, Auth, Storage, RLS) | Accounts, meetups, interactions, landmark photos, community content |
 | **Mapping** | MapLibre GL JS / OpenFreeMap; optional Google Maps | Maps, markers, and place previews |
 | **Interactive experiences** | Three.js, React Three Fiber, MediaPipe | Avatar and camera-based interaction |
+| **Weather** | [Open-Meteo](https://open-meteo.com/) | Campus forecast (no key; fixed campus coordinates, never a user's location) |
 | **Deployment** | Vercel; Docker option | Public Next.js hosting and alternative container builds |
 
 ### Project structure
 
 ```text
-app/             Next.js routes (meetups, explore, landmarks, board, profile, ...)
-components/      Reusable UI: feed, forms, maps, social, landmarks, avatar, game
+app/             Next.js routes (meetups, explore, landmarks, board, markets, play, profile, ...)
+components/      Reusable UI: feed, forms, maps, social, landmarks, avatar, game, markets, blackjack, weather
 lib/             Supabase services, validation, business logic, shared utilities
 types/           Shared TypeScript contracts
 supabase/        SQL migrations, database tests, verification helpers
@@ -155,7 +182,7 @@ public/          Public assets
 
 ### How the pieces fit together
 
-A visitor opens a Next.js page. Server-side services fetch the content that user is allowed to see from Supabase. Signed-in actions (create, edit, Peck, Flap, upload, and post) are validated on the server and checked against database permissions. Maps and interactive experiences run in the browser. Vercel hosts the web application; Supabase stores persistent app data.
+A visitor opens a Next.js page. Server-side services fetch the content that user is allowed to see from Supabase. Signed-in actions (create, edit, Peck, Flap, upload, post, trade and deal) are validated on the server and checked against database permissions. Anything involving points (trades, payouts, blackjack hands) runs inside a single database function, so the browser can't change the outcome. Maps and interactive experiences run in the browser. Vercel hosts the web application; Supabase stores persistent app data.
 
 ## Run locally
 
