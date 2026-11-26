@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { featherShower } from "./feathers";
 import { X } from "lucide-react";
 import { getAchievement, isAchievementId, type AchievementId } from "@/lib/achievement-catalog";
 import { ACHIEVEMENT_EVENT, earn } from "./earn";
@@ -7,6 +8,7 @@ import { AchievementIcon } from "./AchievementIcon";
 
 const SHOW_MS = 6000;
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+const SECRET_WORD = "martlet";
 
 type Toast = { key: number; id: AchievementId; saved: boolean };
 
@@ -36,6 +38,14 @@ export function AchievementToaster() {
     const onKey = (event: KeyboardEvent) => {
       typed = [...typed, event.key.length === 1 ? event.key.toLowerCase() : event.key].slice(-KONAMI.length);
       if (typed.join() === KONAMI.join()) void earn("old-school");
+      // Typing the secret word anywhere except a text field: a shower of pixel feathers.
+      const target = event.target as HTMLElement | null;
+      const editing = target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? "");
+      if (!editing && typed.slice(-SECRET_WORD.length).join("") === SECRET_WORD) {
+        typed = [];
+        featherShower();
+        void earn("secret-word");
+      }
     };
 
     // Hover or focus anything tagged data-achievement="<id>" (e.g. a photo on the tree).
@@ -44,8 +54,11 @@ export function AchievementToaster() {
       if (isAchievementId(id)) void earn(id);
     };
 
-    const hour = new Date().getHours();
+    const now = new Date();
+    const hour = now.getHours();
     if (hour >= 2 && hour < 5) void earn("night-owl");
+    // McGill's royal charter: March 31, 1821.
+    if (now.getMonth() === 2 && now.getDate() === 31) void earn("mcgill-birthday");
 
     window.addEventListener(ACHIEVEMENT_EVENT, onEarned);
     window.addEventListener("keydown", onKey);

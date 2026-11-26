@@ -21,6 +21,14 @@ export interface ActivityCounts {
   trendShares: number;
   /** Likes received across those entries (within the ranked list the app loads). */
   trendLikesReceived: number;
+  /** Creator directory (ADR 0042): 1 with a profile, its works, requests sent and accepted. */
+  creatorProfile: number;
+  creatorWorks: number;
+  requestsSent: number;
+  requestsAccepted: number;
+  /** Marketplace (ADR 0040): the student's listings and how many are sold. */
+  listingsPosted: number;
+  listingsSold: number;
 }
 
 export type ActivityProgress = Partial<Record<AchievementId, { current: number; target: number }>>;
@@ -42,6 +50,12 @@ export const ACTIVITY_LADDERS: readonly Ladder[] = [
   { id: "full-bloom", target: (c) => Math.max(c.totalLandmarks, 1), current: (c) => c.unlockedLandmarks },
   { id: "trendsetter", target: () => 1, current: (c) => c.trendShares },
   { id: "campus-taste", target: () => 10, current: (c) => c.trendLikesReceived },
+  { id: "open-studio", target: () => 1, current: (c) => c.creatorProfile },
+  { id: "gallery", target: () => 3, current: (c) => c.creatorWorks },
+  { id: "patron", target: () => 1, current: (c) => c.requestsSent },
+  { id: "commissioned", target: () => 1, current: (c) => c.requestsAccepted },
+  { id: "market-day", target: () => 1, current: (c) => c.listingsPosted },
+  { id: "sold", target: () => 1, current: (c) => c.listingsSold },
 ];
 
 /** Catalogue ids whose ladder the counts already satisfy (candidates to earn). */

@@ -11,7 +11,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useColorMode } from "@/lib/useColorMode";
 import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook, type AvatarLook } from "@/components/avatar/look";
-import { ART, drawScene } from "./flight-scene";
+import { ART, LANDMARK_SPACING, SKYLINE_PARALLAX, drawScene } from "./flight-scene";
+import { LANDMARKS } from "./flight-landmarks";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 
 // Logical playfield (scaled to fit the container).
@@ -129,6 +130,8 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
         wingT += dt; speed = Math.min(SPEED_MAX, SPEED_START + points * 3);
         bird.vy = Math.min(MAX_FALL, bird.vy + GRAVITY * dt); bird.y += bird.vy * dt;
         distance += speed * dt;
+        // Every landmark in the skyline has scrolled past (the fourth one fully off screen).
+        if ((distance * SKYLINE_PARALLAX) / ART > LANDMARK_SPACING * LANDMARKS.length + 100) void earn("heritage-tour");
         for (const c of cols) c.x -= speed * dt;
         if (cols.length && cols[0].x < -COL_W - 10) cols.shift();
         const lastCol = cols[cols.length - 1];

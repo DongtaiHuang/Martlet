@@ -19,6 +19,14 @@ export const ACHIEVEMENTS = [
   { id: "enhance", icon: "🔍", title: "Enhance!", description: "Zoomed all the way into a landmark photo.", hidden: true },
   { id: "high-flyer", icon: "🪽", title: "High flyer", description: "Scored 10 in Martlet Flight.", hidden: true },
   { id: "birds-eye-view", icon: "🦅", title: "Bird’s-eye view", description: "Visited every landmark from the air in Martlet Skies.", hidden: true },
+  { id: "through-the-gates", icon: "🏛️", title: "Through the gates", description: "Flew low over the Roddick Gates in Martlet Skies.", hidden: true },
+  { id: "cloud-nine", icon: "☁️", title: "Cloud nine", description: "Climbed as high as Martlet Skies goes.", hidden: true },
+  { id: "heritage-tour", icon: "🗺️", title: "Heritage tour", description: "Flew past all four landmarks in one Martlet Flight run.", hidden: true },
+  { id: "round-the-block", icon: "🏁", title: "Round the block", description: "Drove a full lap of Sherbrooke, University, Pine and McTavish in Martlet Drift.", hidden: true },
+  { id: "sideways-society", icon: "🔥", title: "Sideways society", description: "Reached a ×5 drift combo.", hidden: true },
+  { id: "natural", icon: "🃏", title: "Natural", description: "Was dealt a blackjack.", hidden: true },
+  { id: "secret-word", icon: "🪶", title: "Secret word", description: "Typed the magic word. Feathers everywhere.", hidden: true },
+  { id: "mcgill-birthday", icon: "🎂", title: "Happy birthday, McGill", description: "Opened Martlet on March 31, the day McGill got its charter in 1821.", hidden: true },
   { id: "chameleon", icon: "🎨", title: "Chameleon", description: "Tried three different themes.", hidden: true },
   { id: "lights-out", icon: "🌙", title: "Lights out", description: "Switched Martlet to dark mode.", hidden: true },
   { id: "leaf-blower", icon: "🍂", title: "Leaf blower", description: "Swept away a leaf pile in the Fall theme.", hidden: true },
@@ -38,6 +46,12 @@ export const ACHIEVEMENTS = [
   { id: "full-bloom", icon: "🌸", title: "Full bloom", description: "Unlock every landmark.", hidden: false },
   { id: "trendsetter", icon: "🔥", title: "Trendsetter", description: "Share your first trend.", hidden: false },
   { id: "campus-taste", icon: "🏆", title: "Campus taste", description: "Collect 10 likes on trends you shared.", hidden: false },
+  { id: "open-studio", icon: "🎨", title: "Open studio", description: "Make your creator profile.", hidden: false },
+  { id: "gallery", icon: "🖼️", title: "Gallery", description: "Add 3 works to your creator portfolio.", hidden: false },
+  { id: "patron", icon: "💌", title: "Patron of the arts", description: "Send your first commission request.", hidden: false },
+  { id: "commissioned", icon: "🤝", title: "Commissioned", description: "Accept a request as a creator.", hidden: false },
+  { id: "market-day", icon: "🛍️", title: "Market day", description: "Post your first marketplace listing.", hidden: false },
+  { id: "sold", icon: "💰", title: "Sold!", description: "Mark a listing as sold.", hidden: false },
 ] as const;
 
 export type Achievement = (typeof ACHIEVEMENTS)[number];

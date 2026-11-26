@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { earn } from "@/components/achievements/earn";
 import { FELT_CLASS, PixelChip, PixelCoin, RoomWall, feltStyleFor } from "./PixelTable";
 import { useRouter } from "next/navigation";
 import { LogOut, Radio, Split, UserRound } from "lucide-react";
@@ -148,6 +149,7 @@ export function MultiTable({ initial }: { initial: TableState }) {
       : me.split_result ? ` Hand 1: ${HAND_RESULT[me.result]}. Hand 2: ${HAND_RESULT[me.split_result]}.`
       : ` ${RESULT_TEXT[me.result]}.`;
     setAnnounce(`Dealer has ${next.dealer_value}.${mine}${me?.result && seatNet(me) > 0 ? ` Plus ${seatNet(me)}.` : ""}`);
+    if (me?.result === "blackjack") void earn("natural");
   }
 
   /** One sync at a time; a change that arrives mid-sync queues one more. */

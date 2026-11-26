@@ -17,13 +17,15 @@ import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { PixelSprite } from "@/components/pixel/PixelSprite";
 import { spriteSvg } from "@/lib/pixel/sprite";
 import { PIXEL_SIZE } from "@/components/pixel/pixel3d";
-import { START, angleDiff, distanceM, nearest, step, zoomFor, type Bird, type Controls } from "./skies-math";
+import { ALTITUDE, START, angleDiff, distanceM, nearest, step, zoomFor, type Bird, type Controls } from "./skies-math";
 import { MEETUP_PIN, backFrames, type Wing } from "./skies-sprites";
 
 export type SkiesLandmark = { id: string; name: string; latitude: number; longitude: number; radius_m: number; unlock_count: number; unlocked: boolean };
 export type SkiesMeetup = { id: string; title: string; location_name: string; latitude: number; longitude: number; starts_at: string };
 
 const VISITED_KEY = "martlet.skies.visited";
+/** The Roddick Gates (OpenStreetMap), for the "Through the gates" achievement. */
+const RODDICK_GATES = { lng: -73.574885, lat: 45.503889 };
 const MEETUP_RADIUS = 45;
 const PITCH = 62;
 const BIRD_Y = 0.7; // the bird sits 70% of the way down the view; the map's centre is moved there
@@ -127,6 +129,8 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
       if (map && stateRef.current === "flying") {
         const next = step(birdRef.current, keys.current, dt);
         birdRef.current = next;
+        if (next.altitude <= 50 && distanceM(next.lng, next.lat, RODDICK_GATES.lng, RODDICK_GATES.lat) <= 30) void earn("through-the-gates");
+        if (next.altitude >= ALTITUDE.max - 0.5) void earn("cloud-nine");
         map.jumpTo({ center: [next.lng, next.lat], bearing: next.heading, zoom: zoomFor(next.altitude), pitch: PITCH });
 
         // Landmark visits.
