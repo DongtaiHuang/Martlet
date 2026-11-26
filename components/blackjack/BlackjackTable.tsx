@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Coins } from "lucide-react";
+import { Coins, Split } from "lucide-react";
 import { dealAction, handAction, type BlackjackResponse } from "@/app/play/blackjack/actions";
 import { PlayingCard } from "./PlayingCard";
 import {
-  cardInfo, handValue, MAX_BET, MIN_BET, practiceAction, practiceDeal, practiceView, RESULT_TEXT, shuffledDeck,
-  type HandState, type PracticeHand,
+  cardInfo, HAND_RESULT, handValue, MAX_BET, MIN_BET, practiceAction, practiceDeal, practiceView, RESULT_TEXT, shuffledDeck,
+  type Action, type HandState, type PracticeHand, type Result,
 } from "@/lib/blackjack-engine";
 
 const CHIPS = [5, 10, 25, 50, 100];
 
 /** How much of the hand is on the table so far. The server's answer arrives at once; the table
  *  plays it out card by card, flips the hole card, and lets the dealer draw one at a time. */
-interface Shown { p: number; d: number; hole: boolean; result: boolean; dealerTurn: boolean }
+interface Shown { p: number; s: number; d: number; hole: boolean; result: boolean; dealerTurn: boolean }
 
 const fullyShown = (h: HandState | null): Shown => ({
   p: h?.player.length ?? 0,
+  s: h?.split_cards?.length ?? 0,
   d: h ? (h.status === "playing" ? 2 : h.dealer.length) : 0,
   hole: h?.status === "done",
   result: h?.status === "done",
@@ -51,9 +52,22 @@ function describe(prev: HandState | null, next: HandState): string {
     const start = `You have ${next.player.map(name).join(" and ")}, ${next.player_value}. Dealer shows ${name(next.dealer[0])}.`;
     return next.result ? `${start} Dealer has ${next.dealer.map(name).join(" and ")}. ${RESULT_TEXT[next.result]}.` : start;
   }
-  const drawn = next.player.slice(prev.player.length);
-  let text = drawn.length ? `You drew ${drawn.map(name).join(", ")}. You have ${next.player_value}.` : "";
-  if (next.result) text += ` Dealer has ${next.dealer.map(name).join(", ")}, ${next.dealer_value}. ${RESULT_TEXT[next.result]}.`;
+  const second = next.split_cards ?? [];
+  let text = "";
+  if (next.split && !prev.split) {
+    text = `You split. Hand 1 has ${next.player.map(name).join(" and ")}, ${next.player_value}. Hand 2 has ${second.map(name).join(" and ")}, ${next.split_value}.`;
+  } else {
+    const drawn1 = next.player.slice(prev.player.length), drawn2 = second.slice(prev.split_cards?.length ?? 0);
+    if (drawn1.length) text += `You drew ${drawn1.map(name).join(", ")}. ${next.split ? "Hand 1 has" : "You have"} ${next.player_value}.`;
+    if (drawn2.length) text += ` You drew ${drawn2.map(name).join(", ")}. Hand 2 has ${next.split_value}.`;
+  }
+  if (next.status === "playing" && next.active === 2 && prev.active !== 2) text += ` Now playing hand 2, ${next.split_value}.`;
+  if (next.result) {
+    text += ` Dealer has ${next.dealer.map(name).join(", ")}, ${next.dealer_value}.`;
+    text += next.split && next.split_result
+      ? ` Hand 1: ${HAND_RESULT[next.result]}. Hand 2: ${HAND_RESULT[next.split_result]}.`
+      : ` ${RESULT_TEXT[next.result]}.`;
+  }
   return text.trim();
 }
 
@@ -82,7 +96,7 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
     const fast = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const wait = (ms: number) => new Promise<boolean>((r) => setTimeout(() => r(run.current === me), fast ? 0 : ms));
     const fresh = !prev || prev.id !== next.id;
-    let s: Shown = fresh ? { p: 0, d: 0, hole: false, result: false, dealerTurn: false } : { ...shownRef.current, result: false };
+    let s: Shown = fresh ? { p: 0, s: 0, d: 0, hole: false, result: false, dealerTurn: false } : { ...shownRef.current, result: false };
     const push = (patch: Partial<Shown>) => { s = { ...s, ...patch }; setShown(s); };
 
     setAnimating(true);
@@ -98,9 +112,18 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
         push(who === "p" ? { p: s.p + 1 } : { d: s.d + 1 });
       }
     }
+    // A split pulls the pair apart first; then each hand gets its second card.
+    if (!fresh && next.split && !prev?.split) {
+      push({ p: 1, s: 1 });
+      if (!(await wait(450))) return;
+    }
     while (s.p < next.player.length) {
       if (!(await wait(420))) return;
       push({ p: s.p + 1 });
+    }
+    while (s.s < (next.split_cards?.length ?? 0)) {
+      if (!(await wait(420))) return;
+      push({ s: s.s + 1 });
     }
 
     if (next.status === "done") {
@@ -138,10 +161,10 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
     setLocal(h);
     void animate(hand, { ...view, balance: balance - bet + view.payout });
   };
-  const practicePlay = (action: "hit" | "stand" | "double") => {
+  const practicePlay = (action: Action) => {
     if (!local || !hand) return;
-    if (action === "double" && balance < local.bet) { setError("Not enough practice chips to double."); return; }
-    const spent = action === "double" ? local.bet : 0;
+    const spent = action === "double" ? (local.active === 2 ? local.splitBet : local.bet) : action === "split" ? local.bet : 0;
+    if (spent > balance) { setError(`Not enough practice chips to ${action}.`); return; }
     const h = practiceAction(local, action);
     const view = practiceView(h, hand.id, 0);
     setLocal(h);
@@ -149,20 +172,28 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
   };
 
   const deal = () => (practice ? practiceDealHand() : call(() => dealAction(bet)));
-  const play = (action: "hit" | "stand" | "double") => (practice ? practicePlay(action) : hand && call(() => handAction(hand.id, action)));
+  const play = (action: Action) => (practice ? practicePlay(action) : hand && call(() => handAction(hand.id, action)));
 
   const busy = pending || animating;
   const playing = hand?.status === "playing";
   const btn = "inline-flex min-h-12 flex-1 items-center justify-center rounded-xl px-4 text-base font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 sm:flex-none sm:min-w-28";
-  const net = hand?.result ? hand.payout - hand.bet : 0;
+  const net = hand?.result ? hand.payout - hand.total_bet : 0;
+  const activeBet = hand?.active === 2 ? hand.split_bet : hand?.bet ?? 0;
 
   const playerCards = hand ? hand.player.slice(0, shown.p) : [];
+  const splitCards = hand?.split_cards ? hand.split_cards.slice(0, shown.s) : [];
   const dealerSlots = hand ? Array.from({ length: shown.d }, (_, i) => hand.dealer[i] ?? null) : [];
   const dealerUp = dealerSlots.filter((c, i) => c !== null && (i !== 1 || shown.hole)) as number[];
-  const playerValue = handValue(playerCards);
   const dealerValue = handValue(dealerUp);
   const result = shown.result ? hand?.result ?? null : null;
-  const good = result === "win" || result === "blackjack";
+  const splitResult = shown.result ? hand?.split_result ?? null : null;
+  const good = hand?.split ? net > 0 : result === "win" || result === "blackjack";
+  const hands: { label: string; cards: number[]; result: Result | null; bet: number; doubled: boolean; active: boolean }[] = hand?.split
+    ? [
+        { label: "Hand 1", cards: playerCards, result, bet: hand.bet, doubled: hand.doubled, active: playing && hand.active === 1 },
+        { label: "Hand 2", cards: splitCards, result: splitResult, bet: hand.split_bet, doubled: hand.split_doubled, active: playing && hand.active === 2 },
+      ]
+    : [{ label: "You", cards: playerCards, result, bet: hand?.bet ?? 0, doubled: false, active: false }];
 
   return (
     <div className="overflow-hidden rounded-3xl border border-emerald-950 bg-emerald-800 p-4 text-white shadow-lg sm:p-6">
@@ -195,14 +226,25 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
                 {dealerSlots.map((card, i) => <li key={`d${i}`}><PlayingCard card={card} down={i === 1 && !shown.hole} from="dealer" /></li>)}
               </ul>
             </section>
-            <section aria-label="You" className={result === "bust" ? "bj-shake" : undefined}>
-              <h2 className="text-sm font-bold text-white/90">
-                You {playerCards.length > 0 && <span key={playerValue} className={`bj-land ml-1 inline-block rounded-full px-2 py-0.5 tabular-nums ${playerValue > 21 ? "bg-red-900/70" : "bg-black/25"}`}>{playerValue}</span>}
-              </h2>
-              <ul className={`mt-2 flex min-h-24 flex-wrap gap-2 transition-opacity duration-500 sm:min-h-28 ${result === "lose" || result === "bust" ? "opacity-70" : ""}`}>
-                {playerCards.map((card, i) => <li key={`p${i}`}><PlayingCard card={card} down={false} from="player" /></li>)}
-              </ul>
-            </section>
+            <div className={hand.split ? "grid gap-4 sm:grid-cols-2" : undefined}>
+              {hands.map((h, n) => {
+                const value = handValue(h.cards);
+                return (
+                  <section key={h.label} aria-label={h.label} aria-current={h.active ? "true" : undefined}
+                    className={`${h.result === "bust" ? "bj-shake" : ""} ${hand.split ? `rounded-2xl p-2 transition ${h.active ? "bg-black/25 ring-2 ring-amber-300" : ""}` : ""}`}>
+                    <h2 className="flex flex-wrap items-center gap-1 text-sm font-bold text-white/90">
+                      {h.label}
+                      {h.cards.length > 0 && <span key={value} className={`bj-land ml-1 inline-block rounded-full px-2 py-0.5 tabular-nums ${value > 21 ? "bg-red-900/70" : "bg-black/25"}`}>{value}</span>}
+                      {hand.split && <span className="ml-1 text-xs font-semibold text-white/75">Bet {h.bet}{h.doubled ? " (doubled)" : ""}</span>}
+                      {hand.split && h.result && <span className="bj-land ml-auto rounded-full bg-black/30 px-2 py-0.5 text-xs">{HAND_RESULT[h.result]}</span>}
+                    </h2>
+                    <ul className={`mt-2 flex min-h-24 flex-wrap gap-2 transition-opacity duration-500 sm:min-h-28 ${h.result === "lose" || h.result === "bust" ? "opacity-70" : ""}`}>
+                      {h.cards.map((card, i) => <li key={`${n}-${i}`}><PlayingCard card={card} down={false} from="player" /></li>)}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
           </>
         ) : (
           <p className="py-10 text-center text-white/85">Place a bet and deal to start.</p>
@@ -211,8 +253,8 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
 
       {result && (
         <p className={`bj-land mt-5 rounded-xl px-4 py-3 text-center text-lg font-extrabold ${good ? "bj-glow bg-amber-300 text-neutral-900" : "bg-black/30"}`}>
-          {RESULT_TEXT[result]}
-          <span className={`ml-2 text-base font-semibold ${good ? "text-neutral-800" : "text-white/90"}`}>{net > 0 ? `+${net}` : net < 0 ? `−${-net}` : "±0"}{hand?.doubled ? " (doubled)" : ""}</span>
+          {hand?.split && splitResult ? `Hand 1: ${HAND_RESULT[result]} · Hand 2: ${HAND_RESULT[splitResult]}` : RESULT_TEXT[result]}
+          <span className={`ml-2 text-base font-semibold ${good ? "text-neutral-800" : "text-white/90"}`}>{net > 0 ? `+${net}` : net < 0 ? `−${-net}` : "±0"}{!hand?.split && hand?.doubled ? " (doubled)" : ""}</span>
         </p>
       )}
 
@@ -226,10 +268,16 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
             <button type="button" onClick={() => play("hit")} disabled={busy} className={`${btn} bg-white text-emerald-900 hover:bg-emerald-50`}>Hit</button>
             <button type="button" onClick={() => play("stand")} disabled={busy} className={`${btn} bg-amber-300 text-neutral-900 hover:bg-amber-200`}>Stand</button>
             {hand.can_double && (
-              <button type="button" onClick={() => play("double")} disabled={busy || balance < hand.bet} className={`${btn} border-2 border-white/80 hover:bg-white/10`}>
-                Double <span className="ml-1 text-sm font-semibold text-white/80">+{hand.bet}</span>
+              <button type="button" onClick={() => play("double")} disabled={busy || balance < activeBet} className={`${btn} border-2 border-white/80 hover:bg-white/10`}>
+                Double <span className="ml-1 text-sm font-semibold text-white/80">+{activeBet}</span>
               </button>
             )}
+            {hand.can_split && (
+              <button type="button" onClick={() => play("split")} disabled={busy || balance < hand.bet} className={`${btn} border-2 border-white/80 hover:bg-white/10`}>
+                <Split aria-hidden="true" size={17} className="mr-1.5" />Split <span className="ml-1 text-sm font-semibold text-white/80">+{hand.bet}</span>
+              </button>
+            )}
+            {hand.split && <p className="w-full text-sm font-semibold text-amber-200">Playing hand {hand.active}</p>}
           </div>
         ) : (
           <div className="space-y-3">

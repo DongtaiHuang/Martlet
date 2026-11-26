@@ -1,7 +1,7 @@
 "use server";
 
 import { BlackjackError, dealHand, playHand } from "@/lib/blackjack";
-import { MAX_BET, MIN_BET, type HandState } from "@/lib/blackjack-engine";
+import { isAction, MAX_BET, MIN_BET, type HandState } from "@/lib/blackjack-engine";
 import { AuthRequiredError } from "@/lib/supabase/auth";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -21,6 +21,6 @@ export async function dealAction(bet: number): Promise<BlackjackResponse> {
 
 export async function handAction(id: string, action: string): Promise<BlackjackResponse> {
   if (!UUID.test(id)) return { error: "That hand isn't available." };
-  if (action !== "hit" && action !== "stand" && action !== "double") return { error: "Pick hit, stand or double." };
+  if (!isAction(action)) return { error: "Pick hit, stand, double or split." };
   try { return { hand: await playHand(id, action) }; } catch (error) { return { error: friendly(error) }; }
 }

@@ -141,7 +141,7 @@ Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during fi
 
 - **Martlet Flight:** a flap-to-fly mini-game starring the bird you designed, with a leaderboard for signed-in players.
 - **Martlet Drift:** a 3D drifting game. Throw an unbranded sports coupe sideways around a campus loop for 90 seconds, chain drifts into combos up to ×5, and post your score. Keyboard or on-screen controls.
-- **Blackjack:** play against the dealer with your Martlet points, solo or at a **live table with up to four other students**. The server deals every hand, so results can't be faked. Guests get a practice table.
+- **Blackjack:** play against the dealer with your Martlet points, solo or at a **live table with up to four other students**. Split pairs, double down, and turn on **table chat** to text the table from any blackjack page. The server deals every hand, so results can't be faked. Guests get a practice table.
 
 **Explore:** [Martlet Flight](https://martlet-brown.vercel.app/play) · [Martlet Drift](https://martlet-brown.vercel.app/play/drift) · [Blackjack](https://martlet-brown.vercel.app/play/blackjack) · [Live tables](https://martlet-brown.vercel.app/play/blackjack/tables)
 

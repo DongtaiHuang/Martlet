@@ -3,7 +3,7 @@
 import { requireUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
-import type { HandState } from "@/lib/blackjack-engine";
+import type { Action, HandState } from "@/lib/blackjack-engine";
 
 export class BlackjackError extends Error {}
 export interface BlackjackTable { hand: HandState | null; today: { hands: number; net: number }; balance: number }
@@ -38,7 +38,7 @@ export async function dealHand(bet: number): Promise<HandState> {
   return data as HandState;
 }
 
-export async function playHand(id: string, action: "hit" | "stand" | "double"): Promise<HandState> {
+export async function playHand(id: string, action: Action): Promise<HandState> {
   await requireUser();
   const { data, error } = await (await createClient()).rpc("blackjack_action", { p_hand: id, p_action: action });
   if (error) rpcError(error);

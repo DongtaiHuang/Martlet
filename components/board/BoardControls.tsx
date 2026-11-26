@@ -33,7 +33,7 @@ export function VoteButton({ postId, votes, voted }: { postId: string; votes: nu
 }
 
 /** Report with a reason; uses a native <dialog> for focus handling. */
-const TARGET_NAMES: Record<ReportTarget, string> = { post: "post", comment: "comment", photo: "photo", listing: "listing", listing_message: "message" };
+const TARGET_NAMES: Record<ReportTarget, string> = { post: "post", comment: "comment", photo: "photo", listing: "listing", listing_message: "message", table_chat: "message" };
 
 export function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -57,7 +57,7 @@ export function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
             start(async () => setMessage(await reportAction(type, id, String(f.get("reason")), String(f.get("note") ?? ""))));
           }}>
             <h2 id={`report-${id}`} className="text-lg font-bold">Report this {TARGET_NAMES[type]}</h2>
-            <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the {type === "photo" ? "person who shared it" : type === "listing" ? "seller" : "author"}. {type === "listing_message" ? "Your report hides this message until a moderator checks." : "Three reports hide it until a moderator checks."}</p>
+            <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the {type === "photo" ? "person who shared it" : type === "listing" ? "seller" : "author"}. {type === "listing_message" || type === "table_chat" ? "Your report hides this message until a moderator checks." : "Three reports hide it until a moderator checks."}</p>
             <fieldset className="mt-3 grid gap-1">
               <legend className="sr-only">Reason</legend>
               {Object.entries(REPORT_REASONS).map(([value, label], i) => (
