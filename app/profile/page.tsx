@@ -90,7 +90,7 @@ export default async function ProfilePage() {
               <MessagesSquare aria-hidden="true" size={22} className="shrink-0 text-brand-ink" />
               <span className="min-w-0">
                 <span className="block text-sm font-bold">Campus board</span>
-                <span className="block text-xs text-ink-muted">Memes, tips, questions and skillshare from other students.</span>
+                <span className="block text-xs text-ink-muted">Memes, tips and questions from other students.</span>
               </span>
               <ArrowRight aria-hidden="true" size={16} className="ml-auto shrink-0 text-brand-ink" />
             </Link>
