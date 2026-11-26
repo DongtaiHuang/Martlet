@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-11-26
 - **Builds on:** [0012](0012-progress-growth-tree.md) and [0030](0030-tree-species-and-bloom-levels.md) (pixel tree), [0013](0013-landmark-map-tower-pins.md) (pixel towers and chick), [0024](0024-seasonal-themes-and-scenes.md) (pixel sprites in code)
-- **Changes:** [0010](0010-martlet-avatar-expression-tracking.md) (low-poly avatar look) and [0037](0037-martlet-drift.md) (Drift's look), as the later PRs land
+- **Changes:** [0010](0010-martlet-avatar-expression-tracking.md) (low-poly avatar look) and [0037](0037-martlet-drift.md) (Drift's look)
 
 ## Context
 
@@ -13,7 +13,7 @@ Marty and his nest, the landmark towers, the map chick, the seasonal scenes and 
 
 - **One helper and one palette.** `lib/pixel/sprite.ts` holds the grid-to-sprite code (letter grids, outlines, overlays, one path per colour), drawn as SVG or onto a canvas. `lib/pixel/palette.ts` holds Marty's colours, the campus scenery colours shared with the towers and the tree, and day and night skies. New pixel art uses these. The existing copies can move onto them when those files are next touched.
 - **2D games draw pixel sprites.** Martlet Flight draws everything on a small canvas, one canvas pixel per art pixel (2 game units each). That canvas is scaled up with smoothing off. The game uses a compact Marty with three wing frames and the avatar accessories, plus pixel columns, campus buildings, Mount Royal, clouds and a pixel digit font. Physics and hitboxes are unchanged. Blackjack draws 20×30 pixel cards (pixel rank font and suits, a burgundy back), pixel chips coloured by value, a pixel coin, and dithered felt inside a wooden rail. The flip and deal animations are unchanged.
-- **3D scenes are pixelated, not replaced.** Drift and the MediaPipe avatar keep three.js. They render at low resolution with nearest-neighbour upscaling, flat colours from the palette and no smooth shading, so face and arm tracking keep working.
+- **3D scenes are pixelated, not replaced.** Drift and the MediaPipe avatar keep three.js (`components/pixel/pixel3d.ts`). They render at a third of their CSS size (one art pixel is 3 CSS pixels) with anti-aliasing off and are upscaled with `image-rendering: pixelated`. Materials use three-tone toon shading with a nearest-filtered ramp instead of physically based shading. Drift's scenery uses the shared campus palette. Face and arm tracking, physics and timing are untouched.
 - **Marty is the default plumage.** A "Marty" plumage (burgundy and cream) becomes the default. The other plumages stay as options, drawn with Marty's outline, cream chest and coral beak, and saved choices keep working.
 
 ## Consequences

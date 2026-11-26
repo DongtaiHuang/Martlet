@@ -1,6 +1,7 @@
 # 0010. Martlet avatar with in-browser expression tracking
 
 - **Status:** Accepted
+- **Amended by:** [0044](0044-uniform-pixel-art.md) (rendered as pixel art: low resolution, toon shading)
 - **Date:** 2026-11-22
 - **Relates to:** [0007](0007-frozen-mvp-and-service-contracts.md) (adds a feature beyond the frozen MVP), issue #28 (achievements)
 

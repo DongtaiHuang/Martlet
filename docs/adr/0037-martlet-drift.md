@@ -1,6 +1,7 @@
 # 0037. Martlet Drift
 
 - **Status:** Accepted
+- **Amended by:** [0044](0044-uniform-pixel-art.md) (rendered as pixel art: low resolution, toon shading)
 - **Date:** 2026-11-25
 - **Issue:** #149
 

@@ -3,6 +3,8 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { nearest, TRACK_WIDTH, type Track } from "@/lib/drift";
+import { toonGradient } from "@/components/pixel/pixel3d";
+import { CAMPUS } from "@/lib/pixel/palette";
 
 /** A ribbon `from`–`to` metres either side of the centre line, optionally striped. */
 function ribbon(track: Track, inner: number, outer: number, side: 1 | -1, colors?: [THREE.Color, THREE.Color]) {
@@ -72,11 +74,11 @@ export function TrackScene({ track }: { track: Track }) {
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[80, 0, -40]}>
         <planeGeometry args={[1400, 1400]} />
-        <meshStandardMaterial color="#5b8a46" roughness={1} />
+        <meshToonMaterial gradientMap={toonGradient()} color={CAMPUS.grass} />
       </mesh>
-      <mesh geometry={road}><meshStandardMaterial color="#3a3d42" roughness={0.95} side={THREE.DoubleSide} /></mesh>
+      <mesh geometry={road}><meshToonMaterial gradientMap={toonGradient()} color="#3a3d42" side={THREE.DoubleSide} /></mesh>
       {kerbs.map((g, i) => (
-        <mesh key={i} geometry={g} position={[0, 0.005, 0]}><meshStandardMaterial vertexColors roughness={0.8} side={THREE.DoubleSide} /></mesh>
+        <mesh key={i} geometry={g} position={[0, 0.005, 0]}><meshToonMaterial gradientMap={toonGradient()} vertexColors side={THREE.DoubleSide} /></mesh>
       ))}
       {/* chequered start line */}
       <group position={[start.x, 0.02, start.z]} rotation={[0, startAngle, 0]}>
@@ -89,17 +91,17 @@ export function TrackScene({ track }: { track: Track }) {
       </group>
       <instancedMesh ref={trunks} args={[undefined, undefined, trees.length]}>
         <cylinderGeometry args={[0.25, 0.35, 2.4, 6]} />
-        <meshStandardMaterial color="#6b4a2f" />
+        <meshToonMaterial gradientMap={toonGradient()} color={CAMPUS.wood} />
       </instancedMesh>
       <instancedMesh ref={crowns} args={[undefined, undefined, trees.length]}>
         <coneGeometry args={[2.2, 5, 7]} />
-        <meshStandardMaterial color="#2f6b3a" flatShading />
+        <meshToonMaterial gradientMap={toonGradient()} color={CAMPUS.leaf} />
       </instancedMesh>
-      {/* grey-stone campus buildings with darker roofs */}
+      {/* campus buildings in the towers' stone and brick (ADR 0044) */}
       {buildings.map((b, i) => (
         <group key={i} position={[b.x, 0, b.z]} rotation={[0, b.r, 0]}>
-          <mesh position={[0, 6 * b.s, 0]}><boxGeometry args={[22 * b.s, 12 * b.s, 12]} /><meshStandardMaterial color="#b8b1a3" roughness={0.9} /></mesh>
-          <mesh position={[0, 12.6 * b.s, 0]}><boxGeometry args={[23 * b.s, 1.2, 13]} /><meshStandardMaterial color="#5a6b70" /></mesh>
+          <mesh position={[0, 6 * b.s, 0]}><boxGeometry args={[22 * b.s, 12 * b.s, 12]} /><meshToonMaterial gradientMap={toonGradient()} color={i % 3 === 2 ? CAMPUS.brick : CAMPUS.stone} /></mesh>
+          <mesh position={[0, 12.6 * b.s, 0]}><boxGeometry args={[23 * b.s, 1.2, 13]} /><meshToonMaterial gradientMap={toonGradient()} color={i % 3 === 2 ? CAMPUS.brickShade : "#5a6b70"} /></mesh>
         </group>
       ))}
     </group>
