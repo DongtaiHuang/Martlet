@@ -18,6 +18,7 @@ export const ACHIEVEMENTS = [
   { id: "shake-it-off", icon: "📳", title: "Shake it off", description: "Shook loose the photos other students shared at a landmark.", hidden: true },
   { id: "enhance", icon: "🔍", title: "Enhance!", description: "Zoomed all the way into a landmark photo.", hidden: true },
   { id: "high-flyer", icon: "🪽", title: "High flyer", description: "Scored 10 in Martlet Flight.", hidden: true },
+  { id: "birds-eye-view", icon: "🦅", title: "Bird’s-eye view", description: "Visited every landmark from the air in Martlet Skies.", hidden: true },
   { id: "chameleon", icon: "🎨", title: "Chameleon", description: "Tried three different themes.", hidden: true },
   { id: "lights-out", icon: "🌙", title: "Lights out", description: "Switched Martlet to dark mode.", hidden: true },
   { id: "leaf-blower", icon: "🍂", title: "Leaf blower", description: "Swept away a leaf pile in the Fall theme.", hidden: true },
