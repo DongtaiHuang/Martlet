@@ -7,6 +7,8 @@ const zero = {
   hosted: 0, joined: 0, flapped: 0,
   unlockedLandmarks: 0, totalLandmarks: 6,
   trendShares: 0, trendLikesReceived: 0,
+  creatorProfile: 0, creatorWorks: 0, requestsSent: 0, requestsAccepted: 0,
+  listingsPosted: 0, listingsSold: 0,
 };
 
 test("every ladder id exists in the catalogue and is not hidden", () => {
@@ -53,4 +55,12 @@ test("progress is capped at the target", () => {
 test("full bloom targets the live landmark total and never a zero target", () => {
   assert.deepEqual(activityProgress({ ...zero, unlockedLandmarks: 2, totalLandmarks: 9 })["full-bloom"], { current: 2, target: 9 });
   assert.deepEqual(activityProgress({ ...zero, totalLandmarks: 0 })["full-bloom"], { current: 0, target: 1 });
+});
+
+test("creator and marketplace ladders", () => {
+  assert.deepEqual(satisfiedActivityAchievements({ ...zero, creatorProfile: 1, creatorWorks: 2 }), ["open-studio"]);
+  assert.deepEqual(
+    satisfiedActivityAchievements({ ...zero, creatorProfile: 1, creatorWorks: 3, requestsSent: 1, requestsAccepted: 1, listingsPosted: 2, listingsSold: 1 }).sort(),
+    ["commissioned", "gallery", "market-day", "open-studio", "patron", "sold"],
+  );
 });

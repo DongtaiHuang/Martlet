@@ -7,6 +7,8 @@ import { BIRD_OFFSET, BIRD_PAD, CLOUD, MOON, PIN, birdFrames, numberSprite, type
 import { LANDMARKS, labelSprite, landmarkSprite, treeSprite } from "./flight-landmarks";
 
 export const ART = 2;
+/** Skyline scroll speed relative to the columns (parallax). */
+export const SKYLINE_PARALLAX = 0.3;
 
 export type SceneState = {
   mode: "light" | "dark";
@@ -67,11 +69,11 @@ function mountain(mode: "light" | "dark") {
 }
 
 /** Real McGill landmarks scroll past in turn, with trees between them (ADR 0044). */
-const LANDMARK_SPACING = 170; // art pixels from one landmark to the next
+export const LANDMARK_SPACING = 170; // art pixels from one landmark to the next
 
 /** Draws the skyline and returns a function that draws the name plate (after the ground). */
 function skyline(g: CanvasRenderingContext2D, s: SceneState, w: number, groundY: number): () => void {
-  const scroll = Math.floor((s.distance * 0.3) / ART);
+  const scroll = Math.floor((s.distance * SKYLINE_PARALLAX) / ART);
   const n = LANDMARKS.length;
   const tree = treeSprite(s.mode);
   let featured: { index: number; centre: number } | null = null;

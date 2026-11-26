@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { FELT_CLASS, FELT_STYLE, PixelChip, PixelCoin } from "./PixelTable";
+import { earn } from "@/components/achievements/earn";
 import { Split } from "lucide-react";
 import { dealAction, handAction, type BlackjackResponse } from "@/app/play/blackjack/actions";
 import { PlayingCard } from "./PlayingCard";
@@ -189,6 +190,7 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
   const result = shown.result ? hand?.result ?? null : null;
   const splitResult = shown.result ? hand?.split_result ?? null : null;
   const good = hand?.split ? net > 0 : result === "win" || result === "blackjack";
+  useEffect(() => { if (result === "blackjack") void earn("natural"); }, [result]);
   const hands: { label: string; cards: number[]; result: Result | null; bet: number; doubled: boolean; active: boolean }[] = hand?.split
     ? [
         { label: "Hand 1", cards: playerCards, result, bet: hand.bet, doubled: hand.doubled, active: playing && hand.active === 1 },

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { earn } from "@/components/achievements/earn";
 import { useMapColorMode } from "@/components/map/map-mode";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { buildTrack, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
+import { buildTrack, nearest, TRACK_WIDTH, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
 import { startDriftRunAction, submitDriftScoreAction } from "@/app/play/drift/actions";
 import type { SubmitResult } from "@/lib/drift-scores";
 import { Coupe, PAINTS, type Paint } from "./Coupe";
@@ -33,6 +34,7 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef }: { engine: Drif
   const skids = useRef<THREE.InstancedMesh>(null);
   const skidIndex = useRef(0);
   const timers = useRef({ skid: 0, smoke: 0, hud: -1 });
+  const lap = useRef({ last: -1, progress: 0 });
   const temp = useMemo(() => new THREE.Object3D(), []);
   const reduce = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
 
@@ -49,6 +51,24 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef }: { engine: Drif
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
     if (phase === "running" && engine.advance(dt)) onFinish();
+    // Achievements: a full lap driven on the road (progress along the track, wrapping at the
+    // start line), and a x5 combo.
+    if (phase === "ready" || phase === "countdown") lap.current = { last: -1, progress: 0 };
+    if (phase === "running") {
+      const near = nearest(TRACK, engine.car.x, engine.car.z);
+      const n = TRACK.points.length;
+      if (near.distance <= TRACK_WIDTH) {
+        if (lap.current.last >= 0) {
+          let d = near.index - lap.current.last;
+          if (d > n / 2) d -= n;
+          if (d < -n / 2) d += n;
+          lap.current.progress += d;
+          if (lap.current.progress >= n * 0.97) void earn("round-the-block");
+        }
+        lap.current.last = near.index;
+      }
+      if (engine.score.multiplier >= 5) void earn("sideways-society");
+    }
 
     const c = engine.car;
     const speed = speedOf(c);

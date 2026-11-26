@@ -672,6 +672,16 @@ body:has(> .martlet-footer) > .martlet-page > .min-h-screen {
   .martlet-season-floor { bottom: calc(3.75rem + env(safe-area-inset-bottom)); }
 }
 
+/* "Secret word" easter egg (components/achievements/feathers.ts): pixel feathers drift down. */
+.martlet-feathers { position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; }
+.martlet-feathers img { position: absolute; top: -60px; height: auto; image-rendering: pixelated; animation: martlet-feather-fall linear forwards; }
+@keyframes martlet-feather-fall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  50% { transform: translate(calc(var(--sway) * 40px), 55vh) rotate(calc(var(--sway) * 25deg)); }
+  100% { transform: translate(calc(var(--sway) * -20px), 115vh) rotate(calc(var(--sway) * -15deg)); opacity: 0.9; }
+}
+
 /* A game's on-screen gamepad is showing (components/pixel/Gamepad.tsx): keep Marty off the D-pad. */
 html[data-gamepad] .martlet-stage { display: none; }
 
