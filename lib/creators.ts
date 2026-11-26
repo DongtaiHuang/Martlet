@@ -17,6 +17,8 @@ export type Creator = {
   user_id: string; name: string; headline: string; bio: string; disciplines: Discipline[]; rates: string; links: string[];
   open_for_requests: boolean; status: "visible" | "hidden" | "removed"; updated_at: string;
   cover_url: string | null; works: CreatorWork[]; is_mine: boolean;
+  /** Short-lived signed URL of the profile photo (ADR 0045), or null for the pixel chick. */
+  photo_url: string | null;
 };
 export type CreatorMessage = { id: string; body: string; mine: boolean; created_at: string; status: string };
 export type CreatorRequest = {
@@ -25,14 +27,15 @@ export type CreatorRequest = {
   i_am_creator: boolean;
 };
 
-const PROFILE_SELECT = "user_id, headline, bio, disciplines, rates, links, open_for_requests, status, updated_at, owner:profiles!user_id(display_name)";
+const PROFILE_SELECT = "user_id, headline, bio, disciplines, rates, links, open_for_requests, status, updated_at, has_photo, owner:profiles!user_id(display_name)";
 const WORK_SELECT = "id, creator_id, title, caption, link, has_image, created_at";
 // creator_requests.creator_id points at creator_profiles, which a hidden profile would blank out,
 // so creators' names come from a second profiles lookup.
 const REQUEST_SELECT = "id, creator_id, client_id, discipline, budget_cents, needed_by, status, created_at, updated_at, client:profiles!client_id(display_name)";
 
 type Named = { display_name: string } | { display_name: string }[] | null;
-type ProfileRow = Omit<Creator, "name" | "cover_url" | "works" | "is_mine"> & { owner: Named };
+type ProfileRow = Omit<Creator, "name" | "cover_url" | "works" | "is_mine" | "photo_url"> & { has_photo: boolean; owner: Named };
+const photoPath = (userId: string) => `${userId}/photo.jpg`;
 type WorkRow = { id: string; creator_id: string; title: string; caption: string; link: string | null; has_image: boolean; created_at: string };
 type RequestRow = Omit<CreatorRequest, "creator_name" | "client_name" | "i_am_creator"> & { client: Named };
 
@@ -51,18 +54,21 @@ async function session() {
 }
 type Session = NonNullable<Awaited<ReturnType<typeof session>>>;
 
-async function signed(s: Session, works: WorkRow[]): Promise<Map<string, string>> {
-  const paths = works.filter((w) => w.has_image).map(filePath);
+async function signed(s: Session, works: WorkRow[], profiles: { user_id: string; has_photo: boolean }[] = []): Promise<Map<string, string>> {
+  const paths = [...works.filter((w) => w.has_image).map(filePath), ...profiles.filter((p) => p.has_photo).map((p) => photoPath(p.user_id))];
   if (!paths.length) return new Map();
   const { data } = await s.supabase.storage.from(BUCKET).createSignedUrls(paths, URL_SECONDS);
   return new Map((data ?? []).filter((u) => u.signedUrl && !u.error).map((u) => [u.path as string, u.signedUrl as string]));
 }
 
 function toCreator(s: Session, row: ProfileRow, works: WorkRow[], urls: Map<string, string>): Creator {
-  const { owner, ...rest } = row;
+  const { owner, has_photo: hasPhoto, ...rest } = row;
   const mine = works.filter((w) => w.creator_id === row.user_id);
   const list = mine.map((w) => ({ id: w.id, title: w.title, caption: w.caption, link: w.link, image_url: w.has_image ? urls.get(filePath(w)) ?? null : null }));
-  return { ...rest, name: nameOf(owner), works: list, cover_url: list.find((w) => w.image_url)?.image_url ?? null, is_mine: row.user_id === s.userId };
+  return {
+    ...rest, name: nameOf(owner), works: list, cover_url: list.find((w) => w.image_url)?.image_url ?? null, is_mine: row.user_id === s.userId,
+    photo_url: hasPhoto ? urls.get(photoPath(row.user_id)) ?? null : null,
+  };
 }
 
 export type CreatorFilter = { discipline?: Discipline; q?: string; open?: boolean };
@@ -88,7 +94,7 @@ export async function listCreators(filter: CreatorFilter = {}): Promise<Creator[
   if (workError) throw new Error("Could not load portfolios", { cause: workError });
   const covers = new Map<string, WorkRow>();
   for (const w of works) if (!covers.has(w.creator_id)) covers.set(w.creator_id, w);
-  const urls = await signed(s, [...covers.values()]);
+  const urls = await signed(s, [...covers.values()], data);
   return data.map((row) => toCreator(s, row, [...covers.values()], urls));
 }
 
@@ -102,7 +108,7 @@ export async function getCreator(userId: string): Promise<Creator | null> {
   if (!data) return null;
   const { data: works, error: workError } = await s.supabase.from("creator_works").select(WORK_SELECT).eq("creator_id", userId).order("created_at").returns<WorkRow[]>();
   if (workError) throw new Error("Could not load the portfolio", { cause: workError });
-  return toCreator(s, data, works, await signed(s, works));
+  return toCreator(s, data, works, await signed(s, works, [data]));
 }
 
 /** The signed-in student's own profile, or null if they haven't made one. */
@@ -189,6 +195,26 @@ export async function addCreatorWork(input: { title: string; caption: string; li
   }
   return id;
 }
+/** Uploads (or replaces) the signed-in creator's photo: a square JPEG resized in the browser. */
+export async function setCreatorPhoto(image: Uint8Array): Promise<void> {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.storage.from(BUCKET).upload(photoPath(user.id), image, { contentType: "image/jpeg", upsert: true });
+  if (error) {
+    console.error("Creator photo upload failed", error);
+    throw new CreatorError("The photo didn’t upload. Try again.");
+  }
+  await call("set_creator_photo", { p_has_photo: true });
+}
+
+/** Removes the photo; the pixel chick shows instead. */
+export async function removeCreatorPhoto(): Promise<void> {
+  const user = await requireUser();
+  await call("set_creator_photo", { p_has_photo: false });
+  const { error } = await (await createClient()).storage.from(BUCKET).remove([photoPath(user.id)]);
+  if (error) console.error("Creator photo delete failed", error); // the background purge retries
+}
+
 export const deleteCreatorWork = (id: string) => call("delete_creator_work", { p_work: id }).then(() => undefined);
 
 export type NewCreatorRequest = { creatorId: string; discipline: Discipline; budgetCents: number | null; neededBy: string | null; body: string };

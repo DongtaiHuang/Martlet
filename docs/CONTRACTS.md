@@ -129,6 +129,8 @@ saveCreatorProfile(input: CreatorProfileInput): Promise<void>                   
 deleteMyCreatorProfile(): Promise<void>                                               // deletes works and requests too
 addCreatorWork(input: { title; caption; link; image }): Promise<string>               // image: JPEG resized in the browser
 deleteCreatorWork(id: string): Promise<void>
+setCreatorPhoto(image: Uint8Array): Promise<void>                                    // square JPEG cropped in the browser (ADR 0045)
+removeCreatorPhoto(): Promise<void>
 sendCreatorRequest(input: NewCreatorRequest): Promise<string>                          // opens a private thread
 listMyRequests(): Promise<{ received: CreatorRequest[]; sent: CreatorRequest[] } | null>
 getCreatorRequest(id: string): Promise<{ request; messages } | null>

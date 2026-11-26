@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Palette, ShieldCheck } from "lucide-react";
 import { ReportButton } from "@/components/board/BoardControls";
+import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
 import { DisciplineChips } from "@/components/creators/CreatorCard";
 import { RequestForm } from "@/components/creators/RequestControls";
 import { MartletNav } from "@/components/layout/MartletNav";
@@ -45,9 +46,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ id: st
 
         <header className="mt-3 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="flex min-w-0 items-center gap-4">
+              <CreatorAvatar userId={creator.user_id} photoUrl={creator.photo_url} name={creator.name} className="size-20 sm:size-24" />
+              <div className="min-w-0">
               <h1 className="text-3xl font-extrabold tracking-tight [overflow-wrap:anywhere]">{creator.is_mine ? `${creator.name} (you)` : creator.name}</h1>
               <p className="mt-1 text-lg text-ink-2 [overflow-wrap:anywhere]">{creator.headline}</p>
+              </div>
             </div>
             {creator.is_mine && (
               <Link href="/creators/edit" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">

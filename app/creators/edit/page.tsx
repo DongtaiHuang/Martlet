@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { CreatorProfileForm } from "@/components/creators/CreatorProfileForm";
+import { PhotoPicker } from "@/components/creators/PhotoPicker";
 import { WorkManager } from "@/components/creators/WorkManager";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { getMyCreator, isCreatorPreview } from "@/lib/creators";
@@ -32,6 +33,12 @@ export default async function EditCreatorPage() {
         ) : (
           <>
             <p className="mt-2 text-ink-muted">Students see your display name, this profile and your portfolio. They contact you through private requests, never by email or phone.</p>
+            {creator && (
+              <section aria-labelledby="photo-heading" className="mt-6 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+                <h2 id="photo-heading" className="mb-3 text-sm font-semibold">Profile photo</h2>
+                <PhotoPicker userId={creator.user_id} name={creator.name} photoUrl={creator.photo_url} />
+              </section>
+            )}
             <div className="mt-6"><CreatorProfileForm creator={creator} /></div>
             {creator && (
               <section aria-labelledby="works-heading" className="mt-8">
