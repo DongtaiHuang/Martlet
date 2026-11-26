@@ -7,12 +7,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Map as MapLibre, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { ArrowUp, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Pause, Play, Rocket } from "lucide-react";
+import { ArrowUp, Pause, Play } from "lucide-react";
 import { earn } from "@/components/achievements/earn";
 import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook } from "@/components/avatar/look";
 import { towerSvg, towerTier } from "@/components/map/landmark-tower";
 import { initialMapStyle, trackMapStyle, useMapColorMode } from "@/components/map/map-mode";
 import "@/components/map/map-config"; // sets MapLibre's worker URL
+import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { PixelSprite } from "@/components/pixel/PixelSprite";
 import { spriteSvg } from "@/lib/pixel/sprite";
 import { PIXEL_SIZE } from "@/components/pixel/pixel3d";
@@ -36,19 +37,6 @@ function saveVisited(ids: Set<string>) {
 const timeFormat = new Intl.DateTimeFormat("en-CA", { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: "America/Toronto" });
 
 type State = "ready" | "flying" | "paused";
-
-/** An on-screen button that holds a control while pressed (phones). */
-function HoldPad({ control, label, onHold, children }: { control: keyof Controls; label: string; onHold: (c: keyof Controls, on: boolean) => void; children: React.ReactNode }) {
-  const release = () => onHold(control, false);
-  return (
-    <button type="button" aria-label={label}
-      className="pointer-events-auto grid size-14 select-none place-items-center rounded-2xl bg-black/45 text-white backdrop-blur-sm active:bg-black/70 [touch-action:none] sm:size-16"
-      onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); onHold(control, true); }}
-      onPointerUp={release} onPointerCancel={release} onPointerLeave={release}>
-      {children}
-    </button>
-  );
-}
 
 export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesLandmark[]; meetups: SkiesMeetup[] }) {
   const box = useRef<HTMLDivElement>(null);
@@ -213,10 +201,11 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); document.removeEventListener("visibilitychange", hide); };
   }, [go]);
 
-  // Touch pads hold a control while pressed.
-  const setControl = useCallback((c: keyof Controls, on: boolean) => {
-    if (on && stateRef.current === "ready") go("flying");
-    keys.current[c] = on;
+  // The gamepad (phones): D-pad steers and climbs, A boosts, B pauses.
+  const onPad = useCallback((c: PadControl, on: boolean) => {
+    if (c === "b") { if (on && stateRef.current !== "ready") go(stateRef.current === "flying" ? "paused" : "flying"); return; }
+    if (on && stateRef.current !== "flying") go("flying");
+    keys.current[c === "a" ? "boost" : c] = on;
   }, [go]);
 
   const start = () => { box.current?.focus({ preventScroll: true }); go("flying"); };
@@ -226,7 +215,7 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
   return (
     <div>
       <div ref={box} tabIndex={-1} aria-label="Martlet Skies. Arrow keys or WASD to steer and climb, Shift to boost, P to pause."
-        className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl bg-[#9cc3e6] outline-none focus-visible:ring-2 focus-visible:ring-focus sm:aspect-[16/10]">
+        className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#9cc3e6] outline-none focus-visible:ring-2 focus-visible:ring-focus sm:aspect-[16/10]">
         {/* MapLibre's CSS makes its container position: relative, so it fills a positioned wrapper. */}
         <div className="absolute inset-0" style={{ imageRendering: "pixelated" }} aria-hidden="true">
           <div ref={mapEl} className="size-full" />
@@ -276,19 +265,6 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
           </div>
         )}
 
-        {/* Touch controls. */}
-        <div className="pointer-events-none absolute inset-x-3 bottom-10 flex items-end justify-between sm:hidden">
-          <div className="flex gap-2">
-            <HoldPad control="left" label="Turn left" onHold={setControl}><ChevronLeft aria-hidden="true" size={26} /></HoldPad>
-            <HoldPad control="right" label="Turn right" onHold={setControl}><ChevronRight aria-hidden="true" size={26} /></HoldPad>
-          </div>
-          <HoldPad control="boost" label="Boost" onHold={setControl}><Rocket aria-hidden="true" size={22} /></HoldPad>
-          <div className="flex flex-col gap-2">
-            <HoldPad control="up" label="Climb" onHold={setControl}><ChevronUp aria-hidden="true" size={24} /></HoldPad>
-            <HoldPad control="down" label="Dive" onHold={setControl}><ChevronDown aria-hidden="true" size={24} /></HoldPad>
-          </div>
-        </div>
-
         {state !== "flying" && (
           <div className="absolute inset-0 grid place-items-center bg-black/35 backdrop-blur-[1px]">
             <div className="mx-4 max-w-xs rounded-2xl bg-surface p-5 text-center text-ink shadow-xl">
@@ -306,6 +282,7 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
           </button>
         )}
       </div>
+      <Gamepad onChange={onPad} a="Boost" b="Pause" title="Martlet Skies" />
       <p className="mt-2 text-xs text-ink-muted">Visits are saved in this browser. Map data © OpenStreetMap contributors (OpenFreeMap).</p>
     </div>
   );
