@@ -75,8 +75,19 @@ Server-only. `null` means signed out or migration 018 not applied; preview mode 
 ```typescript
 getBlackjackTable(): Promise<BlackjackTable | null>       // hand in play, today's record, balance
 dealHand(bet: number): Promise<HandState>
-playHand(id: string, action: "hit" | "stand" | "double"): Promise<HandState>
+playHand(id: string, action: "hit" | "stand" | "double" | "split"): Promise<HandState>
 ```
+
+Splits (ADR 0041, migration 027): `HandState.player` is hand 1 and `split_cards` hand 2; `active` is the hand in play and `payout` covers both. Table seats carry the same `split_*` fields.
+
+Table chat — `lib/blackjack-tables.ts` (ADR 0041, migration 028):
+
+```typescript
+getTableChat(): Promise<TableChat | null>   // the table you're seated at, or null
+sendTableChat(body: string): Promise<void>  // 1–200 characters, 10 a minute
+```
+
+Reports reuse `reportContent("table_chat", …)` from `lib/board.ts`.
 
 Server-only; the database deals and pays (migration 019) and never returns the deck or the hole card while a hand is in play. `null` means the practice table (signed out, preview mode or migration missing). Rules, card names and the practice engine are in `lib/blackjack-engine.ts` (client-safe). Errors: `BlackjackError`.
 

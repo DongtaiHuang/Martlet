@@ -46,7 +46,8 @@ export default async function TablesPage() {
           <ul className="mt-2 list-disc space-y-1.5 pl-5">
             <li>The first bet opens a 15-second betting window. It closes early once everyone seated has bet.</li>
             <li>Players act in seat order with 20 seconds each. If time runs out, you stand.</li>
-            <li>When everyone’s done, the dealer plays and pays the whole table. Same rules as solo: dealer stands on 17, blackjack pays 3:2.</li>
+            <li>When everyone’s done, the dealer plays and pays the whole table. Same rules as solo: dealer stands on 17, blackjack pays 3:2, and you can double or split a pair.</li>
+            <li>Turn on <strong>Table chat</strong> at your seat to text the other players. It stays open on every blackjack page; only people at your table see it, and messages disappear after a day.</li>
             <li>You can leave before the deal (your bet comes back) or between hands.</li>
           </ul>
         </section>

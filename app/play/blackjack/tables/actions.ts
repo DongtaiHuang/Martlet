@@ -1,7 +1,7 @@
 "use server";
 
 import { actAtTable, betAtTable, joinTable, leaveTable, syncTable, TableError, type TableState } from "@/lib/blackjack-tables";
-import { MAX_BET, MIN_BET } from "@/lib/blackjack-engine";
+import { isAction, MAX_BET, MIN_BET } from "@/lib/blackjack-engine";
 import { AuthRequiredError } from "@/lib/supabase/auth";
 
 const TABLE_ID = /^[a-z0-9-]{2,30}$/;
@@ -32,6 +32,6 @@ export async function betTableAction(id: string, bet: number) {
   return wrap(id, () => betAtTable(id, bet));
 }
 export async function actTableAction(id: string, action: string) {
-  if (action !== "hit" && action !== "stand" && action !== "double") return { error: "Pick hit, stand or double." };
+  if (!isAction(action)) return { error: "Pick hit, stand, double or split." };
   return wrap(id, () => actAtTable(id, action));
 }

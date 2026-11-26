@@ -50,6 +50,7 @@ export default async function BlackjackPage() {
           <ul className="mt-2 list-disc space-y-1.5 pl-5">
             <li>Get closer to 21 than the dealer without going over. Face cards are 10, aces are 1 or 11.</li>
             <li><strong>Hit</strong> takes a card, <strong>Stand</strong> ends your turn, <strong>Double</strong> doubles your bet for exactly one more card.</li>
+            <li><strong>Split</strong> a pair of the same rank (two 8s, two kings) into two hands for a second bet, once per hand. You play them one after the other and can double after splitting. Split aces get one card each, and 21 after a split pays 1:1.</li>
             <li>The dealer draws to 17 and stands on every 17. A win pays 1:1, blackjack (an ace and a 10-card) pays 3:2.</li>
             <li>One fresh deck per hand, shuffled on the server. Bets are 1–100 points.</li>
           </ul>

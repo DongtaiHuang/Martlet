@@ -2,13 +2,17 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Coins, LogOut, Radio, UserRound } from "lucide-react";
+import { Coins, LogOut, Radio, Split, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { handValue, RESULT_TEXT } from "@/lib/blackjack-engine";
+import { HAND_RESULT, handValue, isPair, RESULT_TEXT, type Action } from "@/lib/blackjack-engine";
 import { SEATS, type TableSeat, type TableState } from "@/lib/blackjack-tables-types";
 import { actTableAction, betTableAction, joinTableAction, leaveTableAction, syncTableAction, type TableResponse } from "@/app/play/blackjack/tables/actions";
 import { PlayingCard } from "./PlayingCard";
 import { AnimatedNumber } from "./BlackjackTable";
+import { announceSeatChange, ChatToggle } from "./TableChat";
+
+/** Points won or lost this round, across both hands after a split. */
+const seatNet = (s: TableSeat) => s.payout - s.bet - s.split_bet;
 
 const CHIPS = [5, 10, 25, 50, 100];
 const btn = "inline-flex min-h-12 flex-1 items-center justify-center rounded-xl px-4 text-base font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 sm:flex-none sm:min-w-28";
@@ -32,24 +36,44 @@ function SeatView({ seat, n, active, secondsLeft, showResult }: { seat: TableSea
     );
   }
   const result = showResult ? seat.result : null;
-  const net = result ? seat.payout - seat.bet : 0;
+  const net = result ? seatNet(seat) : 0;
+  const split = seat.split_cards !== null;
   const status =
-    result ? `${RESULT_TEXT[result]} ${net > 0 ? `+${net}` : net < 0 ? `−${-net}` : "±0"}`
+    result ? `${split ? "Total" : RESULT_TEXT[result]} ${net > 0 ? `+${net}` : net < 0 ? `−${-net}` : "±0"}`
     : active ? `Thinking${secondsLeft !== null ? ` · ${secondsLeft}s` : ""}`
     : { seated: "No bet yet", bet: "Bet placed", playing: "Waiting", stood: "Stands", bust: "Bust", blackjack: "Blackjack!", out: "Sitting out" }[seat.status];
-  const good = result === "win" || result === "blackjack";
+  const good = split ? net > 0 : result === "win" || result === "blackjack";
+  const hands = split
+    ? [
+        { n: 1, cards: seat.cards, value: seat.value, result: showResult ? seat.result : null, current: active && seat.active === 1 },
+        { n: 2, cards: seat.split_cards ?? [], value: seat.split_value, result: showResult ? seat.split_result : null, current: active && seat.active === 2 },
+      ]
+    : null;
   return (
     <li
       aria-current={active ? "true" : undefined}
       className={`relative flex flex-col rounded-2xl p-2 transition ${seat.cards.length ? "min-h-40" : "min-h-16 sm:min-h-40"} ${active ? "bg-black/30 ring-2 ring-amber-300" : "bg-black/15"} ${seat.me ? "outline-2 outline-offset-2 outline-white/70" : ""} ${result === "bust" ? "bj-shake" : ""}`}
     >
       <p className="truncate text-xs font-bold">{seat.me ? "You" : seat.name}<span className="sr-only">, seat {n}</span></p>
-      <p className="text-[11px] text-white/75">{seat.bet > 0 ? `Bet ${seat.bet}${seat.doubled ? " (doubled)" : ""}` : " "}</p>
-      <ul className="mt-1 flex flex-wrap gap-1" aria-label={`${seat.me ? "Your" : `${seat.name}'s`} cards`}>
-        {seat.cards.map((c, i) => <li key={i}><PlayingCard card={c} size="sm" from="player" /></li>)}
-      </ul>
+      <p className="text-[11px] text-white/75">{seat.bet > 0 ? (split ? `Bets ${seat.bet} + ${seat.split_bet}` : `Bet ${seat.bet}${seat.doubled ? " (doubled)" : ""}`) : " "}</p>
+      {hands ? (
+        hands.map((h) => (
+          <div key={h.n} className={`mt-1 rounded-lg p-0.5 ${h.current ? "ring-2 ring-amber-300" : ""}`}>
+            <p className="flex items-center gap-1 text-[11px] font-semibold text-white/85">
+              Hand {h.n}<span className="rounded-full bg-black/30 px-1.5 tabular-nums">{h.value}</span>{h.result && <span>{HAND_RESULT[h.result]}</span>}
+            </p>
+            <ul className="mt-0.5 flex flex-wrap gap-1" aria-label={`${seat.me ? "Your" : `${seat.name}'s`} hand ${h.n}`}>
+              {h.cards.map((c, i) => <li key={i}><PlayingCard card={c} size="sm" from="player" /></li>)}
+            </ul>
+          </div>
+        ))
+      ) : (
+        <ul className="mt-1 flex flex-wrap gap-1" aria-label={`${seat.me ? "Your" : `${seat.name}'s`} cards`}>
+          {seat.cards.map((c, i) => <li key={i}><PlayingCard card={c} size="sm" from="player" /></li>)}
+        </ul>
+      )}
       <div className="mt-auto pt-1.5 text-[11px] font-semibold">
-        {seat.cards.length > 0 && <span key={seat.value} className="bj-land mr-1 inline-block rounded-full bg-black/30 px-1.5 tabular-nums">{seat.value}</span>}
+        {seat.cards.length > 0 && !split && <span key={seat.value} className="bj-land mr-1 inline-block rounded-full bg-black/30 px-1.5 tabular-nums">{seat.value}</span>}
         <span key={status} className={`bj-land inline-block rounded-full px-1.5 ${good ? "bj-glow bg-amber-300 text-neutral-900" : active ? "text-amber-200" : "text-white/85"}`}>{status}</span>
       </div>
       {active && secondsLeft !== null && (
@@ -98,7 +122,9 @@ export function MultiTable({ initial }: { initial: TableState }) {
     const roundEnded = prev.dealer_hidden && !next.dealer_hidden && next.round === prev.round;
     if (roundEnded) void playOutDealer(next);
     else { revealRun.current++; setRevealState(settled(next)); }
+    const before = prev.seats.find((s) => s.me);
     if (me && next.turn_seat === me.seat && prev.turn_seat !== me.seat) setAnnounce(`Your turn. You have ${me.value}.`);
+    else if (me?.split_cards && me.status === "playing" && me.active === 2 && before?.active !== 2) setAnnounce(`Now playing hand 2, ${me.split_value}.`);
   }
 
   async function playOutDealer(next: TableState) {
@@ -117,7 +143,10 @@ export function MultiTable({ initial }: { initial: TableState }) {
     if (!(await wait(500))) return;
     setRevealState({ ...r, results: true });
     const me = next.seats.find((s) => s.me);
-    setAnnounce(`Dealer has ${next.dealer_value}.${me?.result ? ` ${RESULT_TEXT[me.result]}${me.payout - me.bet > 0 ? `, plus ${me.payout - me.bet}` : ""}.` : ""}`);
+    const mine = !me?.result ? ""
+      : me.split_result ? ` Hand 1: ${HAND_RESULT[me.result]}. Hand 2: ${HAND_RESULT[me.split_result]}.`
+      : ` ${RESULT_TEXT[me.result]}.`;
+    setAnnounce(`Dealer has ${next.dealer_value}.${mine}${me?.result && seatNet(me) > 0 ? ` Plus ${seatNet(me)}.` : ""}`);
   }
 
   /** One sync at a time; a change that arrives mid-sync queues one more. */
@@ -141,6 +170,7 @@ export function MultiTable({ initial }: { initial: TableState }) {
     setError("");
     if (r.state) apply(r.state);
   });
+  const play = (action: Action) => act(() => actTableAction(table.id, action));
 
   // Realtime: bj_tables changes → refetch. Falls back to polling while not connected.
   useEffect(() => {
@@ -184,6 +214,11 @@ export function MultiTable({ initial }: { initial: TableState }) {
   const serverNow = clock.now + clock.offset;
   const secondsLeft = table.deadline ? Math.max(0, Math.ceil((Date.parse(table.deadline) - serverNow) / 1000)) : null;
   const myTurn = table.phase === "playing" && mySeat !== null && table.turn_seat === mySeat.seat && mySeat.status === "playing";
+  const onTwo = mySeat?.active === 2 && mySeat.split_cards !== null;
+  const activeCards = (onTwo ? mySeat?.split_cards : mySeat?.cards) ?? [];
+  const activeBet = (onTwo ? mySeat?.split_bet : mySeat?.bet) ?? 0;
+  const canDouble = activeCards.length === 2 && !(onTwo ? mySeat?.split_doubled : mySeat?.doubled);
+  const canSplit = mySeat !== null && mySeat.split_cards === null && isPair(mySeat.cards);
   const canBet = mySeat !== null && table.phase !== "playing" && mySeat.status !== "bet" && reveal.results;
   const turnName = table.turn_seat !== null ? (bySeat.get(table.turn_seat)?.me ? "you" : bySeat.get(table.turn_seat)?.name) : null;
   const balance = (table.balance ?? 0) - (!reveal.results && mySeat ? mySeat.payout : 0);
@@ -226,19 +261,24 @@ export function MultiTable({ initial }: { initial: TableState }) {
 
       <div className="mt-5 min-h-12">
         {!mySeat ? (
-          <button type="button" onClick={() => act(() => joinTableAction(table.id))} disabled={pending || table.seats.length >= SEATS} className={`${btn} w-full bg-amber-300 text-neutral-900 hover:bg-amber-200 sm:w-auto`}>
+          <button type="button" onClick={() => act(async () => { const r = await joinTableAction(table.id); announceSeatChange(); return r; })} disabled={pending || table.seats.length >= SEATS} className={`${btn} w-full bg-amber-300 text-neutral-900 hover:bg-amber-200 sm:w-auto`}>
             {table.seats.length >= SEATS ? "Table full" : "Sit down"}
           </button>
         ) : myTurn ? (
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => act(() => actTableAction(table.id, "hit"))} disabled={pending} className={`${btn} bg-white text-emerald-900 hover:bg-emerald-50`}>Hit</button>
-            <button type="button" onClick={() => act(() => actTableAction(table.id, "stand"))} disabled={pending} className={`${btn} bg-amber-300 text-neutral-900 hover:bg-amber-200`}>Stand</button>
-            {mySeat.cards.length === 2 && !mySeat.doubled && (
-              <button type="button" onClick={() => act(() => actTableAction(table.id, "double"))} disabled={pending || balance < mySeat.bet} className={`${btn} border-2 border-white/80 hover:bg-white/10`}>
-                Double <span className="ml-1 text-sm font-semibold text-white/80">+{mySeat.bet}</span>
+            <button type="button" onClick={() => play("hit")} disabled={pending} className={`${btn} bg-white text-emerald-900 hover:bg-emerald-50`}>Hit</button>
+            <button type="button" onClick={() => play("stand")} disabled={pending} className={`${btn} bg-amber-300 text-neutral-900 hover:bg-amber-200`}>Stand</button>
+            {canDouble && (
+              <button type="button" onClick={() => play("double")} disabled={pending || balance < activeBet} className={`${btn} border-2 border-white/80 hover:bg-white/10`}>
+                Double <span className="ml-1 text-sm font-semibold text-white/80">+{activeBet}</span>
               </button>
             )}
-            <p className="w-full text-sm font-semibold text-amber-200 sm:ml-2 sm:w-auto">Your turn · {secondsLeft ?? 0}s</p>
+            {canSplit && (
+              <button type="button" onClick={() => play("split")} disabled={pending || balance < mySeat.bet} className={`${btn} border-2 border-white/80 hover:bg-white/10`}>
+                <Split aria-hidden="true" size={17} className="mr-1.5" />Split <span className="ml-1 text-sm font-semibold text-white/80">+{mySeat.bet}</span>
+              </button>
+            )}
+            <p className="w-full text-sm font-semibold text-amber-200 sm:ml-2 sm:w-auto">Your turn{mySeat.split_cards ? ` · hand ${mySeat.active}` : ""} · {secondsLeft ?? 0}s</p>
           </div>
         ) : canBet ? (
           <div className="space-y-3">
@@ -264,10 +304,11 @@ export function MultiTable({ initial }: { initial: TableState }) {
         )}
       </div>
 
+      {mySeat && <ChatToggle />}
       {mySeat && (
         <button
           type="button"
-          onClick={() => act(async () => { const r = await leaveTableAction(table.id); if (!r.error) router.push("/play/blackjack/tables"); return r; })}
+          onClick={() => act(async () => { const r = await leaveTableAction(table.id); announceSeatChange(); if (!r.error) router.push("/play/blackjack/tables"); return r; })}
           disabled={pending || mySeat.status === "playing"}
           className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-white/80 hover:text-white disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-white"
         >

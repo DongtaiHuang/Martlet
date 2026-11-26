@@ -16,7 +16,7 @@ export type BoardPost = {
   accepted_comment_id: string | null;
 };
 export type BoardComment = { id: string; body: string; created_at: string; author_name: string; is_mine: boolean; status: string };
-export const REPORT_TARGETS = ["post", "comment", "photo", "listing", "listing_message"] as const;
+export const REPORT_TARGETS = ["post", "comment", "photo", "listing", "listing_message", "table_chat"] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 export type OpenReport = { target_type: ReportTarget; target_id: string; reasons: string[]; notes: string[]; count: number; first_at: string; preview: string; status: string; image_url?: string };
 
@@ -186,9 +186,11 @@ export async function listOpenReports(): Promise<OpenReport[]> {
   ]);
   const listingIds = list.filter((g) => g.target_type === "listing").map((g) => g.target_id);
   const messageIds = list.filter((g) => g.target_type === "listing_message").map((g) => g.target_id);
-  const [listings, messages] = await Promise.all([
+  const chatIds = list.filter((g) => g.target_type === "table_chat").map((g) => g.target_id);
+  const [listings, messages, chats] = await Promise.all([
     listingIds.length ? s.supabase.from("listings").select("id, title, description, status").in("id", listingIds) : Promise.resolve({ data: [] }),
     messageIds.length ? s.supabase.from("listing_messages").select("id, body, status").in("id", messageIds) : Promise.resolve({ data: [] }),
+    chatIds.length ? s.supabase.from("bj_chat_messages").select("id, body, status").in("id", chatIds) : Promise.resolve({ data: [] }),
   ]);
   const byId = new Map<string, { preview: string; status: string; image_url?: string }>();
   // Meetup photos (ADR 0039): RLS shows moderators live photos only; closed albums read as deleted.
@@ -204,6 +206,7 @@ export async function listOpenReports(): Promise<OpenReport[]> {
   for (const c of (comments.data ?? []) as { id: string; body: string; status: string }[]) byId.set(c.id, { preview: c.body.slice(0, 240), status: c.status });
   for (const l of (listings.data ?? []) as { id: string; title: string; description: string; status: string }[]) byId.set(l.id, { preview: `${l.title} — ${l.description}`.slice(0, 240), status: l.status });
   for (const m of (messages.data ?? []) as { id: string; body: string; status: string }[]) byId.set(m.id, { preview: `Private message: ${m.body}`.slice(0, 240), status: m.status });
+  for (const m of (chats.data ?? []) as { id: string; body: string; status: string }[]) byId.set(m.id, { preview: `Blackjack table chat: ${m.body}`.slice(0, 240), status: m.status });
   return list.map((g) => ({ ...g, ...(byId.get(g.target_id) ?? { preview: "(deleted)", status: "removed" }) })).sort((a, b) => b.count - a.count);
 }
 
