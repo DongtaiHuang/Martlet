@@ -104,6 +104,18 @@ Posts support community votes and comments. Signed-in users can report content; 
 
 **Explore:** [Campus Board](https://martlet-brown.vercel.app/board)
 
+### 🛍️ Marketplace: buy, sell, swap, give away
+
+Textbooks, furniture, winter boots: list them for other McGill students, or post what you're looking for.
+
+- **Sell, give away, swap or ask** in seven categories; textbooks can name their course (COMP 250).
+- Up to four photos, resized on your device with location data removed.
+- **Private messages** on each listing between the seller and each interested student, with a notification for every new message.
+- **Meet at an approved campus building.** Martlet never handles payments; listings last 30 days and can be renewed.
+- Banned items (alcohol, weapons, completed assignments, scalped tickets…) are listed on the form. Students can report listings and messages for moderators.
+
+**Explore:** [Marketplace](https://martlet-brown.vercel.app/marketplace)
+
 ### 🔮 Predictions: forecast campus life
 
 Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during finals?") and trade on the answer with **Martlet points**:
@@ -161,9 +173,10 @@ Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during fi
 | Post and interact on Campus Board | — | ✅ |
 | Forecast on Predictions | — | ✅ |
 | Trade Martlet Coin | — | ✅ |
+| Buy, sell and message on the Marketplace | — | ✅ |
 | Save account-linked progress and leaderboard scores | — | ✅ |
 
-For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests. Old meetups are deleted automatically: 30 days after they start, or 7 days if cancelled, along with their Pecks, polls and notifications (ADR 0038). Meetup album photos are visible only to the host and people going, and disappear 7 days after the start (ADR 0039).
+For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests. Old meetups are deleted automatically: 30 days after they start, or 7 days if cancelled, along with their Pecks, polls and notifications (ADR 0038). Meetup album photos are visible only to the host and people going, and disappear 7 days after the start (ADR 0039). Marketplace listings and their messages are for signed-in students only and are deleted 30 days after they expire, or 7 days after they're removed (ADR 0040).
 
 **Moderators** are the only elevated role in the app. They review reported board posts and approve and settle prediction markets. The project owner sets them in the database ([how](docs/SUPABASE_SETUP.md#moderators)).
 

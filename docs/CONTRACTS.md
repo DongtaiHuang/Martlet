@@ -91,6 +91,21 @@ purgeMyDeadMeetupPhotos(): Promise<number>                                      
 
 Server-only. Album rules (7 days, 20 photos per person) are in `lib/meetup-album.ts` (client-safe); the database (migration 025) enforces them. Reports reuse `reportContent("photo", id, …)` from `lib/board.ts`. Errors: `AlbumError`.
 
+## Marketplace — `lib/marketplace.ts` (issue #48, ADR 0040)
+
+```typescript
+listListings(filter?: { category?; kind?; q?; mine? }): Promise<Listing[] | null>   // null: signed out
+getListing(id: string): Promise<{ listing: Listing; threads: Thread[] } | null>   // threads: your own, or all for the seller
+createListing(input: NewListing): Promise<string>                                 // photos: JPEGs resized in the browser
+setListingStatus(id: string, status: "active" | "reserved" | "sold"): Promise<void>
+renewListing(id: string): Promise<void>                                            // only with 7 days or less left
+removeListing(id: string): Promise<void>
+sendListingMessage(id: string, buyerId: string | null, body: string): Promise<void> // buyer: null; seller: the buyer's id
+purgeMyDeadListingPhotos(): Promise<number>
+```
+
+Server-only. Catalog, banned items and price helpers are in `lib/marketplace-catalog.ts` (client-safe); preview mode returns `lib/mock-listings.ts`. Reports reuse `reportContent("listing" | "listing_message", …)` from `lib/board.ts`. Errors: `MarketplaceError`. No payments.
+
 ## Weather and feed layout
 
 - `lib/weather.ts` (issue #138, ADR 0032): `getCampusWeather(): Promise<Forecast | null>` fetches Open-Meteo for the fixed campus coordinates, cached 15 minutes; `null` when unreachable. Pure helpers: `parseForecast`, `forecastAt`, `upcomingHours`, `weatherTip`, `describeWeather`.

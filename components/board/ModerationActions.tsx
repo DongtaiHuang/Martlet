@@ -15,6 +15,7 @@ export function ModerationActions({ type, id }: { type: ReportTarget; id: string
       <button type="button" disabled={pending} onClick={() => act("restore")} className={`${btn} border border-line-strong text-ink-2`}>Restore</button>
       <button type="button" disabled={pending} onClick={() => act("dismiss")} className={`${btn} text-ink-muted`}>Dismiss reports</button>
       {type === "post" && <a href={`/board/${id}`} className={`${btn} text-brand-ink underline`}>Open</a>}
+      {type === "listing" && <a href={`/marketplace/${id}`} className={`${btn} text-brand-ink underline`}>Open</a>}
     </div>
   );
 }
