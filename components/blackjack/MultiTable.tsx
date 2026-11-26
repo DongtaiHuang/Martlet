@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { FELT_CLASS, FELT_STYLE, PixelChip, PixelCoin } from "./PixelTable";
+import { FELT_CLASS, PixelChip, PixelCoin, RoomWall, feltStyleFor } from "./PixelTable";
 import { useRouter } from "next/navigation";
 import { LogOut, Radio, Split, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -232,7 +232,8 @@ export function MultiTable({ initial }: { initial: TableState }) {
     : String(handValue(table.dealer.slice(0, reveal.dealer)));
 
   return (
-    <div className={FELT_CLASS} style={FELT_STYLE}>
+    <div className={FELT_CLASS} style={feltStyleFor(table.id)}>
+      <RoomWall tableId={table.id} />
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-1 font-bold">
           <PixelCoin /><AnimatedNumber value={balance} /> points

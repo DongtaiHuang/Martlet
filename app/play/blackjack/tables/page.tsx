@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { roomFor } from "@/components/blackjack/rooms";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Users } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
@@ -31,6 +32,7 @@ export default async function TablesPage() {
                 <h2 className="text-lg font-bold">
                   <Link href={`/play/blackjack/tables/${t.id}`} className="after:absolute after:inset-0 focus-visible:outline-2 focus-visible:outline-focus">{t.name}</Link>
                 </h2>
+                {roomFor(t.id) && <p className="text-xs font-semibold text-ink-muted">{roomFor(t.id)?.title}</p>}
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-2"><Users aria-hidden="true" size={15} />{t.players}/{SEATS} seated</p>
                 <p className="text-xs text-ink-muted">{PHASE[t.phase]}</p>
                 <p className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-brand-ink">
