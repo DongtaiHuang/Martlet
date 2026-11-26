@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { DISCIPLINES, MAX_DISCIPLINES, isCreatorLink, parseLinks, type Discipline } from "@/lib/creator-catalog";
 import {
-  CreatorError, addCreatorWork, deleteCreatorWork, deleteMyCreatorProfile, purgeMyDeadCreatorWorkFiles, saveCreatorProfile,
+  CreatorError, addCreatorWork, deleteCreatorWork, deleteMyCreatorProfile, purgeMyDeadCreatorWorkFiles, removeCreatorPhoto, saveCreatorProfile, setCreatorPhoto,
   sendCreatorMessage, sendCreatorRequest, setCreatorRequestStatus,
 } from "@/lib/creators";
 import { parsePrice } from "@/lib/marketplace-catalog";
@@ -80,6 +80,24 @@ export async function addWorkAction(_: FormState, form: FormData): Promise<FormS
   }
   revalidatePath("/creators", "layout");
   return { success: "Added to your portfolio." };
+}
+
+/** Profile photo (ADR 0045): a square JPEG made in the browser, at most 500 KB. */
+export async function uploadPhotoAction(_: FormState, form: FormData): Promise<FormState> {
+  const file = form.get("photo");
+  if (!(file instanceof Blob) || file.size === 0) return { error: "Choose a photo." };
+  if (file.size > 500_000) return { error: "That photo is too large." };
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!(bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)) return { error: "Photos must be JPEGs." };
+  try { await setCreatorPhoto(bytes); } catch (error) { return { error: friendly(error) }; }
+  revalidatePath("/creators", "layout");
+  return { success: "Photo updated." };
+}
+
+export async function removePhotoAction(): Promise<string | null> {
+  try { await removeCreatorPhoto(); } catch (error) { return friendly(error); }
+  revalidatePath("/creators", "layout");
+  return null;
 }
 
 export async function deleteWorkAction(id: string): Promise<string | null> {

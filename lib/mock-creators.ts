@@ -6,7 +6,7 @@ const base = Date.parse("2026-11-20T15:00:00Z");
 const sample = (i: number, c: Partial<Creator> & Pick<Creator, "name" | "headline" | "disciplines">): Creator => ({
   user_id: `00000000-0000-4000-8000-0000000005${String(i).padStart(2, "0")}`,
   bio: "", rates: "", links: [], open_for_requests: true, status: "visible",
-  updated_at: new Date(base - i * 3_600_000).toISOString(), cover_url: null, works: [], is_mine: false,
+  updated_at: new Date(base - i * 3_600_000).toISOString(), cover_url: null, works: [], is_mine: false, photo_url: null,
   ...c,
 });
 
