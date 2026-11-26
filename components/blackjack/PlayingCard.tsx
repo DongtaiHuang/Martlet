@@ -1,8 +1,11 @@
+import { PixelSprite } from "@/components/pixel/PixelSprite";
 import { cardInfo } from "@/lib/blackjack-engine";
+import { CARD_BACK, cardFace } from "./pixel-cards";
 
+// Pixel cards are 20 x 30 art pixels (ADR 0044), so boxes keep that 2:3 shape.
 const SIZES = {
-  md: { box: "h-24 w-16 sm:h-28 sm:w-20", corner: "text-sm sm:text-base", pip: "text-3xl sm:text-4xl" },
-  sm: { box: "h-16 w-11 sm:h-20 sm:w-14", corner: "text-[11px] sm:text-xs", pip: "text-xl sm:text-2xl" },
+  md: { box: "h-24 w-16 sm:h-30 sm:w-20" },
+  sm: { box: "h-[66px] w-11 sm:h-21 sm:w-14" },
 } as const;
 
 /**
@@ -23,16 +26,12 @@ export function PlayingCard({ card, down = false, from = "dealer", size = "md" }
       style={{ "--bj-from-x": from === "dealer" ? "140px" : "120px" } as React.CSSProperties}
     >
       <div className="bj-card-inner relative size-full" data-down={faceDown}>
-        <div className={`bj-face absolute inset-0 rounded-lg border border-neutral-300 bg-white shadow-md ${c?.red ? "text-red-700" : "text-neutral-900"}`}>
-          {c && (
-            <>
-              <span aria-hidden="true" className={`absolute top-1 left-1.5 leading-none font-bold ${s.corner}`}>{c.rank}<br />{c.suit}</span>
-              <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center ${s.pip}`}>{c.suit}</span>
-              <span aria-hidden="true" className={`absolute right-1.5 bottom-1 rotate-180 leading-none font-bold ${s.corner}`}>{c.rank}<br />{c.suit}</span>
-            </>
-          )}
+        <div className="bj-face absolute inset-0 drop-shadow-[2px_2px_0_rgb(0_0_0/0.35)]">
+          {c && <PixelSprite sprite={cardFace(c.rank, c.suit, c.red)} className="size-full" />}
         </div>
-        <div className="bj-face bj-back absolute inset-0 rounded-lg border-2 border-white/80 bg-brand bg-[repeating-linear-gradient(45deg,transparent_0_6px,rgb(255_255_255/0.18)_6px_8px)] shadow-md" />
+        <div className="bj-face bj-back absolute inset-0 drop-shadow-[2px_2px_0_rgb(0_0_0/0.35)]">
+          <PixelSprite sprite={CARD_BACK} className="size-full" />
+        </div>
       </div>
     </div>
   );

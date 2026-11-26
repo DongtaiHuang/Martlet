@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { FELT_CLASS, FELT_STYLE, PixelChip, PixelCoin } from "./PixelTable";
 import { useRouter } from "next/navigation";
-import { Coins, LogOut, Radio, Split, UserRound } from "lucide-react";
+import { LogOut, Radio, Split, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { HAND_RESULT, handValue, isPair, RESULT_TEXT, type Action } from "@/lib/blackjack-engine";
 import { SEATS, type TableSeat, type TableState } from "@/lib/blackjack-tables-types";
@@ -231,10 +232,10 @@ export function MultiTable({ initial }: { initial: TableState }) {
     : String(handValue(table.dealer.slice(0, reveal.dealer)));
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-emerald-950 bg-emerald-800 p-4 text-white shadow-lg sm:p-6">
+    <div className={FELT_CLASS} style={FELT_STYLE}>
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-1 font-bold">
-          <Coins aria-hidden="true" size={16} className="text-amber-300" /><AnimatedNumber value={balance} /> points
+          <PixelCoin /><AnimatedNumber value={balance} /> points
         </p>
         <p className={`inline-flex items-center gap-1.5 text-xs font-semibold ${live ? "text-emerald-200" : "text-amber-200"}`}>
           <Radio aria-hidden="true" size={14} /> {live ? "Live" : "Connecting…"}
@@ -286,9 +287,9 @@ export function MultiTable({ initial }: { initial: TableState }) {
               <legend className="text-sm font-bold">{table.phase === "betting" ? `Bet for this hand · ${secondsLeft ?? 0}s left` : "Bet to start the next hand"}</legend>
               <div className="mt-2 flex flex-wrap gap-2">
                 {CHIPS.map((c) => (
-                  <label key={c} className={`inline-flex size-12 cursor-pointer items-center justify-center rounded-full border-4 border-dashed text-sm font-extrabold has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-white ${bet === c ? "border-amber-200 bg-amber-300 text-neutral-900" : "border-white/60 bg-black/20 text-white hover:bg-black/30"} ${c > balance ? "opacity-40" : ""}`}>
+                  <PixelChip key={c} value={c} selected={bet === c} disabled={c > balance}>
                     <input type="radio" name="bet" value={c} checked={bet === c} onChange={() => setBet(c)} disabled={c > balance} className="sr-only" />{c}
-                  </label>
+                  </PixelChip>
                 ))}
               </div>
             </fieldset>

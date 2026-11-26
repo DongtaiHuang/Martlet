@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Coins, Split } from "lucide-react";
+import { FELT_CLASS, FELT_STYLE, PixelChip, PixelCoin } from "./PixelTable";
+import { Split } from "lucide-react";
 import { dealAction, handAction, type BlackjackResponse } from "@/app/play/blackjack/actions";
 import { PlayingCard } from "./PlayingCard";
 import {
@@ -196,10 +197,10 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
     : [{ label: "You", cards: playerCards, result, bet: hand?.bet ?? 0, doubled: false, active: false }];
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-emerald-950 bg-emerald-800 p-4 text-white shadow-lg sm:p-6">
+    <div className={FELT_CLASS} style={FELT_STYLE}>
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-1 font-bold">
-          <Coins aria-hidden="true" size={16} className="text-amber-300" />
+          <PixelCoin />
           <AnimatedNumber value={balance} /> {practice ? "practice chips" : "points"}
         </p>
         <p className="text-white/80">Dealer stands on 17 · Blackjack pays 3:2</p>
@@ -285,9 +286,9 @@ export function BlackjackTable({ initial, balance: initialBalance, practice }: {
               <legend className="text-sm font-bold">Bet</legend>
               <div className="mt-2 flex flex-wrap gap-2">
                 {CHIPS.map((c) => (
-                  <label key={c} className={`inline-flex size-12 cursor-pointer items-center justify-center rounded-full border-4 border-dashed text-sm font-extrabold has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-white ${bet === c ? "border-amber-200 bg-amber-300 text-neutral-900" : "border-white/60 bg-black/20 text-white hover:bg-black/30"} ${c > balance ? "opacity-40" : ""}`}>
+                  <PixelChip key={c} value={c} selected={bet === c} disabled={c > balance}>
                     <input type="radio" name="bet" value={c} checked={bet === c} onChange={() => setBet(c)} disabled={c > balance} className="sr-only" />{c}
-                  </label>
+                  </PixelChip>
                 ))}
               </div>
             </fieldset>
