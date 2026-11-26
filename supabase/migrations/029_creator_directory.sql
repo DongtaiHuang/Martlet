@@ -9,7 +9,8 @@ begin;
 
 create or replace function public.creator_link_ok(p text) returns boolean
 language sql immutable set search_path = '' as $$
-  select p ~ '^https://[^[:space:]<>"]{3,290}$';
+  -- Postgres caps regex repeat counts at 255, so the length is checked on its own.
+  select p ~ '^https://[^[:space:]<>"]+$' and char_length(p) between 11 and 298;
 $$;
 
 create or replace function public.creator_links_ok(p text[]) returns boolean
