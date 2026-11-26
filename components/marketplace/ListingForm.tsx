@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { createListingAction, type FormState } from "@/app/marketplace/actions";
 import { prepareLandmarkPhoto } from "@/lib/landmark-photo";
@@ -13,18 +13,38 @@ import {
 const input = "mt-1 w-full rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-ink focus-visible:outline-2 focus-visible:outline-focus";
 const LOCATIONS = [...CAMPUS_LOCATIONS].sort((a, b) => a.name.localeCompare(b.name));
 
+let nextPhotoKey = 0;
+
+/** Local preview drawn on a canvas, so no URL built from the chosen file reaches the page. */
+function PhotoThumb({ file, label }: { file: File; label: string }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    let cancelled = false;
+    createImageBitmap(file, { imageOrientation: "from-image" }).then((bitmap) => {
+      const c = canvas.current;
+      const ctx = c?.getContext("2d");
+      if (cancelled || !c || !ctx) return bitmap.close();
+      const side = Math.min(bitmap.width, bitmap.height);
+      ctx.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, c.width, c.height);
+      bitmap.close();
+    }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [file]);
+  return <canvas ref={canvas} width={192} height={192} role="img" aria-label={label} className="size-24 rounded-xl bg-surface-muted" />;
+}
+
 export function ListingForm() {
   const [state, action, pending] = useActionState<FormState, FormData>(createListingAction, {});
   const [kind, setKind] = useState<ListingKind>((state.fields?.kind as ListingKind) || "sell");
   const [category, setCategory] = useState<ListingCategory>((state.fields?.category as ListingCategory) || "textbooks");
-  const [photos, setPhotos] = useState<{ file: File; url: string }[]>([]);
+  const [photos, setPhotos] = useState<{ file: File; key: number }[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const priced = kind === "sell" || kind === "wanted";
 
   function addPhotos(files: File[]) {
     setPhotoError(files.length + photos.length > MAX_LISTING_PHOTOS ? `Up to ${MAX_LISTING_PHOTOS} photos.` : null);
     const room = MAX_LISTING_PHOTOS - photos.length;
-    setPhotos([...photos, ...files.slice(0, room).map((file) => ({ file, url: URL.createObjectURL(file) }))]);
+    setPhotos([...photos, ...files.slice(0, room).map((file) => ({ file, key: nextPhotoKey++ }))]);
   }
 
   // Resize + re-encode each photo in the browser (drops EXIF/GPS, ADR 0009) before submitting.
@@ -99,9 +119,8 @@ export function ListingForm() {
           <p className="flex items-center gap-2 text-sm font-semibold"><ImagePlus aria-hidden="true" size={16} /> Photos <span className="font-normal text-ink-muted">(up to {MAX_LISTING_PHOTOS}; resized on your device, location data removed)</span></p>
           <div className="mt-2 flex flex-wrap gap-2">
             {photos.map((photo, i) => (
-              <div key={photo.url} className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element -- local preview */}
-                <img src={photo.url} alt={`Photo ${i + 1}`} className="size-24 rounded-xl object-cover" />
+              <div key={photo.key} className="relative">
+                <PhotoThumb file={photo.file} label={`Photo ${i + 1}`} />
                 <button type="button" aria-label={`Remove photo ${i + 1}`} onClick={() => setPhotos(photos.filter((p) => p !== photo))}
                   className="absolute -top-2 -right-2 grid size-8 place-items-center rounded-full border border-line-strong bg-surface text-ink shadow focus-visible:outline-2 focus-visible:outline-focus">
                   <X aria-hidden="true" size={15} />
