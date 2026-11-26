@@ -10,6 +10,7 @@ import { Coupe, PAINTS, type Paint } from "./Coupe";
 import { DriftEngine, SmokePool, type TouchKey } from "./engine";
 import { DRIFT_SCORE_EVENT } from "./events";
 import { TrackScene } from "./TrackScene";
+import { PIXEL_CANVAS } from "@/components/pixel/pixel3d";
 
 const TRACK = buildTrack(CAMPUS_LOOP);
 type Phase = "ready" | "countdown" | "running" | "paused" | "done";
@@ -194,7 +195,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
 
   return (
     <div ref={box} tabIndex={-1} className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl bg-[#86b0d8] outline-none sm:aspect-[16/10]">
-      <Canvas camera={{ fov: 60, near: 0.5, far: 900, position: [0, 6, -150] }} dpr={[1, 2]} aria-hidden="true">
+      <Canvas camera={{ fov: 60, near: 0.5, far: 900, position: [0, 6, -150] }} {...PIXEL_CANVAS} aria-hidden="true">
         <color attach="background" args={["#9cc3e6"]} />
         <fog attach="fog" args={["#9cc3e6", 180, 520]} />
         <hemisphereLight args={["#ffffff", "#4b6b3a", 1.1]} />

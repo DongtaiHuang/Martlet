@@ -1,4 +1,5 @@
 "use client";
+import { toonGradient } from "@/components/pixel/pixel3d";
 
 /** Paint options. Generic names: the car is an unbranded sports coupe (no maker's names or badges). */
 export const PAINTS = [
@@ -21,11 +22,11 @@ function Wheel({ x, z, index }: { x: number; z: number; index: number }) {
       <group>
         <mesh rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.36, 0.36, 0.3, 20]} />
-          <meshStandardMaterial color="#1a1a1a" roughness={0.9} />
+          <meshToonMaterial gradientMap={toonGradient()} color="#1a1a1a" />
         </mesh>
         <mesh rotation={[0, 0, Math.PI / 2]} position={[x > 0 ? 0.16 : -0.16, 0, 0]}>
           <cylinderGeometry args={[0.23, 0.23, 0.02, 10]} />
-          <meshStandardMaterial color={CHROME} metalness={0.8} roughness={0.3} />
+          <meshToonMaterial gradientMap={toonGradient()} color={CHROME} />
         </mesh>
       </group>
     </group>
@@ -38,7 +39,7 @@ function Wheel({ x, z, index }: { x: number; z: number; index: number }) {
  * kidney grille, no maker's lights. Faces +z; wheels are named wheel-0…3 (front two first).
  */
 export function Coupe({ paint }: { paint: Paint }) {
-  const body = <meshStandardMaterial color={paint.color} metalness={0.45} roughness={0.35} />;
+  const body = <meshToonMaterial gradientMap={toonGradient()} color={paint.color} />;
   return (
     <group>
       {/* soft shadow */}
@@ -54,24 +55,24 @@ export function Coupe({ paint }: { paint: Paint }) {
       <mesh position={[0, 0.79, 1.3]}><boxGeometry args={[1.7, 0.1, 1.75]} />{body}</mesh>
       <mesh position={[0, 0.85, 1.25]}><boxGeometry args={[0.7, 0.05, 1.3]} />{body}</mesh>
       {/* cabin: glasshouse and a dark roof */}
-      <mesh position={[0, 1.02, -0.35]}><boxGeometry args={[1.56, 0.46, 1.95]} /><meshStandardMaterial color={GLASS} metalness={0.3} roughness={0.15} /></mesh>
-      <mesh position={[0, 1.27, -0.45]}><boxGeometry args={[1.46, 0.06, 1.45]} /><meshStandardMaterial color={BLACK} roughness={0.5} /></mesh>
+      <mesh position={[0, 1.02, -0.35]}><boxGeometry args={[1.56, 0.46, 1.95]} /><meshToonMaterial gradientMap={toonGradient()} color={GLASS} /></mesh>
+      <mesh position={[0, 1.27, -0.45]}><boxGeometry args={[1.46, 0.06, 1.45]} /><meshToonMaterial gradientMap={toonGradient()} color={BLACK} /></mesh>
       {/* boot with a small lip spoiler */}
       <mesh position={[0, 0.82, -1.85]}><boxGeometry args={[1.66, 0.12, 0.85]} />{body}</mesh>
-      <mesh position={[0, 0.9, -2.25]}><boxGeometry args={[1.6, 0.05, 0.18]} /><meshStandardMaterial color={BLACK} /></mesh>
+      <mesh position={[0, 0.9, -2.25]}><boxGeometry args={[1.6, 0.05, 0.18]} /><meshToonMaterial gradientMap={toonGradient()} color={BLACK} /></mesh>
       {/* front: splitter, a plain lower intake, headlights */}
-      <mesh position={[0, 0.24, 2.32]}><boxGeometry args={[1.84, 0.06, 0.28]} /><meshStandardMaterial color={BLACK} /></mesh>
-      <mesh position={[0, 0.42, 2.31]}><boxGeometry args={[1.2, 0.16, 0.04]} /><meshStandardMaterial color={BLACK} /></mesh>
+      <mesh position={[0, 0.24, 2.32]}><boxGeometry args={[1.84, 0.06, 0.28]} /><meshToonMaterial gradientMap={toonGradient()} color={BLACK} /></mesh>
+      <mesh position={[0, 0.42, 2.31]}><boxGeometry args={[1.2, 0.16, 0.04]} /><meshToonMaterial gradientMap={toonGradient()} color={BLACK} /></mesh>
       {[-0.62, 0.62].map((x) => (
-        <mesh key={x} position={[x, 0.66, 2.31]}><boxGeometry args={[0.46, 0.1, 0.04]} /><meshStandardMaterial color="#ffffff" emissive="#fff6d5" emissiveIntensity={1.2} /></mesh>
+        <mesh key={x} position={[x, 0.66, 2.31]}><boxGeometry args={[0.46, 0.1, 0.04]} /><meshToonMaterial gradientMap={toonGradient()} color="#ffffff" emissive="#fff6d5" emissiveIntensity={1.2} /></mesh>
       ))}
       {/* rear: tail lights, diffuser, quad exhausts */}
       {[-0.6, 0.6].map((x) => (
-        <mesh key={x} position={[x, 0.72, -2.31]}><boxGeometry args={[0.52, 0.1, 0.04]} /><meshStandardMaterial color="#b3121b" emissive="#ff1a1a" emissiveIntensity={0.9} /></mesh>
+        <mesh key={x} position={[x, 0.72, -2.31]}><boxGeometry args={[0.52, 0.1, 0.04]} /><meshToonMaterial gradientMap={toonGradient()} color="#b3121b" emissive="#ff1a1a" emissiveIntensity={0.9} /></mesh>
       ))}
-      <mesh position={[0, 0.26, -2.28]}><boxGeometry args={[1.6, 0.18, 0.2]} /><meshStandardMaterial color={BLACK} /></mesh>
+      <mesh position={[0, 0.26, -2.28]}><boxGeometry args={[1.6, 0.18, 0.2]} /><meshToonMaterial gradientMap={toonGradient()} color={BLACK} /></mesh>
       {[-0.56, -0.36, 0.36, 0.56].map((x) => (
-        <mesh key={x} position={[x, 0.27, -2.4]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.055, 0.055, 0.14, 10]} /><meshStandardMaterial color={CHROME} metalness={0.9} roughness={0.25} /></mesh>
+        <mesh key={x} position={[x, 0.27, -2.4]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.055, 0.055, 0.14, 10]} /><meshToonMaterial gradientMap={toonGradient()} color={CHROME} /></mesh>
       ))}
       {/* mirrors */}
       {[-0.86, 0.86].map((x) => (

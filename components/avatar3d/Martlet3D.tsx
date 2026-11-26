@@ -8,12 +8,13 @@ import * as THREE from "three";
 import type { ItemId, Plumage } from "@/components/avatar/items";
 import { MartletAvatar } from "@/components/avatar/MartletAvatar";
 import { fromRow, NEUTRAL, type Clip, type Face } from "./face";
+import { PIXEL_CANVAS, toonGradient } from "@/components/pixel/pixel3d";
 
 const RED = "#a6192e", CREAM = "#f4efe4", GOLD = "#e3a835", INK = "#15171f";
 const PIN_COLORS = ["#f2c14e", "#e67e22", "#4fb3bf", "#c0392b", "#8e7cc3"];
 
-function Mat({ color, ...rest }: { color: string } & Partial<THREE.MeshStandardMaterialParameters>) {
-  return <meshStandardMaterial color={color} flatShading roughness={0.75} {...rest} />;
+function Mat({ color, ...rest }: { color: string } & Partial<THREE.MeshToonMaterialParameters>) {
+  return <meshToonMaterial gradientMap={toonGradient()} color={color} {...rest} />;
 }
 
 /** Drag (mouse/touch) or arrow keys to turn the martlet around; eases toward the target angle. */
@@ -184,7 +185,7 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
               <mesh><boxGeometry args={[0.42, 0.28, 0.18]} /><Mat color="#2b2b2b" /></mesh>
               <mesh position={[-0.1, 0.17, 0]}><boxGeometry args={[0.12, 0.07, 0.12]} /><Mat color="#2b2b2b" /></mesh>
               <mesh position={[0.02, -0.01, 0.12]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.1, 0.11, 0.1, 12]} /><Mat color="#4a5568" /></mesh>
-              <mesh position={[0.02, -0.01, 0.175]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.065, 0.065, 0.02, 12]} /><meshStandardMaterial color="#1a202c" roughness={0.1} metalness={0.4} /></mesh>
+              <mesh position={[0.02, -0.01, 0.175]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.065, 0.065, 0.02, 12]} /><meshToonMaterial gradientMap={toonGradient()} color="#1a202c" /></mesh>
               <mesh position={[0.15, 0.08, 0.095]}><boxGeometry args={[0.05, 0.03, 0.02]} /><Mat color="#f6e05e" /></mesh>
             </group>
           </group>
@@ -212,8 +213,8 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
         <mesh position={[0, -0.5, 0.3]} scale={[0.24, 0.11, 0.13]}><icosahedronGeometry args={[1, 1]} /><Mat color={RED} /></mesh>
         {[-1, 1].map((s, i) => (
           <group key={s} ref={eyes[i]} position={[s * 0.25, 0.1, 0.5]}>
-            <mesh><sphereGeometry args={[0.16, 12, 10]} /><Mat color="#ffffff" roughness={0.3} /></mesh>
-            <mesh position={[0, 0, 0.12]}><sphereGeometry args={[0.075, 12, 10]} /><meshStandardMaterial color={INK} roughness={0.2} /></mesh>
+            <mesh><sphereGeometry args={[0.16, 12, 10]} /><Mat color="#ffffff" /></mesh>
+            <mesh position={[0, 0, 0.12]}><sphereGeometry args={[0.075, 12, 10]} /><meshToonMaterial gradientMap={toonGradient()} color={INK} /></mesh>
             <mesh position={[0.03, 0.035, 0.19]}><sphereGeometry args={[0.022, 6, 6]} /><meshBasicMaterial color="#ffffff" /></mesh>
           </group>
         ))}
@@ -228,7 +229,7 @@ function Bird({ plumage, wearing, pins, live, tracking, clip, playId, animate }:
           <mesh position={[0, -0.08, 0.72]} rotation={[Math.PI / 2, 0, 0]}><coneGeometry args={[0.13, 0.42, 5]} /><Mat color={GOLD} /></mesh>
           <group ref={jaw} position={[0, -0.16, 0.56]}>
             <mesh position={[0, -0.02, 0.15]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 0.6]}><coneGeometry args={[0.1, 0.32, 5]} /><Mat color="#c98d1f" /></mesh>
-            <mesh ref={tongue} visible={false}><icosahedronGeometry args={[1, 1]} /><Mat color="#e86a7f" roughness={0.5} /></mesh>
+            <mesh ref={tongue} visible={false}><icosahedronGeometry args={[1, 1]} /><Mat color="#e86a7f" /></mesh>
           </group>
         </group>
         {wearing.has("beanie") && (
@@ -258,7 +259,7 @@ export default function Martlet3D(props: Props & { name: string }) {
   return (
     <div className="aspect-square w-full max-w-[520px] overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50 to-stone-100 dark:from-stone-800 dark:to-stone-950">
       <Canvas
-        dpr={[1, 2]} camera={{ position: [0, 2.0, 6.3], fov: 36 }}
+        {...PIXEL_CANVAS} camera={{ position: [0, 2.0, 6.3], fov: 36 }}
         onCreated={({ camera }) => camera.lookAt(0, 1.15, 0)}
         fallback={<MartletAvatar plumage={props.plumage} wearing={props.wearing} pins={props.pins} size={480} title={`${props.name}’s martlet`} />}
         aria-label={`${props.name}’s martlet`}
