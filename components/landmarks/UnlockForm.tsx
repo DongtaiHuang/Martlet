@@ -4,6 +4,7 @@ import { startTransition, useActionState, useEffect, useState, type FormEvent } 
 import { Camera, Info } from "lucide-react";
 import type { UnlockState } from "@/app/landmarks/[id]/actions";
 import { announceAchievement } from "@/components/achievements/earn";
+import { FilePreview } from "@/components/forms/FilePreview";
 import { prepareLandmarkPhoto } from "@/lib/landmark-photo";
 
 const CAPTION_MAX = 200;
@@ -19,15 +20,12 @@ interface UnlockFormProps {
 export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps) {
   const [state, dispatch, pending] = useActionState(action, {});
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [localError, setLocalError] = useState("");
   const [preparing, setPreparing] = useState(false);
   const [handledState, setHandledState] = useState(state);
   const [fileInputKey, setFileInputKey] = useState(0);
   const busy = pending || preparing;
 
-  // Free the preview object URL when it changes or the form unmounts.
-  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   useEffect(() => {
     if (state.achievement) announceAchievement(state.achievement, true);
   }, [state.achievement]);
@@ -38,7 +36,6 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
     setHandledState(state);
     if (state.success) {
       setFile(null);
-      setPreview(null);
       setFileInputKey((key) => key + 1);
     }
   }
@@ -46,7 +43,6 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
   function onFileChange(selected: File | null) {
     setLocalError("");
     setFile(selected);
-    setPreview(selected ? URL.createObjectURL(selected) : null);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -98,11 +94,7 @@ export function UnlockForm({ action, unlocked, currentCaption }: UnlockFormProps
             className="sr-only"
             onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
           />
-          {preview && (
-            // A local object URL preview; next/image doesn't apply to blob: URLs.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="Preview of the photo you chose" className="mt-3 max-h-72 w-full rounded-xl object-contain bg-surface-muted" />
-          )}
+          {file && <FilePreview file={file} label="Preview of the photo you chose" className="mx-auto mt-3 block max-h-72 rounded-xl" />}
         </div>
 
         <div>
