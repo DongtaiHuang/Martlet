@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { BookOpen, CarFront, Club, Coins, Ellipsis, Gamepad2, MessagesSquare, Newspaper, Palette, ShieldCheck, Sprout, Store, TrendingUp, Trophy } from "lucide-react";
+import { BookOpen, CarFront, Club, Coins, Ellipsis, Gamepad2, Map, MessagesSquare, Newspaper, Palette, ShieldCheck, Sprout, Store, TrendingUp, Trophy } from "lucide-react";
 
 /** Pages without their own tab (issue #119). Progress has a tab on larger screens, so it only appears here on phones. */
 const items = [
@@ -15,6 +15,7 @@ const items = [
   { href: "/coin", label: "Martlet Coin", icon: Coins, tone: "text-amber-600 dark:text-amber-300" },
   { href: "/achievements", label: "Achievements", icon: Trophy, tone: "text-amber-500" },
   { href: "/play", label: "Martlet Flight", icon: Gamepad2, tone: "text-sky-600 dark:text-sky-300" },
+  { href: "/play/skies", label: "Martlet Skies", icon: Map, tone: "text-sky-600 dark:text-sky-300" },
   { href: "/play/drift", label: "Martlet Drift", icon: CarFront, tone: "text-sky-600 dark:text-sky-300" },
   { href: "/play/blackjack", label: "Blackjack", icon: Club, tone: "text-emerald-700 dark:text-emerald-300" },
   { href: "/news", label: "McGill News", icon: Newspaper, tone: "text-ink-muted" },
