@@ -4,6 +4,7 @@
 import { CAMPUS, MARTY, SKY } from "@/lib/pixel/palette";
 import { drawSprite } from "@/lib/pixel/sprite";
 import { BIRD_OFFSET, BIRD_PAD, CLOUD, MOON, PIN, birdFrames, numberSprite, type Wing } from "./flight-sprites";
+import { LANDMARKS, labelSprite, landmarkSprite, treeSprite } from "./flight-landmarks";
 
 export const ART = 2;
 
@@ -65,27 +66,33 @@ function mountain(mode: "light" | "dark") {
   });
 }
 
-/** A strip of campus buildings (stone, a domed hall, brick), 120 art pixels wide, tiles. */
-function campus(mode: "light" | "dark") {
-  const s = SCENE[mode];
-  return layer(`campus-${mode}`, 120, 64, (g) => {
-    const building = (x: number, w: number, h: number, body: string, shade: string) => {
-      g.fillStyle = MARTY.outline; g.fillRect(x - 1, 64 - h - 1, w + 2, h + 1);
-      g.fillStyle = body; g.fillRect(x, 64 - h, w, h);
-      g.fillStyle = shade; g.fillRect(x + w - 3, 64 - h, 3, h);
-      g.fillStyle = s.window;
-      for (let wy = 64 - h + 4; wy < 60; wy += 7) for (let wx = x + 3; wx < x + w - 5; wx += 6) g.fillRect(wx, wy, 3, 4);
-    };
-    building(2, 30, 36, s.city, s.cityShade);
-    building(44, 28, 48, s.city, s.cityShade);
-    // Dome on the middle hall, row by row.
-    for (let r = 0; r < 10; r++) {
-      const half = Math.round(Math.sqrt(100 - (10 - r) * (10 - r)) * 1.1);
-      g.fillStyle = r === 0 ? MARTY.outline : mode === "dark" ? "#3c5a5a" : "#6e9c8c";
-      g.fillRect(58 - half, 64 - 48 - 10 + r, half * 2, 1);
-    }
-    building(84, 26, 28, mode === "dark" ? "#4a2a2a" : CAMPUS.brick, mode === "dark" ? "#3a2020" : CAMPUS.brickShade);
-  });
+/** Real McGill landmarks scroll past in turn, with trees between them (ADR 0044). */
+const LANDMARK_SPACING = 170; // art pixels from one landmark to the next
+
+/** Draws the skyline and returns a function that draws the name plate (after the ground). */
+function skyline(g: CanvasRenderingContext2D, s: SceneState, w: number, groundY: number): () => void {
+  const scroll = Math.floor((s.distance * 0.3) / ART);
+  const n = LANDMARKS.length;
+  const tree = treeSprite(s.mode);
+  let featured: { index: number; centre: number } | null = null;
+  for (let k = Math.floor(scroll / LANDMARK_SPACING) - 1; k * LANDMARK_SPACING - scroll < w; k++) {
+    const index = ((k % n) + n) % n;
+    const sprite = landmarkSprite(index, s.mode);
+    const x = k * LANDMARK_SPACING - scroll;
+    drawSprite(g, tree, x + sprite.w + 14, groundY - tree.h);
+    drawSprite(g, tree, x + sprite.w + 38, groundY - tree.h + 3);
+    drawSprite(g, sprite, x, groundY - sprite.h);
+    const centre = x + sprite.w / 2;
+    if (centre > w * 0.1 && centre < w * 0.9 && (!featured || Math.abs(centre - w / 2) < Math.abs(featured.centre - w / 2))) featured = { index, centre };
+  }
+  // The name of the landmark in view, on a plate over the brick path below it.
+  const shown = featured;
+  return () => {
+    if (!shown) return;
+    const label = labelSprite(LANDMARKS[shown.index].name);
+    const lx = Math.min(w - label.w - 2, Math.max(2, Math.round(shown.centre - label.w / 2)));
+    drawSprite(g, label, lx, groundY + 12);
+  };
 }
 
 /** A fluted stone column with a red McGill banner; `capAtBottom` for the hanging top half. */
@@ -131,7 +138,8 @@ export function drawScene(g: CanvasRenderingContext2D, s: SceneState) {
     for (let x = off; x < w; x += img.width) g.drawImage(img, x, y);
   };
   const m = mountain(s.mode); tile(m, 0.08, groundY - m.height + 4);
-  const c = campus(s.mode); tile(c, 0.3, groundY - c.height);
+
+  const drawLandmarkName = skyline(g, s, w, groundY);
 
   // Columns and pins.
   const colW = a(s.COL_W);
@@ -158,6 +166,8 @@ export function drawScene(g: CanvasRenderingContext2D, s: SceneState) {
     g.fillRect(0, y + 6, w, 1);
     for (let x = -(scroll % 14) + (row % 2) * 7; x < w; x += 14) g.fillRect(x, y, 1, 6);
   }
+
+  drawLandmarkName();
 
   // Marty (the student's look).
   const bx = a(s.bird.x), by = a(s.bird.y);
