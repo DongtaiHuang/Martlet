@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Amended by:** [0044](0044-uniform-pixel-art.md) (rendered as pixel art: low resolution, toon shading)
+- **Amended by:** [0047](0047-drift-on-the-real-campus.md) (raced on real campus streets over the MapLibre map)
 - **Date:** 2026-11-25
 - **Issue:** #149
 

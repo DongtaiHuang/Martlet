@@ -39,8 +39,11 @@ function scatter(track: Track, count: number, clearance: number, seed: number) {
   return out;
 }
 
-/** Asphalt, red-and-white kerbs, grass, start line, trees and a few campus-style buildings. */
-export function TrackScene({ track }: { track: Track }) {
+/**
+ * Asphalt, red-and-white kerbs and the start line; with `scenery`, also grass, trees and a few
+ * campus-style buildings (off when the real campus map is underneath, ADR 0047).
+ */
+export function TrackScene({ track, scenery = true }: { track: Track; scenery?: boolean }) {
   const half = TRACK_WIDTH / 2;
   const road = useMemo(() => {
     const g = ribbon(track, -half, half, 1);
@@ -72,10 +75,12 @@ export function TrackScene({ track }: { track: Track }) {
 
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[80, 0, -40]}>
-        <planeGeometry args={[1400, 1400]} />
-        <meshToonMaterial gradientMap={toonGradient()} color={CAMPUS.grass} />
-      </mesh>
+      {scenery && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[80, 0, -40]}>
+          <planeGeometry args={[1400, 1400]} />
+          <meshToonMaterial gradientMap={toonGradient()} color={CAMPUS.grass} />
+        </mesh>
+      )}
       <mesh geometry={road}><meshToonMaterial gradientMap={toonGradient()} color="#3a3d42" side={THREE.DoubleSide} /></mesh>
       {kerbs.map((g, i) => (
         <mesh key={i} geometry={g} position={[0, 0.005, 0]}><meshToonMaterial gradientMap={toonGradient()} vertexColors side={THREE.DoubleSide} /></mesh>
@@ -89,6 +94,8 @@ export function TrackScene({ track }: { track: Track }) {
           </mesh>
         ))}
       </group>
+      {scenery && (
+        <>
       <instancedMesh ref={trunks} args={[undefined, undefined, trees.length]}>
         <cylinderGeometry args={[0.25, 0.35, 2.4, 6]} />
         <meshToonMaterial gradientMap={toonGradient()} color={CAMPUS.wood} />
@@ -104,6 +111,8 @@ export function TrackScene({ track }: { track: Track }) {
           <mesh position={[0, 12.6 * b.s, 0]}><boxGeometry args={[23 * b.s, 1.2, 13]} /><meshToonMaterial gradientMap={toonGradient()} color={i % 3 === 2 ? CAMPUS.brickShade : "#5a6b70"} /></mesh>
         </group>
       ))}
+        </>
+      )}
     </group>
   );
 }
