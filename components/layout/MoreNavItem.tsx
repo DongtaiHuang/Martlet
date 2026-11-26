@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { BookOpen, CarFront, Club, Coins, Ellipsis, Gamepad2, MessagesSquare, Newspaper, ShieldCheck, Sprout, TrendingUp, Trophy } from "lucide-react";
+import { BookOpen, CarFront, Club, Coins, Ellipsis, Gamepad2, MessagesSquare, Newspaper, ShieldCheck, Sprout, Store, TrendingUp, Trophy } from "lucide-react";
 
 /** Pages without their own tab (issue #119). Progress has a tab on larger screens, so it only appears here on phones. */
 const items = [
   { href: "/progress", label: "Progress", icon: Sprout, tone: "text-ok-ink", phoneOnly: true },
   { href: "/board", label: "Campus board", icon: MessagesSquare, tone: "text-brand-ink" },
+  { href: "/marketplace", label: "Marketplace", icon: Store, tone: "text-orange-700 dark:text-orange-300" },
   { href: "/markets", label: "Predictions", icon: TrendingUp, tone: "text-emerald-700 dark:text-emerald-300" },
   { href: "/coin", label: "Martlet Coin", icon: Coins, tone: "text-amber-600 dark:text-amber-300" },
   { href: "/achievements", label: "Achievements", icon: Trophy, tone: "text-amber-500" },
@@ -19,7 +20,7 @@ const items = [
   { href: "/guide", label: "Student guide", icon: BookOpen, tone: "text-ink-muted" },
 ] as const;
 
-export const MORE_PATHS = ["/board", "/markets", "/coin", "/achievements", "/play", "/news", "/guide", "/moderation"];
+export const MORE_PATHS = ["/board", "/marketplace", "/markets", "/coin", "/achievements", "/play", "/news", "/guide", "/moderation"];
 
 /**
  * "More" in the nav: a button that opens a short menu of the remaining pages.

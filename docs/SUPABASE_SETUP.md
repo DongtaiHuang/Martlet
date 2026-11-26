@@ -51,6 +51,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 27 | `023_skillshare_category.sql` | Adds the Skillshare (`skills`) meetup category (issue #118) | Apply before deploying the app that offers it |
 | 28 | `024_meetup_cleanup.sql` | Hourly pg_cron job deletes meetups 30 days after they start (7 if cancelled) (ADR 0038) | Enables `pg_cron` if it can; otherwise enable it in **Database → Extensions** and re-run. Safe to re-run |
 | 29 | `025_meetup_photos.sql` | Meetup photo albums: private `meetup-photos` bucket, upload/remove RPCs, photo reports in the moderation queue (ADR 0039) | After `017` and `024`. Apply before deploying the app that shows albums. Safe to re-run |
+| 30 | `026_marketplace.sql` | Marketplace listings, private buyer–seller threads, `listing-photos` bucket, listing reports, hourly `cleanup-marketplace` job (ADR 0040) | After `025`. Apply before deploying the app that shows the Marketplace. Safe to re-run |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

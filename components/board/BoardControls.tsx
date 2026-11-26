@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { ArrowBigUp, Check, Flag, Trash2 } from "lucide-react";
 import { acceptAction, commentAction, removeAction, reportAction, voteAction, type FormState } from "@/app/board/actions";
 import { REPORT_REASONS } from "@/lib/board-catalog";
+import type { ReportTarget } from "@/lib/board";
 
 const focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
@@ -32,7 +33,9 @@ export function VoteButton({ postId, votes, voted }: { postId: string; votes: nu
 }
 
 /** Report with a reason; uses a native <dialog> for focus handling. */
-export function ReportButton({ type, id }: { type: "post" | "comment" | "photo"; id: string }) {
+const TARGET_NAMES: Record<ReportTarget, string> = { post: "post", comment: "comment", photo: "photo", listing: "listing", listing_message: "message" };
+
+export function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -53,8 +56,8 @@ export function ReportButton({ type, id }: { type: "post" | "comment" | "photo";
             const f = new FormData(e.currentTarget);
             start(async () => setMessage(await reportAction(type, id, String(f.get("reason")), String(f.get("note") ?? ""))));
           }}>
-            <h2 id={`report-${id}`} className="text-lg font-bold">Report this {type}</h2>
-            <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the {type === "photo" ? "person who shared it" : "author"}. Three reports hide it until a moderator checks.</p>
+            <h2 id={`report-${id}`} className="text-lg font-bold">Report this {TARGET_NAMES[type]}</h2>
+            <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the {type === "photo" ? "person who shared it" : type === "listing" ? "seller" : "author"}. {type === "listing_message" ? "Your report hides this message until a moderator checks." : "Three reports hide it until a moderator checks."}</p>
             <fieldset className="mt-3 grid gap-1">
               <legend className="sr-only">Reason</legend>
               {Object.entries(REPORT_REASONS).map(([value, label], i) => (

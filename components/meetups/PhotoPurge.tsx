@@ -2,13 +2,14 @@
 
 import { useEffect } from "react";
 import { purgePhotosAction } from "@/app/meetups/[id]/photo-actions";
+import { purgeListingPhotosAction } from "@/app/marketplace/actions";
 
 const KEY = "martlet-photo-purge";
 const EVERY_MS = 6 * 3_600_000;
 
 /**
- * Deletes the signed-in student's expired album photos from Storage in the background, at most
- * every 6 hours per browser (ADR 0039). Renders nothing.
+ * Deletes the signed-in student's dead album and listing photos from Storage in the background,
+ * at most every 6 hours per browser (ADRs 0039 and 0040). Renders nothing.
  */
 export function PhotoPurge() {
   useEffect(() => {
@@ -20,6 +21,7 @@ export function PhotoPurge() {
       return; // storage blocked: skip rather than purge on every page
     }
     void purgePhotosAction();
+    void purgeListingPhotosAction();
   }, []);
   return null;
 }

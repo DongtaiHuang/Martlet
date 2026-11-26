@@ -15,7 +15,7 @@ const idSchema = z.uuid();
 
 const notificationSchema = z.object({
   id: idSchema,
-  kind: z.enum(["meetup_new", "meetup_reminder", "trend_like", "meetup_updated"]),
+  kind: z.enum(["meetup_new", "meetup_reminder", "trend_like", "meetup_updated", "listing_message"]),
   title: z.string(),
   body: z.string(),
   href: z.string(),
