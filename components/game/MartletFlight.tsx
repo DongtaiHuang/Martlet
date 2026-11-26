@@ -7,11 +7,12 @@ import { FLIGHT_SCORE_EVENT } from "./FlightLeaderboard";
 // Martlet Flight (issue #75): an original tap-to-fly mini-game. Fly the martlet between campus
 // columns, collect landmark pins. Pixel art drawn on a small canvas and scaled up (ADR 0044);
 // day scene in light mode, night in dark mode.
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useColorMode } from "@/lib/useColorMode";
 import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook, type AvatarLook } from "@/components/avatar/look";
 import { ART, drawScene } from "./flight-scene";
+import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 
 // Logical playfield (scaled to fit the container).
 const W = 360, H = 600, GROUND = 70;
@@ -165,9 +166,18 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
 
   const btn = "inline-flex min-h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
   const resume = () => { stateRef.current = "playing"; setState("playing"); };
+  // The gamepad (phones): A or up flaps, B pauses and resumes. Tapping the game still flaps too.
+  const onPad = useCallback((c: PadControl, on: boolean) => {
+    if (!on) return;
+    engagedRef.current = true;
+    const s = stateRef.current;
+    if (c === "b") { if (s === "playing" || s === "paused") { const n = s === "playing" ? "paused" : "playing"; stateRef.current = n; setState(n); } return; }
+    if ((c === "a" || c === "up") && s !== "paused") flapRef.current();
+  }, []);
 
   return (
-    <div className="mx-auto w-full max-w-[420px]">
+    // On a phone the game and its gamepad fit on one screen: the width follows the screen height.
+    <div className="mx-auto w-full max-w-[min(420px,calc((100dvh-22rem)*0.6))]">
       <div ref={boxRef} tabIndex={-1} className="relative overflow-hidden rounded-3xl shadow-lg ring-1 ring-line outline-none" style={{ aspectRatio: `${W} / ${H}` }}>
         <canvas
           ref={canvasRef}
@@ -197,6 +207,7 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
           </div>
         )}
       </div>
+      <Gamepad onChange={onPad} a="Flap" b="Pause" title="Martlet Flight" />
       <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
         <p role="status" aria-live="polite">{state === "over" ? `Game over. Score ${score}, best ${best}.` : <>Score <span className="font-bold text-ink tabular-nums">{score}</span></>}</p>
         <div className="flex items-center gap-3">

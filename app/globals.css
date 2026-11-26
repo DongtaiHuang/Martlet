@@ -672,6 +672,9 @@ body:has(> .martlet-footer) > .martlet-page > .min-h-screen {
   .martlet-season-floor { bottom: calc(3.75rem + env(safe-area-inset-bottom)); }
 }
 
+/* A game's on-screen gamepad is showing (components/pixel/Gamepad.tsx): keep Marty off the D-pad. */
+html[data-gamepad] .martlet-stage { display: none; }
+
 /* Blackjack (ADR 0034): cards slide in from the shoe, the hole card flips, results land. */
 .bj-card { perspective: 700px; }
 .bj-card-inner { transform-style: preserve-3d; transition: transform 520ms cubic-bezier(.3, .7, .3, 1); }

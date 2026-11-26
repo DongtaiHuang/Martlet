@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { buildTrack, CAMPUS_LOOP, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
@@ -185,16 +186,13 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
     }
   }
 
-  const hold = (key: TouchKey) => ({
-    onPointerDown: (e: React.PointerEvent) => { e.preventDefault(); engine.setTouch(key, true); },
-    onPointerUp: () => engine.setTouch(key, false),
-    onPointerLeave: () => engine.setTouch(key, false),
-    onPointerCancel: () => engine.setTouch(key, false),
-  });
-  const pad = "pointer-events-auto grid size-16 select-none place-items-center rounded-2xl bg-black/45 text-sm font-extrabold text-white backdrop-blur-sm active:bg-black/70 [touch-action:none]";
+  // The gamepad (phones): D-pad steers (up gas, down brake), A is gas, B is the handbrake.
+  const PAD: Record<PadControl, TouchKey> = { left: "left", right: "right", up: "gas", down: "brake", a: "gas", b: "drift" };
+  const onPad = (c: PadControl, on: boolean) => engine.setTouch(PAD[c], on);
 
   return (
-    <div ref={box} tabIndex={-1} className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl bg-[#86b0d8] outline-none sm:aspect-[16/10]">
+    <div>
+    <div ref={box} tabIndex={-1} className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#86b0d8] outline-none sm:aspect-[16/10]">
       <Canvas camera={{ fov: 60, near: 0.5, far: 900, position: [0, 6, -150] }} {...PIXEL_CANVAS} aria-hidden="true">
         <color attach="background" args={["#9cc3e6"]} />
         <fog attach="fog" args={["#9cc3e6", 180, 520]} />
@@ -233,22 +231,6 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
         </div>
       )}
 
-      {/* Touch controls */}
-      {touch && phase === "running" && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between p-3">
-          <div className="flex gap-2">
-            <button type="button" aria-label="Steer left" className={pad} {...hold("left")}>◀</button>
-            <button type="button" aria-label="Steer right" className={pad} {...hold("right")}>▶</button>
-          </div>
-          <div className="flex items-end gap-2">
-            <button type="button" aria-label="Handbrake" className={`${pad} bg-amber-500/70`} {...hold("drift")}>DRIFT</button>
-            <div className="flex flex-col gap-2">
-              <button type="button" aria-label="Accelerate" className={`${pad} bg-emerald-600/70`} {...hold("gas")}>GAS</button>
-              <button type="button" aria-label="Brake" className={pad} {...hold("brake")}>BRAKE</button>
-            </div>
-          </div>
-        </div>
-      )}
       {(phase === "running" || phase === "paused") && (
         <button type="button" onClick={() => go(phase === "running" ? "paused" : "running")}
           className="absolute top-20 right-3 rounded-lg bg-black/45 px-3 py-1.5 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-white sm:top-24 sm:right-4">
@@ -306,11 +288,13 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
               </button>
             </div>
             <p className="mt-3 text-xs text-ink-muted">
-              {touch ? "Hold GAS, steer with ◀ ▶, tap DRIFT going into a corner." : "W/↑ gas · S/↓ brake · A D/← → steer · Space handbrake · P pause"}
+              {touch ? "Hold A for gas, steer with the D-pad, tap B to drift into a corner." : "W/↑ gas · S/↓ brake · A D/← → steer · Space handbrake · P pause"}
             </p>
           </div>
         </div>
       )}
+    </div>
+    <Gamepad onChange={onPad} a="Gas" b="Drift" title="Martlet Drift" />
     </div>
   );
 }
