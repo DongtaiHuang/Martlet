@@ -50,6 +50,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0044 | [One pixel-art style for the games](0044-uniform-pixel-art.md) | Accepted |
 | 0045 | [Creator profile photos](0045-creator-profile-photos.md) | Accepted |
 | 0046 | [Martlet Skies](0046-martlet-skies.md) | Accepted |
+| 0047 | [Martlet Drift on the real campus](0047-drift-on-the-real-campus.md) | Accepted |
 
 ## Adding a new ADR
 

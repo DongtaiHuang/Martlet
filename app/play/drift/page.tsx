@@ -18,7 +18,7 @@ export default async function DriftPage() {
       <main className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-10">
         <Link href="/play" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-ink hover:underline"><ArrowLeft aria-hidden="true" size={16} /> Games</Link>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Martlet Drift</h1>
-        <p className="mt-1 mb-5 text-ink-muted">90 seconds, one campus loop, as sideways as you dare. Handbrake into a corner, keep the throttle on and steer to hold the slide.</p>
+        <p className="mt-1 mb-5 text-ink-muted">90 seconds on real campus streets (Sherbrooke, University, Pine and McTavish), as sideways as you dare. Handbrake into a corner, keep the throttle on and steer to hold the slide.</p>
         <DriftLoader signedIn={signedIn} />
         <section aria-labelledby="how-heading" className="mt-6 rounded-2xl border border-line bg-surface p-5 text-sm text-ink-2 shadow-sm">
           <h2 id="how-heading" className="text-lg font-bold text-ink">Scoring</h2>

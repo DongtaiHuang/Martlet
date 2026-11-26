@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMapColorMode } from "@/components/map/map-mode";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { buildTrack, CAMPUS_LOOP, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
+import { buildTrack, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
 import { startDriftRunAction, submitDriftScoreAction } from "@/app/play/drift/actions";
 import type { SubmitResult } from "@/lib/drift-scores";
 import { Coupe, PAINTS, type Paint } from "./Coupe";
@@ -12,15 +13,19 @@ import { DriftEngine, SmokePool, type TouchKey } from "./engine";
 import { DRIFT_SCORE_EVENT } from "./events";
 import { TrackScene } from "./TrackScene";
 import { PIXEL_CANVAS } from "@/components/pixel/pixel3d";
+import { STREET_LOOP } from "@/lib/drift-streets";
+import type { Map as MapLibre } from "maplibre-gl";
+import { DRIFT_FOV, createDriftMap, syncDriftMap } from "./drift-map";
 
-const TRACK = buildTrack(CAMPUS_LOOP);
+// The real-street loop around campus (ADR 0047).
+const TRACK = buildTrack(STREET_LOOP);
 type Phase = "ready" | "countdown" | "running" | "paused" | "done";
 interface Hud { score: number; current: number; multiplier: number; angle: number; speed: number; time: number; event: Score["lastEvent"]; offTrack: boolean }
 const EMPTY_HUD: Hud = { score: 0, current: 0, multiplier: 1, angle: 0, speed: 0, time: RUN_SECONDS, event: "", offTrack: false };
 const SMOKE = 48, SKIDS = 1400;
 
 /** Moves the car, wheels, camera, smoke and skid marks each frame, and advances the engine while running. */
-function World({ engine, phase, paint, onHud, onFinish }: { engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void }) {
+function World({ engine, phase, paint, onHud, onFinish, mapRef }: { engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void; mapRef: React.RefObject<MapLibre | null> }) {
   const car = useRef<THREE.Group>(null);
   const wheels = useRef<THREE.Object3D[]>([]);
   const { camera } = useThree();
@@ -63,6 +68,8 @@ function World({ engine, phase, paint, onHud, onFinish }: { engine: DriftEngine;
     const bx = f.x * 0.55 + vdir.x * 0.45, bz = f.z * 0.55 + vdir.z * 0.45;
     camera.position.lerp(new THREE.Vector3(c.x - bx * 10.5, 4.4 + speed * 0.03, c.z - bz * 10.5), phase === "ready" ? 1 : 1 - Math.exp(-dt * 4.5));
     camera.lookAt(c.x + f.x * 4, 1, c.z + f.z * 4);
+    // The real campus underneath follows the same camera.
+    if (mapRef.current) syncDriftMap(mapRef.current, camera.position, { x: c.x + f.x * 4, y: 1, z: c.z + f.z * 4 });
 
     // Smoke and skid marks from the rear tyres while sliding.
     const angle = driftAngle(c);
@@ -104,7 +111,7 @@ function World({ engine, phase, paint, onHud, onFinish }: { engine: DriftEngine;
 
   return (
     <>
-      <TrackScene track={TRACK} />
+      <TrackScene track={TRACK} scenery={false} />
       <instancedMesh ref={skids} args={[undefined, undefined, SKIDS]} frustumCulled={false}>
         <planeGeometry args={[0.28, 0.5]} />
         <meshBasicMaterial color="#1b1b1b" transparent opacity={0.55} depthWrite={false} polygonOffset polygonOffsetFactor={-2} />
@@ -127,6 +134,17 @@ const fmt = (n: number) => n.toLocaleString("en-CA");
 /** Martlet Drift (issue #149, ADR 0037): a 90-second drift run on the campus loop. */
 export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   const engine = useMemo(() => new DriftEngine(TRACK), []);
+  const mapEl = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MapLibre | null>(null);
+  useMapColorMode(mapRef);
+  useEffect(() => {
+    if (!mapEl.current) return;
+    const map = createDriftMap(mapEl.current);
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(mapEl.current);
+    mapRef.current = map;
+    return () => { ro.disconnect(); map.remove(); mapRef.current = null; };
+  }, []);
   const [phase, setPhase] = useState<Phase>("ready");
   const phaseRef = useRef<Phase>("ready");
   const [paint, setPaint] = useState<Paint>(PAINTS[0]);
@@ -193,12 +211,15 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   return (
     <div>
     <div ref={box} tabIndex={-1} className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#86b0d8] outline-none sm:aspect-[16/10]">
-      <Canvas camera={{ fov: 60, near: 0.5, far: 900, position: [0, 6, -150] }} {...PIXEL_CANVAS} aria-hidden="true">
-        <color attach="background" args={["#9cc3e6"]} />
-        <fog attach="fog" args={["#9cc3e6", 180, 520]} />
+      {/* The real campus (MapLibre) under a transparent three.js layer for the car and the road. */}
+      <div className="absolute inset-0" style={{ imageRendering: "pixelated" }} aria-hidden="true">
+        <div ref={mapEl} className="size-full" />
+      </div>
+      <Canvas camera={{ fov: DRIFT_FOV, near: 0.5, far: 900, position: [0, 6, -150] }} dpr={PIXEL_CANVAS.dpr} gl={{ ...PIXEL_CANVAS.gl, alpha: true }}
+        style={{ ...PIXEL_CANVAS.style, position: "absolute", inset: 0 }} aria-hidden="true">
         <hemisphereLight args={["#ffffff", "#4b6b3a", 1.1]} />
         <directionalLight position={[80, 120, 40]} intensity={1.6} />
-        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} />
+        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} />
       </Canvas>
 
       {/* HUD */}
@@ -262,7 +283,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
             ) : (
               <>
                 <h2 className="text-xl font-extrabold">Drift run · {RUN_SECONDS} s</h2>
-                <p className="mt-1 text-sm text-ink-2">Slide through the campus loop. Longer, wider, faster drifts score more, and chaining them builds a combo up to ×5. Leave the track or spin out and the combo’s gone.</p>
+                <p className="mt-1 text-sm text-ink-2">Slide round Sherbrooke, University, Pine and McTavish. Longer, wider, faster drifts score more, and chaining them builds a combo up to ×5. Leave the track or spin out and the combo’s gone.</p>
               </>
             )}
             {phase !== "paused" && (
