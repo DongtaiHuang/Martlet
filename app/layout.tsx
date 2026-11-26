@@ -29,7 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="flex min-h-dvh flex-col bg-canvas pb-[calc(3.75rem+env(safe-area-inset-bottom))] font-sans text-ink antialiased sm:pb-0">
-        <div className="martlet-page grid min-w-0 flex-1">{children}</div>
+        {/* minmax(0, 1fr): the page column is the screen width, never its widest content (a
+            horizontally scrolling chip row would otherwise stretch the whole page on phones). */}
+        <div className="martlet-page grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)]">{children}</div>
         <FooterVisibility><MartletFooter /></FooterVisibility>
         <SeasonalScene />
         <FlyingMartlet />
