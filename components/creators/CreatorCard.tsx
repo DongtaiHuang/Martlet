@@ -21,9 +21,9 @@ export function CreatorCard({ creator }: { creator: Creator }) {
     <li className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm transition hover:border-line-strong">
       {creator.cover_url ? (
         // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL from a private bucket
-        <img src={creator.cover_url} alt="" loading="lazy" className="aspect-[4/3] w-full bg-surface-muted object-cover" />
+        <img src={creator.cover_url} alt="" loading="lazy" className="aspect-video w-full sm:aspect-[4/3] bg-surface-muted object-cover" />
       ) : (
-        <div aria-hidden="true" className="grid aspect-[4/3] w-full place-items-center bg-surface-muted text-5xl">{emoji}</div>
+        <div aria-hidden="true" className="grid aspect-video w-full sm:aspect-[4/3] place-items-center bg-surface-muted text-5xl">{emoji}</div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
