@@ -25,7 +25,7 @@ const getMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").ma
 export function AvatarStudio({ progress, name, persist = true }: { progress: Progress; name: string; persist?: boolean }) {
   const unlockedItems = ITEMS.filter((i) => i.unlocked(progress));
   const [wearing, setWearing] = useState<Set<ItemId>>(() => new Set(unlockedItems.filter((i) => i.slot !== "hat").map((i) => i.id)));
-  const [plumageId, setPlumageId] = useState<PlumageId>("classic");
+  const [plumageId, setPlumageId] = useState<PlumageId>("marty");
   const [clip, setClip] = useState<Clip | null>(null);
   const [playId, setPlayId] = useState(0);
   const reduced = useSyncExternalStore(subscribeMotion, getMotion, () => false);

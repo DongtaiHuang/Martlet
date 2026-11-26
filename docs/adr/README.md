@@ -47,6 +47,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0041 | [Blackjack splits and table chat](0041-blackjack-splits-and-table-chat.md) | Accepted |
 | 0042 | [Creator directory](0042-creator-directory.md) | Accepted |
 | 0043 | [Trend images](0043-trend-images.md) | Accepted |
+| 0044 | [One pixel-art style for the games](0044-uniform-pixel-art.md) | Accepted |
 
 ## Adding a new ADR
 
