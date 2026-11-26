@@ -55,6 +55,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 31 | `027_blackjack_split.sql` | Splitting pairs in solo blackjack and at tables (ADR 0041) | After `020`. Apply before deploying the app that shows the Split button. Safe to re-run |
 | 32 | `028_blackjack_chat.sql` | Blackjack table chat: `bj_chat_messages` (in the Realtime publication), `table_chat` reports (ADR 0041) | After `026` and `027`. Apply before deploying the app with table chat. Safe to re-run |
 | 33 | `029_creator_directory.sql` | Creator directory: profiles, portfolio works, `creator-works` bucket, private request threads, `creator_request` notifications, creator reports, daily `cleanup-creators` job (ADR 0042) | After `026` and `028`. Apply before deploying the app that shows Creators. Safe to re-run |
+| 34 | `030_trend_images.sql` | Trend images: `image_status` on trend entries, private `trend-images` bucket, `attach_trend_image`, `trend_image` reports (ADR 0043) | After `010`, `011` and `029`. Safe to re-run |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 
