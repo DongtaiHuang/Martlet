@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { ImagePlus } from "lucide-react";
 import { createPostAction, type FormState } from "@/app/board/actions";
 import { BOARD_KINDS, KIND_INFO, type BoardKind } from "@/lib/board-catalog";
+import { FilePreview } from "@/components/forms/FilePreview";
 import { prepareLandmarkPhoto } from "@/lib/landmark-photo";
 
 const input = "mt-1 w-full rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-ink focus-visible:outline-2 focus-visible:outline-focus";
@@ -12,7 +13,7 @@ export function NewPostForm({ initialKind }: { initialKind: BoardKind }) {
   const [kind, setKind] = useState<BoardKind>(initialKind);
   const [state, action, pending] = useActionState<FormState, FormData>(createPostAction, {});
   const [imageError, setImageError] = useState<string | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<File | null>(null);
 
   // Resize + re-encode the image in the browser (drops EXIF/GPS, ADR 0009) before submitting.
   const submit = async (form: FormData) => {
@@ -50,9 +51,8 @@ export function NewPostForm({ initialKind }: { initialKind: BoardKind }) {
         <label className="text-sm font-semibold">
           <span className="flex items-center gap-2"><ImagePlus aria-hidden="true" size={16} /> Image <span className="font-normal text-ink-muted">(resized on your device; location data removed)</span></span>
           <input name="image" type="file" accept="image/*" className={`${input} file:mr-3 file:rounded-lg file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:font-semibold file:text-brand-ink`}
-            onChange={(e) => { setImageError(null); const f = e.target.files?.[0]; setPreview(f ? URL.createObjectURL(f) : null); }} />
-          {/* eslint-disable-next-line @next/next/no-img-element -- local preview */}
-          {preview && <img src={preview} alt="Preview of your image" className="mt-2 max-h-64 rounded-xl object-contain" />}
+            onChange={(e) => { setImageError(null); setPreview(e.target.files?.[0] ?? null); }} />
+          {preview && <FilePreview file={preview} label="Preview of your image" className="mt-2 max-h-64 rounded-xl" />}
         </label>
       )}
       <label className="text-sm font-semibold">Link <span className="font-normal text-ink-muted">(optional, https)</span>
