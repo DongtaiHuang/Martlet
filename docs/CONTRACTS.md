@@ -45,6 +45,7 @@ Server action `earnAchievement(id: unknown): Promise<EarnResult>` (`app/achievem
 listTrends(type?: TrendType, limit?: number): Promise<TrendEntry[]>
 createTrend(input: CreateTrendInput): Promise<void>
 setTrendLike(id: string, liked: boolean): Promise<void>
+purgeMyDeadTrendImages(): Promise<number>                // background Storage clean-up (ADR 0043)
 ```
 
 Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-validation.ts` (`validateCreateTrendInput`, `TREND_TYPES`).
@@ -52,6 +53,7 @@ Server-only. Types in `types/trend.ts`; client-safe validation in `lib/trend-val
 - Data interpretation: one like per user per entry (composite primary key); rank = like count descending, then newest first. `likedByMe`/`createdByMe` are computed for the current user only.
 - Coffee and study entries may reference an approved `CAMPUS_LOCATIONS` id; recipes and songs are address-free. Links must be empty or start with `https://`.
 - Errors: `TrendError`; `AuthRequiredError` and `MockModeError` are reused from `lib/meetups.ts`. Mutations run through the RPCs in `supabase/migrations/010_trends.sql`.
+- Images (ADR 0043): `createTrend` fetches album art (Spotify songs) or an `og:image` (allowlisted recipe sites) once, through the SSRF-guarded `lib/trend-image-fetch.ts`, and stores it in the private `trend-images` bucket. `TrendEntry.imageUrl` is a short-lived signed URL or `null`. Reports use `reportContent("trend_image", entryId, …)`.
 
 ## Prediction markets — `lib/markets.ts` (issue #139, ADR 0033)
 

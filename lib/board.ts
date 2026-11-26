@@ -16,7 +16,7 @@ export type BoardPost = {
   accepted_comment_id: string | null;
 };
 export type BoardComment = { id: string; body: string; created_at: string; author_name: string; is_mine: boolean; status: string };
-export const REPORT_TARGETS = ["post", "comment", "photo", "listing", "listing_message", "table_chat", "creator", "creator_message"] as const;
+export const REPORT_TARGETS = ["post", "comment", "photo", "listing", "listing_message", "table_chat", "creator", "creator_message", "trend_image"] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 export type OpenReport = { target_type: ReportTarget; target_id: string; reasons: string[]; notes: string[]; count: number; first_at: string; preview: string; status: string; image_url?: string };
 
@@ -189,14 +189,24 @@ export async function listOpenReports(): Promise<OpenReport[]> {
   const chatIds = list.filter((g) => g.target_type === "table_chat").map((g) => g.target_id);
   const creatorIds = list.filter((g) => g.target_type === "creator").map((g) => g.target_id);
   const creatorMessageIds = list.filter((g) => g.target_type === "creator_message").map((g) => g.target_id);
-  const [listings, messages, chats, creators, creatorMessages] = await Promise.all([
+  const trendImageIds = list.filter((g) => g.target_type === "trend_image").map((g) => g.target_id);
+  const [listings, messages, chats, creators, creatorMessages, trendImages] = await Promise.all([
     listingIds.length ? s.supabase.from("listings").select("id, title, description, status").in("id", listingIds) : Promise.resolve({ data: [] }),
     messageIds.length ? s.supabase.from("listing_messages").select("id, body, status").in("id", messageIds) : Promise.resolve({ data: [] }),
     chatIds.length ? s.supabase.from("bj_chat_messages").select("id, body, status").in("id", chatIds) : Promise.resolve({ data: [] }),
     creatorIds.length ? s.supabase.from("creator_profiles").select("user_id, headline, bio, status").in("user_id", creatorIds) : Promise.resolve({ data: [] }),
     creatorMessageIds.length ? s.supabase.from("creator_messages").select("id, body, status").in("id", creatorMessageIds) : Promise.resolve({ data: [] }),
+    trendImageIds.length ? s.supabase.from("trend_entries").select("id, title, image_status").in("id", trendImageIds) : Promise.resolve({ data: [] }),
   ]);
   const byId = new Map<string, { preview: string; status: string; image_url?: string }>();
+  // Trend images (ADR 0043): moderators can read hidden ones too.
+  const trendRows = (trendImages.data ?? []) as { id: string; title: string; image_status: string }[];
+  if (trendRows.length) {
+    const { data: urls } = await s.supabase.storage.from("trend-images").createSignedUrls(trendRows.map((t) => `${t.id}.img`), 600);
+    trendRows.forEach((t, i) => byId.set(t.id, {
+      preview: `Image on the trend “${t.title}”`, status: t.image_status === "none" ? "removed" : t.image_status, image_url: urls?.[i]?.signedUrl ?? undefined,
+    }));
+  }
   // Meetup photos (ADR 0039): RLS shows moderators live photos only; closed albums read as deleted.
   const photoRows = (photos.data ?? []) as { id: string; meetup_id: string; status: string; meetup: { title: string } | { title: string }[] | null }[];
   if (photoRows.length) {

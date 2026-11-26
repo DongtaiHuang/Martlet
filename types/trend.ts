@@ -24,6 +24,8 @@ export interface TrendEntry {
   likedByMe: boolean;
   createdByMe: boolean;
   createdAt: string;
+  /** Short-lived signed URL of the entry's image in Martlet's storage (ADR 0043), or null. */
+  imageUrl: string | null;
 }
 
 export type CreateTrendInput = {
