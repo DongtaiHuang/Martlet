@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
 import { BookOpen, ChefHat, Coffee, ExternalLink, Flame, LogIn, MapPin, Music } from "lucide-react";
+import { ReportButton } from "@/components/board/BoardControls";
 import type { FeedView } from "@/components/feed/FeedViewToggle";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
@@ -118,6 +119,13 @@ export async function TrendPanel({ view, activeType }: { view: FeedView; activeT
                   <li key={entry.id} className="rounded-xl border border-line bg-canvas p-3">
                     <div className="flex items-start gap-2">
                       <span aria-hidden="true" className="mt-0.5 w-5 shrink-0 text-right text-sm font-extrabold tabular-nums text-ink-muted">{index + 1}</span>
+                      {entry.imageUrl ? (
+                        // Copied into Martlet's storage when shared (ADR 0043): viewers never contact the source site.
+                        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL from a private bucket
+                        <img src={entry.imageUrl} alt="" loading="lazy" className="size-14 shrink-0 rounded-lg bg-surface-muted object-cover" />
+                      ) : (
+                        <span aria-hidden="true" className={`grid size-14 shrink-0 place-items-center rounded-lg ${meta.chip}`}><Icon size={22} /></span>
+                      )}
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold [overflow-wrap:anywhere]">{entry.title}</p>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -144,8 +152,9 @@ export async function TrendPanel({ view, activeType }: { view: FeedView; activeT
                         {entry.detail && <p className="mt-1 line-clamp-2 text-xs leading-5 text-ink-muted">{entry.detail}</p>}
                       </div>
                     </div>
-                    <div className="mt-2 pl-7">
+                    <div className="mt-2 flex items-center justify-between gap-2 pl-7">
                       <TrendLikeButton entryId={entry.id} active={entry.likedByMe} count={entry.likeCount} disabled={!live || !viewer} />
+                      {entry.imageUrl && live && viewer && !entry.createdByMe && <ReportButton type="trend_image" id={entry.id} />}
                     </div>
                   </li>
                 );

@@ -15,6 +15,7 @@ const entries: TrendEntry[] = [
     likedByMe: false,
     createdByMe: false,
     createdAt: "2026-11-19T14:00:00.000Z",
+    imageUrl: null,
   },
   {
     id: "d1c2b3a4-0002-4a5b-8c6d-300000000002",
@@ -27,6 +28,7 @@ const entries: TrendEntry[] = [
     likedByMe: false,
     createdByMe: false,
     createdAt: "2026-11-18T09:30:00.000Z",
+    imageUrl: null,
   },
   {
     id: "d1c2b3a4-0003-4a5b-8c6d-300000000003",
@@ -39,6 +41,7 @@ const entries: TrendEntry[] = [
     likedByMe: false,
     createdByMe: false,
     createdAt: "2026-11-17T21:10:00.000Z",
+    imageUrl: null,
   },
   {
     id: "d1c2b3a4-0004-4a5b-8c6d-300000000004",
@@ -51,6 +54,7 @@ const entries: TrendEntry[] = [
     likedByMe: false,
     createdByMe: false,
     createdAt: "2026-11-16T12:00:00.000Z",
+    imageUrl: null,
   },
   {
     id: "d1c2b3a4-0005-4a5b-8c6d-300000000005",
@@ -63,6 +67,7 @@ const entries: TrendEntry[] = [
     likedByMe: false,
     createdByMe: false,
     createdAt: "2026-11-15T10:20:00.000Z",
+    imageUrl: null,
   },
   {
     id: "d1c2b3a4-0006-4a5b-8c6d-300000000006",
@@ -75,6 +80,7 @@ const entries: TrendEntry[] = [
     likedByMe: false,
     createdByMe: false,
     createdAt: "2026-11-20T08:45:00.000Z",
+    imageUrl: null,
   },
 ];
 
