@@ -4,6 +4,7 @@ import { CompletedLandmarks } from "@/components/profile/CompletedLandmarks";
 import { ProfileMeetupList } from "@/components/profile/ProfileMeetupList";
 import { listLandmarks } from "@/lib/landmarks";
 import { listMeetups } from "@/lib/meetups";
+import { CANCELLED_MEETUP_RETENTION_DAYS, PAST_MEETUP_RETENTION_DAYS } from "@/lib/meetup-retention";
 import { listProfileMeetupHistory, PROFILE_HISTORY_LIMIT } from "@/lib/profile-history";
 
 const linkClass = "font-bold text-brand-ink hover:underline focus-visible:outline-2 focus-visible:outline-focus";
@@ -29,7 +30,7 @@ export async function ProfileActivity({ viewerId }: { viewerId: string }) {
 
       <section aria-labelledby="meetup-history-heading" className="mt-8">
         <h2 id="meetup-history-heading" className="text-xl font-bold">Meetup History</h2>
-        <p className="mt-1 text-sm text-ink-muted">Showing up to {PROFILE_HISTORY_LIMIT} recent meetups per role. Joined history includes meetups you still have a Peck for.</p>
+        <p className="mt-1 text-sm text-ink-muted">Showing up to {PROFILE_HISTORY_LIMIT} recent meetups per role. Joined history includes meetups you still have a Peck for. Meetups are deleted {PAST_MEETUP_RETENTION_DAYS} days after they start ({CANCELLED_MEETUP_RETENTION_DAYS} days if cancelled).</p>
         {history.status === "fulfilled" ? (
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <ProfileMeetupList title="Previously hosted" icon={CalendarDays} meetups={history.value.hosted} historyRole="Host" empty="You have no past or cancelled hosted meetups yet." />

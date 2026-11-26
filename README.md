@@ -161,7 +161,7 @@ Ask yes/no questions about campus events ("Will Redpath stay open 24/7 during fi
 | Trade Martlet Coin | — | ✅ |
 | Save account-linked progress and leaderboard scores | — | ✅ |
 
-For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests.
+For privacy, guest meetup summaries are limited and custom meeting instructions may require signing in. Landmark community photos are not public to guests. Old meetups are deleted automatically: 30 days after they start, or 7 days if cancelled, along with their Pecks, polls and notifications (ADR 0038).
 
 **Moderators** are the only elevated role in the app. They review reported board posts and approve and settle prediction markets. The project owner sets them in the database ([how](docs/SUPABASE_SETUP.md#moderators)).
 
