@@ -20,6 +20,6 @@ Meetups have a start time but no end time.
 ## Consequences
 
 - Profile history shows at most the last 30 days of meetups.
-- The photo album (#117) will add its own shorter deletion to the same job instead of a second scheduler.
+- The photo album (#117, ADR 0039) closes after 7 days through access rules rather than this job, because only the Storage API can delete files.
 - Changing a period means a new migration that replaces the function, plus an update to `lib/meetup-retention.ts`.
 - Projects without `pg_cron` keep every meetup until it's enabled; the function can also be run by hand in the SQL Editor.

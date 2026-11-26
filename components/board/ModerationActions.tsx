@@ -2,10 +2,11 @@
 
 import { useTransition } from "react";
 import { moderateAction } from "@/app/board/actions";
+import type { ReportTarget } from "@/lib/board";
 
 const btn = "inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-60";
 
-export function ModerationActions({ type, id }: { type: "post" | "comment"; id: string }) {
+export function ModerationActions({ type, id }: { type: ReportTarget; id: string }) {
   const [pending, start] = useTransition();
   const act = (a: "restore" | "remove" | "dismiss") => start(() => moderateAction(type, id, a));
   return (

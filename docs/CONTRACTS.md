@@ -80,6 +80,17 @@ playHand(id: string, action: "hit" | "stand" | "double"): Promise<HandState>
 
 Server-only; the database deals and pays (migration 019) and never returns the deck or the hole card while a hand is in play. `null` means the practice table (signed out, preview mode or migration missing). Rules, card names and the practice engine are in `lib/blackjack-engine.ts` (client-safe). Errors: `BlackjackError`.
 
+## Meetup photo albums — `lib/meetup-photos.ts` (issue #117, ADR 0039)
+
+```typescript
+getMeetupAlbum(meetup: { id: string; host_id: string }): Promise<Album | null>   // null: not the host or going
+addMeetupPhoto(meetupId: string, image: Uint8Array): Promise<void>               // JPEG, resized in the browser
+removeMeetupPhoto(photoId: string): Promise<void>                                // uploader, host or moderator
+purgeMyDeadMeetupPhotos(): Promise<number>                                       // background Storage clean-up
+```
+
+Server-only. Album rules (7 days, 20 photos per person) are in `lib/meetup-album.ts` (client-safe); the database (migration 025) enforces them. Reports reuse `reportContent("photo", id, …)` from `lib/board.ts`. Errors: `AlbumError`.
+
 ## Weather and feed layout
 
 - `lib/weather.ts` (issue #138, ADR 0032): `getCampusWeather(): Promise<Forecast | null>` fetches Open-Meteo for the fixed campus coordinates, cached 15 minutes; `null` when unreachable. Pure helpers: `parseForecast`, `forecastAt`, `upcomingHours`, `weatherTip`, `describeWeather`.

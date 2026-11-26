@@ -9,6 +9,7 @@ import { getMeetupViewer } from "@/components/forms/meetup-viewer";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { exploreMeetupHref } from "@/components/map/explore-link";
 import { MeetupLocationMap } from "@/components/map/MeetupLocationMap";
+import { MeetupAlbumSection } from "@/components/meetups/MeetupAlbumSection";
 import { FlapButton } from "@/components/social/FlapButton";
 import { PeckButton } from "@/components/social/PeckButton";
 import { findCampusLocationForMeetup } from "@/lib/locations";
@@ -106,6 +107,7 @@ export default async function MeetupDetailsPage({ params, searchParams }: { para
               </div>
             }
           />
+          {!cancelled && <Suspense fallback={null}><MeetupAlbumSection meetup={meetup} /></Suspense>}
           {canCancel && (
             <div className="mt-6 flex flex-wrap items-start gap-3">
               <Link href={`/meetups/${encodeURIComponent(meetup.id)}/edit`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4 text-sm font-bold text-ink hover:border-brand focus-visible:outline-2 focus-visible:outline-focus">

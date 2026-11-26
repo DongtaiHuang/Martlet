@@ -42,6 +42,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0036 | [Martlet Coin trading sim](0036-martlet-coin.md) | Accepted |
 | 0037 | [Martlet Drift](0037-martlet-drift.md) | Accepted |
 | 0038 | [Auto-cleanup of ended meetups](0038-meetup-cleanup.md) | Accepted |
+| 0039 | [Meetup photo albums](0039-meetup-photo-albums.md) | Accepted |
 
 ## Adding a new ADR
 
