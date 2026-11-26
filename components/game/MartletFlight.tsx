@@ -5,11 +5,13 @@ import { startRunAction, submitScoreAction } from "@/app/play/actions";
 import { FLIGHT_SCORE_EVENT } from "./FlightLeaderboard";
 
 // Martlet Flight (issue #75): an original tap-to-fly mini-game. Fly the martlet between campus
-// columns, collect landmark pins. Canvas-rendered; day scene in light mode, night in dark mode.
+// columns, collect landmark pins. Pixel art drawn on a small canvas and scaled up (ADR 0044);
+// day scene in light mode, night in dark mode.
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useColorMode } from "@/lib/useColorMode";
 import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook, type AvatarLook } from "@/components/avatar/look";
+import { ART, drawScene } from "./flight-scene";
 
 // Logical playfield (scaled to fit the container).
 const W = 360, H = 600, GROUND = 70;
@@ -24,74 +26,6 @@ type State = "ready" | "playing" | "paused" | "over";
 
 function readBest() { try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch { return 0; } }
 function saveBest(n: number) { try { localStorage.setItem(BEST_KEY, String(n)); } catch {} }
-
-const PALETTE = {
-  light: { skyTop: "#9fd4f5", skyBottom: "#fdf2df", mountain: "#8fae8b", cross: "#ffffff", city: "#c9c2b8", cityWindow: "#f4efe7", ground: "#7aa35a", path: "#b5835a", brick: "#9c6b45", col: "#d9d0c3", colShade: "#b9ad9c", banner: "#a6192e", text: "#1f2937", star: "transparent" },
-  dark: { skyTop: "#0b1430", skyBottom: "#2a2340", mountain: "#1e2b2a", cross: "#ffe9a8", city: "#191726", cityWindow: "#ffd36b", ground: "#2f4a2a", path: "#5a4636", brick: "#4a3829", col: "#6b665f", colShade: "#4f4a44", banner: "#c42a2a", text: "#f3efec", star: "#ffffff" },
-};
-
-/** Draws the student's martlet (#132): their plumage and accessories from the avatar studio.
- *  Purely cosmetic: collisions use BIRD_R, so every look flies the same. */
-function drawMartlet(g: CanvasRenderingContext2D, x: number, y: number, tilt: number, wing: number, look: AvatarLook) {
-  const { body, wing: wingColor } = plumageOf(look);
-  const wearing = new Set(look.wearing);
-  g.save(); g.translate(x, y); g.rotate(tilt);
-  // forked tail
-  g.fillStyle = wingColor;
-  g.beginPath(); g.moveTo(-10, 2); g.lineTo(-30, -6); g.lineTo(-22, 3); g.lineTo(-31, 12); g.closePath(); g.fill();
-  // backpack, behind the body
-  if (wearing.has("backpack")) {
-    g.fillStyle = "#6b4f2a"; g.beginPath(); g.roundRect(-19, -11, 12, 15, 3); g.fill();
-    g.fillStyle = "#8a6a3d"; g.fillRect(-18, -4, 10, 3);
-  }
-  // body + belly
-  g.fillStyle = body; g.beginPath(); g.ellipse(0, 0, 17, 12, 0, 0, Math.PI * 2); g.fill();
-  g.fillStyle = "#f7f3ea"; g.beginPath(); g.ellipse(4, 4, 11, 7, 0, 0, Math.PI * 2); g.fill();
-  // camera on the chest
-  if (wearing.has("camera")) {
-    g.fillStyle = "#2b2b2b"; g.beginPath(); g.roundRect(2, 4, 9, 7, 1.5); g.fill();
-    g.fillStyle = "#9fd4f5"; g.beginPath(); g.arc(6.5, 7.5, 2, 0, Math.PI * 2); g.fill();
-  }
-  // wing (flaps)
-  g.fillStyle = wingColor; g.beginPath(); g.ellipse(-3, -2 + wing * 6, 11, 6, -0.4 + wing * 0.9, 0, Math.PI * 2); g.fill();
-  // head, red throat, eye, beak
-  g.fillStyle = body; g.beginPath(); g.arc(12, -6, 9, 0, Math.PI * 2); g.fill();
-  g.fillStyle = "#a6192e"; g.beginPath(); g.ellipse(14, 1, 5, 3, 0, 0, Math.PI * 2); g.fill();
-  // McGill scarf around the neck, with a trailing end
-  if (wearing.has("scarf")) {
-    g.fillStyle = "#a6192e"; g.beginPath(); g.ellipse(9, 1, 7, 3.2, -0.3, 0, Math.PI * 2); g.fill();
-    g.beginPath(); g.moveTo(4, 2); g.lineTo(-4, 9 + wing * 2); g.lineTo(0, 10 + wing * 2); g.lineTo(7, 3); g.closePath(); g.fill();
-    g.fillStyle = "#ffffff"; g.fillRect(6, -0.5, 2, 3);
-  }
-  g.fillStyle = "#fff"; g.beginPath(); g.arc(15, -8, 3.4, 0, Math.PI * 2); g.fill();
-  g.fillStyle = "#111"; g.beginPath(); g.arc(16, -8, 1.8, 0, Math.PI * 2); g.fill();
-  g.fillStyle = "#e3a835"; g.beginPath(); g.moveTo(20, -6); g.lineTo(28, -4); g.lineTo(20, -2); g.closePath(); g.fill();
-  // one hat at most
-  if (wearing.has("beanie")) {
-    g.fillStyle = "#a6192e"; g.beginPath(); g.arc(11, -12, 8, Math.PI, 0); g.fill();
-    g.fillStyle = "#ffffff"; g.fillRect(3, -13, 16, 3);
-    g.beginPath(); g.arc(11, -21, 2.6, 0, Math.PI * 2); g.fill();
-  } else if (wearing.has("gradcap")) {
-    g.fillStyle = "#151515"; g.fillRect(6, -17, 11, 4);
-    g.beginPath(); g.moveTo(1, -18); g.lineTo(12, -23); g.lineTo(23, -18); g.lineTo(12, -14); g.closePath(); g.fill();
-    g.strokeStyle = "#e3a835"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(12, -18.5); g.lineTo(20, -17); g.lineTo(20, -10); g.stroke();
-  }
-  g.restore();
-}
-
-function drawColumn(g: CanvasRenderingContext2D, x: number, top: number, bottom: number, p: typeof PALETTE.light) {
-  const drawPart = (y0: number, y1: number, capAtBottom: boolean) => {
-    g.fillStyle = p.col; g.fillRect(x, y0, COL_W, y1 - y0);
-    g.fillStyle = p.colShade; g.fillRect(x + COL_W - 12, y0, 12, y1 - y0);
-    for (let s = x + 10; s < x + COL_W - 12; s += 12) { g.fillStyle = p.colShade; g.fillRect(s, y0, 2, y1 - y0); } // fluting
-    const capY = capAtBottom ? y1 - 16 : y0;
-    g.fillStyle = p.colShade; g.fillRect(x - 6, capY, COL_W + 12, 16);
-    g.fillStyle = p.banner; g.fillRect(x + 8, capAtBottom ? capY - 22 : capY + 16, COL_W - 22, 22);
-    g.fillStyle = "#fff"; g.fillRect(x + 8, capAtBottom ? capY - 22 : capY + 16 + 18, COL_W - 22, 4);
-  };
-  drawPart(-20, top, true);
-  drawPart(bottom, H - GROUND + 4, false);
-}
 
 /** `embedded`: shown inside another page (the feed), so keys only act while the game has focus
  *  and play pauses when it scrolls out of view. */
@@ -128,11 +62,15 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
     if (!canvas) return;
     const g = canvas.getContext("2d");
     if (!g) return;
+    // The art canvas: one pixel per art pixel, scaled up with smoothing off.
+    const art = document.createElement("canvas");
+    art.width = W / ART; art.height = H / ART;
+    const ag = art.getContext("2d");
+    if (!ag) return;
 
     let bird = { y: H * 0.42, vy: 0 };
     let cols: Column[] = [];
     let speed = SPEED_START, distance = 0, points = 0, t = 0, last = 0, raf = 0, wingT = 0;
-    const stars = Array.from({ length: 40 }, (_, i) => ({ x: (i * 97) % W, y: (i * 53) % (H * 0.5), r: (i % 3) * 0.5 + 0.6 }));
 
     const reset = () => {
       bird = { y: H * 0.42, vy: 0 }; cols = []; speed = SPEED_START; distance = 0; points = 0;
@@ -147,7 +85,7 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
     const resize = () => {
       const rect = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(rect.width * dpr); canvas.height = Math.round(rect.height * dpr);
-      g.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+      g.imageSmoothingEnabled = false;
     };
     resize();
     const ro = new ResizeObserver(resize); ro.observe(canvas);
@@ -170,55 +108,16 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
     };
 
     const draw = () => {
-      const p = PALETTE[modeRef.current];
-      const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, p.skyTop); sky.addColorStop(1, p.skyBottom);
-      g.fillStyle = sky; g.fillRect(0, 0, W, H);
-      if (modeRef.current === "dark") { g.fillStyle = p.star; for (const s of stars) { g.globalAlpha = 0.5 + 0.5 * Math.sin(t * 2 + s.x); g.fillRect((s.x - distance * 0.02 + W) % W, s.y, s.r, s.r); } g.globalAlpha = 1; g.fillStyle = "#f4f1e8"; g.beginPath(); g.arc(W - 60, 70, 18, 0, Math.PI * 2); g.fill(); }
-      // Mount Royal + cross (slow parallax)
-      const mx = -((distance * 0.08) % (W * 1.6));
-      for (const off of [0, W * 1.6]) {
-        g.fillStyle = p.mountain; g.beginPath(); g.moveTo(mx + off - 40, H - GROUND - 60);
-        g.quadraticCurveTo(mx + off + 160, H - GROUND - 230, mx + off + 420, H - GROUND - 70); g.lineTo(mx + off + 420, H - GROUND); g.lineTo(mx + off - 40, H - GROUND); g.fill();
-        g.fillStyle = p.cross; g.fillRect(mx + off + 174, H - GROUND - 172, 3, 26); g.fillRect(mx + off + 167, H - GROUND - 164, 17, 3);
-      }
-      // campus silhouettes (mid parallax)
-      const cx = -((distance * 0.3) % 240);
-      for (let i = 0; i < 4; i++) {
-        const bx = cx + i * 240;
-        g.fillStyle = p.city;
-        g.fillRect(bx, H - GROUND - 90, 70, 90); g.fillRect(bx + 90, H - GROUND - 120, 60, 120);
-        g.beginPath(); g.arc(bx + 120, H - GROUND - 120, 22, Math.PI, 0); g.fill(); // dome
-        g.fillRect(bx + 170, H - GROUND - 70, 50, 70);
-        g.fillStyle = p.cityWindow; for (let wy = 0; wy < 3; wy++) for (let wx = 0; wx < 3; wx++) g.fillRect(bx + 10 + wx * 20, H - GROUND - 78 + wy * 24, 8, 10);
-      }
-      // columns + pins
-      for (const c of cols) {
-        drawColumn(g, c.x, c.gapY - c.gap / 2, c.gapY + c.gap / 2, p);
-        if (c.pin && !c.pin.taken) {
-          const py = c.pin.y + Math.sin(t * 4 + c.x) * 4, px = c.x + COL_W / 2;
-          g.fillStyle = "#f2c14e"; g.beginPath(); g.arc(px, py - 4, 8, Math.PI, 0); g.lineTo(px, py + 10); g.closePath(); g.fill();
-          g.fillStyle = "#fff"; g.beginPath(); g.arc(px, py - 4, 3, 0, Math.PI * 2); g.fill();
-        }
-      }
-      // ground: grass + scrolling brick path
-      g.fillStyle = p.ground; g.fillRect(0, H - GROUND, W, 16);
-      g.fillStyle = p.path; g.fillRect(0, H - GROUND + 16, W, GROUND - 16);
-      g.fillStyle = p.brick; const bo = -(distance % 28);
-      for (let row = 0; row < 3; row++) for (let bx = bo + (row % 2) * 14; bx < W; bx += 28) g.fillRect(bx, H - GROUND + 22 + row * 16, 24, 2);
-      // bird
-      const wing = stateRef.current === "playing" ? Math.sin(wingT * 22) : Math.sin(t * 6) * 0.6;
-      const tilt = stateRef.current === "ready" ? 0 : Math.max(-0.5, Math.min(1.2, bird.vy / 600));
-      if (modeRef.current === "dark") { // moonlit glow so the navy bird reads against the night sky
-        const glow = g.createRadialGradient(BIRD_X + 4, bird.y, 4, BIRD_X + 4, bird.y, 34);
-        glow.addColorStop(0, "rgba(255,240,200,0.45)"); glow.addColorStop(1, "rgba(255,240,200,0)");
-        g.fillStyle = glow; g.beginPath(); g.arc(BIRD_X + 4, bird.y, 34, 0, Math.PI * 2); g.fill();
-      }
-      drawMartlet(g, BIRD_X, bird.y, tilt, wing, lookRef.current);
-      // score
-      if (stateRef.current !== "ready") {
-        g.font = "800 44px system-ui, sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = "rgba(0,0,0,.35)";
-        g.strokeText(String(points), W / 2, 72); g.fillStyle = "#fff"; g.fillText(String(points), W / 2, 72);
-      }
+      const playing = stateRef.current === "playing";
+      const flap = playing ? Math.sin(wingT * 22) : Math.sin(t * 6) * 0.6;
+      const look = lookRef.current;
+      drawScene(ag, {
+        mode: modeRef.current, W, H, GROUND, COL_W, t, distance, cols,
+        bird: { x: BIRD_X, y: bird.y, wing: flap > 0.33 ? "up" : flap < -0.33 ? "down" : "mid" },
+        look: { plumage: plumageOf(look), wearing: look.wearing },
+        score: stateRef.current === "ready" ? null : points,
+      });
+      g.drawImage(art, 0, 0, canvas.width, canvas.height);
     };
 
     const step = (now: number) => {

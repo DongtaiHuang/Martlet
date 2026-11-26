@@ -19,5 +19,6 @@ test("unknown and duplicate items are dropped, and only one hat is kept", () => 
 
 test("plumageOf returns the plumage colours", () => {
   assert.equal(plumageOf({ plumage: "classic", wearing: [] }).body, "#1f2a44");
+  assert.equal(plumageOf({ plumage: "marty", wearing: [] }).body, "#9c2334");
   assert.equal(plumageOf({ plumage: "crimson", wearing: [] }).id, "crimson");
 });

@@ -15,11 +15,13 @@ export const ITEMS: Item[] = [
   { id: "gradcap", label: "Graduation cap", slot: "hat", requirement: "20 achievements", unlocked: (p) => total(p) >= 20 },
 ];
 
-export type PlumageId = "classic" | "teal" | "crimson" | "gold";
+export type PlumageId = "marty" | "classic" | "teal" | "crimson" | "gold";
 export interface Plumage { id: PlumageId; label: string; body: string; wing: string; requirement: string; unlocked: (p: Progress) => boolean }
 
 export const PLUMAGES: Plumage[] = [
-  { id: "classic", label: "Classic", body: "#1f2a44", wing: "#151d33", requirement: "Default", unlocked: () => true },
+  // Marty's burgundy is the default, matching the site's pixel mascot (ADR 0044).
+  { id: "marty", label: "Marty", body: "#9c2334", wing: "#751e2c", requirement: "Default", unlocked: () => true },
+  { id: "classic", label: "Classic navy", body: "#1f2a44", wing: "#151d33", requirement: "Always available", unlocked: () => true },
   { id: "teal", label: "Midnight teal", body: "#134e4a", wing: "#0d3a37", requirement: "Host 3 meetups", unlocked: (p) => p.hosted >= 3 },
   { id: "crimson", label: "Crimson", body: "#8b1e2d", wing: "#6b1522", requirement: "10 achievements", unlocked: (p) => total(p) >= 10 },
   { id: "gold", label: "Golden", body: "#9a6b12", wing: "#7a530b", requirement: "Unlock 3 landmarks", unlocked: (p) => p.landmarks >= 3 },

@@ -6,7 +6,7 @@ import { ITEMS, PLUMAGES, type ItemId, type Plumage, type PlumageId } from "./it
 export interface AvatarLook { plumage: PlumageId; wearing: ItemId[] }
 
 export const LOOK_KEY = "martlet.avatar.look";
-export const DEFAULT_LOOK: AvatarLook = { plumage: "classic", wearing: [] };
+export const DEFAULT_LOOK: AvatarLook = { plumage: "marty", wearing: [] };
 
 /** Validates untrusted stored data: known ids only, no duplicates, at most one hat. */
 export function parseLook(raw: string | null): AvatarLook | null {
