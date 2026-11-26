@@ -42,7 +42,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 18 | `014_meetup_categories.sql` | Ordered multi-category meetups | Once, after `013` and before deploying the multi-category app. Backfills existing meetups and keeps `category` as the first one |
 | 19 | `015_guest_browsing.sql` | Read-only guest view of meetups and landmarks through one summary function (ADR 0025) | Landmark photos stay members-only |
 | 20 | `016_flight_leaderboard.sql` | Martlet Flight leaderboard with server-timed runs (ADR 0026) | |
-| 21 | `017_community_board.sql` | Campus Board (memes, tips, Q&A, skill listings), reports and moderation (ADR 0027) | Set moderators by hand with `profiles.is_moderator` |
+| 21 | `017_community_board.sql` | Campus Board (memes, tips, Q&A, skill listings, retired by ADR 0042), reports and moderation (ADR 0027) | Set moderators by hand with `profiles.is_moderator` |
 | 22 | `018_prediction_market.sql` | Play-money prediction market: wallets, markets, LMSR trading, moderator approval and resolution (ADR 0033) | After `017` (uses its moderator role). Run once |
 | 23 | `019_blackjack.sql` | Blackjack with Martlet points: server-dealt hands, payouts to the market wallets (ADR 0034) | After `018` (uses its wallets). Run once |
 | 24 | `020_blackjack_tables.sql` | Multiplayer blackjack tables: seats, rounds, turn timers, Realtime publication of `bj_tables` (ADR 0035) | After `019`. Run once. Needs Realtime enabled on the project (on by default) |
@@ -54,6 +54,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 30 | `026_marketplace.sql` | Marketplace listings, private buyer–seller threads, `listing-photos` bucket, listing reports, hourly `cleanup-marketplace` job (ADR 0040) | After `025`. Apply before deploying the app that shows the Marketplace. Safe to re-run |
 | 31 | `027_blackjack_split.sql` | Splitting pairs in solo blackjack and at tables (ADR 0041) | After `020`. Apply before deploying the app that shows the Split button. Safe to re-run |
 | 32 | `028_blackjack_chat.sql` | Blackjack table chat: `bj_chat_messages` (in the Realtime publication), `table_chat` reports (ADR 0041) | After `026` and `027`. Apply before deploying the app with table chat. Safe to re-run |
+| 33 | `029_creator_directory.sql` | Creator directory: profiles, portfolio works, `creator-works` bucket, private request threads, `creator_request` notifications, creator reports, daily `cleanup-creators` job (ADR 0042) | After `026` and `028`. Apply before deploying the app that shows Creators. Safe to re-run |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

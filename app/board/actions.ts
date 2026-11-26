@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  BOARD_KINDS, BoardError, REPORT_REASONS, acceptBoardAnswer, addBoardComment, createBoardPost, moderateContent,
-  removeMyBoardContent, REPORT_TARGETS, reportContent, setBoardVote, type BoardKind, type ReportReason, type ReportTarget,
+  POSTABLE_KINDS, BoardError, REPORT_REASONS, acceptBoardAnswer, addBoardComment, createBoardPost, moderateContent,
+  removeMyBoardContent, REPORT_TARGETS, reportContent, setBoardVote, type BoardKind, type PostableKind, type ReportReason, type ReportTarget,
 } from "@/lib/board";
 import { AuthRequiredError } from "@/lib/supabase/auth";
 
@@ -28,7 +28,7 @@ export async function createPostAction(_: FormState, form: FormData): Promise<Fo
   const tags = [...new Set(str(form.get("tags")).split(",").map((t) => t.trim().toLowerCase().replace(/[^a-z0-9 -]/g, "")).filter(Boolean))].slice(0, 5);
   const fields = { kind, title, body, link, tags: tags.join(", ") };
 
-  if (!BOARD_KINDS.includes(kind)) return { error: "Pick what kind of post this is.", fields };
+  if (!POSTABLE_KINDS.includes(kind as PostableKind)) return { error: "Pick what kind of post this is.", fields };
   if (title.length < 3 || title.length > 120) return { error: "The title needs 3 to 120 characters.", fields };
   if (body.length > 2000) return { error: "Keep the text under 2000 characters.", fields };
   if (link && !/^https:\/\/\S+$/.test(link)) return { error: "Links must start with https://", fields };

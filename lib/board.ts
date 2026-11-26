@@ -4,9 +4,9 @@ import { requireUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
-import { BOARD_KINDS, KIND_INFO, REPORT_REASONS, type BoardKind, type ReportReason } from "@/lib/board-catalog";
+import { BOARD_KINDS, KIND_INFO, POSTABLE_KINDS, REPORT_REASONS, type BoardKind, type PostableKind, type ReportReason } from "@/lib/board-catalog";
 
-export { BOARD_KINDS, KIND_INFO, REPORT_REASONS, type BoardKind, type ReportReason };
+export { BOARD_KINDS, KIND_INFO, POSTABLE_KINDS, REPORT_REASONS, type BoardKind, type PostableKind, type ReportReason };
 export type BoardSort = "hot" | "new" | "top";
 
 export type BoardPost = {
@@ -16,7 +16,7 @@ export type BoardPost = {
   accepted_comment_id: string | null;
 };
 export type BoardComment = { id: string; body: string; created_at: string; author_name: string; is_mine: boolean; status: string };
-export const REPORT_TARGETS = ["post", "comment", "photo", "listing", "listing_message", "table_chat"] as const;
+export const REPORT_TARGETS = ["post", "comment", "photo", "listing", "listing_message", "table_chat", "creator", "creator_message"] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 export type OpenReport = { target_type: ReportTarget; target_id: string; reasons: string[]; notes: string[]; count: number; first_at: string; preview: string; status: string; image_url?: string };
 
@@ -187,10 +187,14 @@ export async function listOpenReports(): Promise<OpenReport[]> {
   const listingIds = list.filter((g) => g.target_type === "listing").map((g) => g.target_id);
   const messageIds = list.filter((g) => g.target_type === "listing_message").map((g) => g.target_id);
   const chatIds = list.filter((g) => g.target_type === "table_chat").map((g) => g.target_id);
-  const [listings, messages, chats] = await Promise.all([
+  const creatorIds = list.filter((g) => g.target_type === "creator").map((g) => g.target_id);
+  const creatorMessageIds = list.filter((g) => g.target_type === "creator_message").map((g) => g.target_id);
+  const [listings, messages, chats, creators, creatorMessages] = await Promise.all([
     listingIds.length ? s.supabase.from("listings").select("id, title, description, status").in("id", listingIds) : Promise.resolve({ data: [] }),
     messageIds.length ? s.supabase.from("listing_messages").select("id, body, status").in("id", messageIds) : Promise.resolve({ data: [] }),
     chatIds.length ? s.supabase.from("bj_chat_messages").select("id, body, status").in("id", chatIds) : Promise.resolve({ data: [] }),
+    creatorIds.length ? s.supabase.from("creator_profiles").select("user_id, headline, bio, status").in("user_id", creatorIds) : Promise.resolve({ data: [] }),
+    creatorMessageIds.length ? s.supabase.from("creator_messages").select("id, body, status").in("id", creatorMessageIds) : Promise.resolve({ data: [] }),
   ]);
   const byId = new Map<string, { preview: string; status: string; image_url?: string }>();
   // Meetup photos (ADR 0039): RLS shows moderators live photos only; closed albums read as deleted.
@@ -207,6 +211,8 @@ export async function listOpenReports(): Promise<OpenReport[]> {
   for (const l of (listings.data ?? []) as { id: string; title: string; description: string; status: string }[]) byId.set(l.id, { preview: `${l.title} — ${l.description}`.slice(0, 240), status: l.status });
   for (const m of (messages.data ?? []) as { id: string; body: string; status: string }[]) byId.set(m.id, { preview: `Private message: ${m.body}`.slice(0, 240), status: m.status });
   for (const m of (chats.data ?? []) as { id: string; body: string; status: string }[]) byId.set(m.id, { preview: `Blackjack table chat: ${m.body}`.slice(0, 240), status: m.status });
+  for (const c of (creators.data ?? []) as { user_id: string; headline: string; bio: string; status: string }[]) byId.set(c.user_id, { preview: `Creator profile: ${c.headline} — ${c.bio}`.slice(0, 240), status: c.status });
+  for (const m of (creatorMessages.data ?? []) as { id: string; body: string; status: string }[]) byId.set(m.id, { preview: `Creator request message: ${m.body}`.slice(0, 240), status: m.status });
   return list.map((g) => ({ ...g, ...(byId.get(g.target_id) ?? { preview: "(deleted)", status: "removed" }) })).sort((a, b) => b.count - a.count);
 }
 

@@ -2,14 +2,15 @@
 
 import { useEffect } from "react";
 import { purgePhotosAction } from "@/app/meetups/[id]/photo-actions";
+import { purgeCreatorFilesAction } from "@/app/creators/actions";
 import { purgeListingPhotosAction } from "@/app/marketplace/actions";
 
 const KEY = "martlet-photo-purge";
 const EVERY_MS = 6 * 3_600_000;
 
 /**
- * Deletes the signed-in student's dead album and listing photos from Storage in the background,
- * at most every 6 hours per browser (ADRs 0039 and 0040). Renders nothing.
+ * Deletes the signed-in student's dead album, listing and portfolio files from Storage in the
+ * background, at most every 6 hours per browser (ADRs 0039, 0040 and 0042). Renders nothing.
  */
 export function PhotoPurge() {
   useEffect(() => {
@@ -22,6 +23,7 @@ export function PhotoPurge() {
     }
     void purgePhotosAction();
     void purgeListingPhotosAction();
+    void purgeCreatorFilesAction();
   }, []);
   return null;
 }

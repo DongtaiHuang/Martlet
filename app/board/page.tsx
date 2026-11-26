@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PenSquare, ShieldCheck } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { PostCard } from "@/components/board/PostCard";
-import { BOARD_KINDS, KIND_INFO, isModerator, listBoardPosts, type BoardKind, type BoardSort } from "@/lib/board";
+import { BOARD_KINDS, KIND_INFO, POSTABLE_KINDS, isModerator, listBoardPosts, type BoardKind, type BoardSort } from "@/lib/board";
 
 export const metadata: Metadata = { title: "Campus board · McGill Martlet" };
 export const dynamic = "force-dynamic";
@@ -35,9 +35,11 @@ export default async function BoardPage({ searchParams }: { searchParams: Promis
 
         <nav aria-label="Post types" className="mt-6 flex flex-wrap gap-2">
           <Link href={href(null, sort)} aria-current={!kind ? "page" : undefined} className={chip(!kind)}>All</Link>
-          {BOARD_KINDS.map((k) => (
+          {POSTABLE_KINDS.map((k) => (
             <Link key={k} href={href(k, sort)} aria-current={kind === k ? "page" : undefined} className={chip(kind === k)}><span aria-hidden="true">{KIND_INFO[k].emoji}</span>{KIND_INFO[k].plural}</Link>
           ))}
+          {/* Skill offers moved to the Creator directory (ADR 0042). */}
+          <Link href="/creators" className={chip(false)}><span aria-hidden="true">🎨</span>Creators</Link>
         </nav>
         <nav aria-label="Sort" className="mt-3 flex gap-1 text-sm">
           {SORTS.map((s) => (

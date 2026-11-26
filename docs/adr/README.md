@@ -45,6 +45,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0039 | [Meetup photo albums](0039-meetup-photo-albums.md) | Accepted |
 | 0040 | [Student marketplace](0040-student-marketplace.md) | Accepted |
 | 0041 | [Blackjack splits and table chat](0041-blackjack-splits-and-table-chat.md) | Accepted |
+| 0042 | [Creator directory](0042-creator-directory.md) | Accepted |
 
 ## Adding a new ADR
 

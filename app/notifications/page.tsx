@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { BellRing, CalendarClock, CalendarPlus, CheckCheck, Heart, LogIn, Store } from "lucide-react";
+import { BellRing, CalendarClock, CalendarPlus, CheckCheck, Heart, LogIn, Palette, Store } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { markAllRead } from "@/components/notifications/actions";
 import { listNotifications } from "@/lib/notifications";
@@ -24,6 +24,7 @@ const KIND_META: Record<NotificationKind, {
   meetup_reminder: { label: "Reminder", icon: BellRing, chip: "bg-warn-muted text-warn-ink ring-1 ring-warn-line", edge: "border-l-amber-400" },
   meetup_updated: { label: "Meetup updated", icon: CalendarClock, chip: "bg-ok-soft text-ok-ink ring-1 ring-ok-line", edge: "border-l-emerald-400" },
   listing_message: { label: "Marketplace", icon: Store, chip: "bg-orange-100 text-orange-950 ring-1 ring-orange-200 dark:bg-orange-400/15 dark:text-orange-200 dark:ring-orange-800", edge: "border-l-orange-400" },
+  creator_request: { label: "Creators", icon: Palette, chip: "bg-fuchsia-100 text-fuchsia-950 ring-1 ring-fuchsia-200 dark:bg-fuchsia-400/15 dark:text-fuchsia-200 dark:ring-fuchsia-800", edge: "border-l-fuchsia-400" },
   trend_like: { label: "Trend like", icon: Heart, chip: "bg-violet-100 text-violet-950 ring-1 ring-violet-200 dark:bg-violet-400/15 dark:text-violet-200 dark:ring-violet-800", edge: "border-l-violet-400" },
 };
 
