@@ -117,6 +117,26 @@ purgeMyDeadListingPhotos(): Promise<number>
 
 Server-only. Catalog, banned items and price helpers are in `lib/marketplace-catalog.ts` (client-safe); preview mode returns `lib/mock-listings.ts`. Reports reuse `reportContent("listing" | "listing_message", …)` from `lib/board.ts`. Errors: `MarketplaceError`. No payments.
 
+## Creator directory — `lib/creators.ts` (ADR 0042)
+
+```typescript
+listCreators(filter?: { discipline?; q?; open? }): Promise<Creator[] | null>          // null: signed out
+getCreator(userId: string): Promise<Creator | null>                                   // with every work
+getMyCreator(): Promise<Creator | null>
+saveCreatorProfile(input: CreatorProfileInput): Promise<void>                         // create or update your own
+deleteMyCreatorProfile(): Promise<void>                                               // deletes works and requests too
+addCreatorWork(input: { title; caption; link; image }): Promise<string>               // image: JPEG resized in the browser
+deleteCreatorWork(id: string): Promise<void>
+sendCreatorRequest(input: NewCreatorRequest): Promise<string>                          // opens a private thread
+listMyRequests(): Promise<{ received: CreatorRequest[]; sent: CreatorRequest[] } | null>
+getCreatorRequest(id: string): Promise<{ request; messages } | null>
+sendCreatorMessage(requestId: string, body: string): Promise<void>
+setCreatorRequestStatus(requestId: string, status: "accepted" | "declined" | "closed"): Promise<void>
+purgeMyDeadCreatorWorkFiles(): Promise<number>
+```
+
+Server-only. Kinds of work, limits and link helpers are in `lib/creator-catalog.ts` (client-safe); preview mode returns `lib/mock-creators.ts`. Reports reuse `reportContent("creator" | "creator_message", …)` from `lib/board.ts` (a creator report's id is the student's id). Errors: `CreatorError`. No payments.
+
 ## Weather and feed layout
 
 - `lib/weather.ts` (issue #138, ADR 0032): `getCampusWeather(): Promise<Forecast | null>` fetches Open-Meteo for the fixed campus coordinates, cached 15 minutes; `null` when unreachable. Pure helpers: `parseForecast`, `forecastAt`, `upcomingHours`, `weatherTip`, `describeWeather`.
