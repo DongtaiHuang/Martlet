@@ -5,6 +5,7 @@ import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 import { BOARD_KINDS, KIND_INFO, POSTABLE_KINDS, REPORT_REASONS, type BoardKind, type PostableKind, type ReportReason } from "@/lib/board-catalog";
+import { blockedIds, inList } from "@/lib/blocks";
 
 export { BOARD_KINDS, KIND_INFO, POSTABLE_KINDS, REPORT_REASONS, type BoardKind, type PostableKind, type ReportReason };
 export type BoardSort = "hot" | "new" | "top";
@@ -68,6 +69,9 @@ export async function listBoardPosts(kind: BoardKind | null, sort: BoardSort): P
   if (!s) return null;
   let q = s.supabase.from("board_posts").select(POST_SELECT).eq("status", "visible").order("created_at", { ascending: false }).limit(100);
   if (kind) q = q.eq("kind", kind);
+  // People you've blocked (ADR 0051) are left out.
+  const blocked = await blockedIds(s.supabase);
+  if (blocked.length) q = q.not("author_id", "in", inList(blocked));
   const { data, error } = await q.returns<Row[]>();
   if (error) { console.warn("listBoardPosts failed", error.message); return null; }
   const posts = await toPosts(s, data);
@@ -82,15 +86,16 @@ export async function listBoardPosts(kind: BoardKind | null, sort: BoardSort): P
 export async function getBoardPost(id: string): Promise<{ post: BoardPost; comments: BoardComment[] } | null> {
   const s = await session();
   if (!s || !/^[0-9a-f-]{36}$/i.test(id)) return null;
-  const [post, comments] = await Promise.all([
+  const [post, comments, blocked] = await Promise.all([
     s.supabase.from("board_posts").select(POST_SELECT).eq("id", id).maybeSingle<Row>(),
     s.supabase.from("board_comments").select("id, body, created_at, status, author_id, author:profiles!author_id(display_name)").eq("post_id", id).neq("status", "removed").order("created_at"),
+    blockedIds(s.supabase),
   ]);
   if (post.error || !post.data || post.data.status === "removed") return null;
   const [full] = await toPosts(s, [post.data]);
   return {
     post: full,
-    comments: (comments.data ?? []).map((c) => ({
+    comments: (comments.data ?? []).filter((c) => !blocked.includes(c.author_id as string)).map((c) => ({
       id: c.id as string, body: c.body as string, created_at: c.created_at as string, status: c.status as string,
       author_name: first(c.author as unknown as { display_name: string } | { display_name: string }[] | null)?.display_name ?? "Martlet Student", is_mine: c.author_id === s.userId,
     })),

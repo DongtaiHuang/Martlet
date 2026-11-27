@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Bird, LogIn, MessagesSquare, ShieldCheck, Trophy, UserRound } from "lucide-react";
 import { CourseCodesForm } from "@/components/courses/CourseCodesForm";
 import { AppearancePicker } from "@/components/settings/AppearancePicker";
+import { BlockedPeople } from "@/components/profile/BlockedPeople";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
 import { ProfileActivity } from "@/components/profile/ProfileActivity";
@@ -122,6 +123,7 @@ export default async function ProfilePage() {
         </div>
 
         {state.kind === "ready" && <ProfileActivity viewerId={state.user.id} />}
+        {state.kind === "ready" && <BlockedPeople />}
         <AppearancePicker />
       </main>
     </div>

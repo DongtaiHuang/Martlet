@@ -60,7 +60,8 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 36 | `032_more_landmarks.sql` | Twelve McGill and Montréal landmarks, `landmarks.hidden` (no new unlocks on hidden ones) and hides the duplicate Montréal Biosphère (ADR 0049) | After `006`, `012` and `015`. Safe to re-run |
 | 37 | `033_dashboard_landmarks.sql` | Copies the seven landmarks first added in the dashboard (Atwater, Jean-Talon, Kondiaronk, Museum of Fine Arts, Notre-Dame, Olympic Stadium, hidden Montréal Biosphère) so a fresh database matches production | After `032`. No-op on production. Safe to re-run |
 | 38 | `034_drift_ghosts.sql` | Martlet Drift ghost races: `drift_ghosts` (one replay per student), `submit_drift_run`, `get_drift_ghosts`, `get_my_drift_ghost` (ADR 0050) | After `022`. Apply before deploying the app with ghosts. Safe to re-run |
-| 39 | `036_drift_tracks.sql` | Drift tracks: `track` on scores, runs and ghosts; per-track leaderboard and ghosts; old signatures mean the street loop (ADR 0052) | After `034`. Apply before deploying the app with tracks. Safe to re-run |
+| 39 | `035_user_blocks.sql` | Blocking: `user_blocks`, `block_author`, `unblock_user`, `my_blocks`; marketplace and creator messaging refuse blocked pairs; table chat hides them (ADR 0051) | After `026`, `028`, `029` and `034`. Apply before deploying the app with blocking. Safe to re-run |
+| 40 | `036_drift_tracks.sql` | Drift tracks: `track` on scores, runs and ghosts; per-track leaderboard and ghosts; old signatures mean the street loop (ADR 0052) | After `034`. Apply before deploying the app with tracks. Safe to re-run |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

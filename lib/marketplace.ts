@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import type { ListingCategory, ListingCondition, ListingKind, ListingStatus } from "@/lib/marketplace-catalog";
+import { blockedIds, inList } from "@/lib/blocks";
 
 const BUCKET = "listing-photos";
 const URL_SECONDS = 3600;
@@ -67,7 +68,11 @@ export async function listListings(filter: ListingFilter = {}): Promise<Listing[
   if (!s) return null;
   let query = s.supabase.from("listings").select(SELECT).order("created_at", { ascending: false }).limit(PAGE);
   if (filter.mine) query = query.eq("seller_id", s.userId).neq("status", "removed");
-  else query = query.in("status", ["active", "reserved"]).gt("expires_at", new Date().toISOString());
+  else {
+    query = query.in("status", ["active", "reserved"]).gt("expires_at", new Date().toISOString());
+    const blocked = await blockedIds(s.supabase); // sellers you've blocked (ADR 0051)
+    if (blocked.length) query = query.not("seller_id", "in", inList(blocked));
+  }
   if (filter.category) query = query.eq("category", filter.category);
   if (filter.kind) query = query.eq("kind", filter.kind);
   const q = filter.q?.trim().replace(/[%_,()]/g, " ").slice(0, 60);
@@ -115,6 +120,7 @@ function rpcError(error: { message: string; hint?: string; code?: string }): nev
   if (error.hint === "open-limit") throw new MarketplaceError("You have 20 open listings. Mark some as sold or remove them first.");
   if (error.code === "23514" || error.code === "23503") throw new MarketplaceError("Check the form: something is missing or not allowed.");
   if (error.code === "P0002") throw new MarketplaceError("That listing or conversation isn’t available any more.");
+  if (error.hint === "blocked") throw new MarketplaceError("You can’t message this person.");
   if (error.code === "42501") throw new MarketplaceError("You can’t do that.");
   throw new Error(error.message);
 }

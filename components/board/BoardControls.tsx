@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { ArrowBigUp, Check, Flag, Trash2 } from "lucide-react";
-import { acceptAction, commentAction, removeAction, reportAction, voteAction, type FormState } from "@/app/board/actions";
+import { acceptAction, blockAction, commentAction, removeAction, reportAction, voteAction, type FormState } from "@/app/board/actions";
 import { REPORT_REASONS } from "@/lib/board-catalog";
 import type { ReportTarget } from "@/lib/board";
 
@@ -42,7 +42,7 @@ export function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
   return (
     <>
       <button type="button" onClick={() => { setMessage(null); ref.current?.showModal(); }} className={`inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-ink-muted hover:text-brand-ink ${focus}`}>
-        <Flag aria-hidden="true" size={14} /> Report
+        <Flag aria-hidden="true" size={14} /> Report or block
       </button>
       <dialog ref={ref} aria-labelledby={`report-${id}`} className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-5 text-ink shadow-2xl backdrop:bg-black/50">
         {message ? (
@@ -54,7 +54,11 @@ export function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
           <form onSubmit={(e) => {
             e.preventDefault();
             const f = new FormData(e.currentTarget);
-            start(async () => setMessage(await reportAction(type, id, String(f.get("reason")), String(f.get("note") ?? ""))));
+            start(async () => {
+              const reported = await reportAction(type, id, String(f.get("reason")), String(f.get("note") ?? ""));
+              // "Also block" (ADR 0051): report and block in one go.
+              setMessage(f.get("block") === "on" ? `${reported} ${await blockAction(type, id)}` : reported);
+            });
           }}>
             <h2 id={`report-${id}`} className="text-lg font-bold">Report this {TARGET_NAMES[type]}</h2>
             <p className="mt-1 text-sm text-ink-muted">Reports are anonymous to the {type === "photo" || type === "trend_image" ? "person who shared it" : type === "listing" ? "seller" : type === "creator" ? "creator" : "author"}. {type === "listing_message" || type === "table_chat" || type === "creator_message" ? "Your report hides this message until a moderator checks." : "Three reports hide it until a moderator checks."}</p>
@@ -69,7 +73,13 @@ export function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
             <label className="mt-3 block text-sm font-semibold">Anything to add? <span className="font-normal text-ink-muted">(optional)</span>
               <textarea name="note" maxLength={300} rows={2} className="mt-1 w-full rounded-lg border border-line-strong bg-surface p-2 text-sm font-normal" />
             </label>
-            <div className="mt-4 flex justify-end gap-2">
+            <label className="mt-3 flex items-start gap-2 text-sm">
+              <input type="checkbox" name="block" className="mt-1 size-4 accent-[var(--m-brand)]" />
+              <span><span className="font-semibold">Also block this person.</span> They can&apos;t message you, and you won&apos;t see their posts, comments, listings or chat.</span>
+            </label>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button type="button" disabled={pending} onClick={() => start(async () => setMessage(await blockAction(type, id)))}
+                className={`mr-auto inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-bold text-brand-ink hover:underline disabled:opacity-60 ${focus}`}>Block only</button>
               <button type="button" onClick={() => ref.current?.close()} className={`inline-flex min-h-11 items-center rounded-xl border border-line-strong px-4 text-sm font-bold ${focus}`}>Cancel</button>
               <button type="submit" disabled={pending} className={`inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover disabled:opacity-60 ${focus}`}>{pending ? "Sending…" : "Send report"}</button>
             </div>
