@@ -2,7 +2,7 @@ import type { LandmarkSummary } from "@/types/landmark";
 import { EXPO_67_ID } from "@/lib/achievement-catalog";
 
 // Mock-mode copy of the landmarks seeded in supabase/migrations/006_landmarks.sql and
-// 032_more_landmarks.sql (hidden ones left out).
+// 032_more_landmarks.sql and 033_dashboard_landmarks.sql (hidden ones left out).
 // Keep the two in sync. In mock mode everything is locked and there are no photos.
 export function getMockLandmarks(): LandmarkSummary[] {
   return [
@@ -101,6 +101,37 @@ export function getMockLandmarks(): LandmarkSummary[] {
       id: "lachine-canal", name: "Lachine Canal", latitude: 45.4934, longitude: -73.553691, radius_m: 250,
       challenge_prompt: "Take a photo on the canal path by the Peel Basin, bike or no bike.",
       description: "The 1825 canal that built industrial Montréal, now a 14 km cycling and walking path.",
+    },
+    // 033_dashboard_landmarks.sql
+    {
+      id: "atwater-market", name: "Atwater Market", latitude: 45.4789, longitude: -73.5767, radius_m: 120,
+      challenge_prompt: "From the canal-side walkway, take a photo with the market’s clock tower visible behind you.",
+      description: "An Art Deco public market beside the Lachine Canal.",
+    },
+    {
+      id: "jean-talon-market", name: "Jean-Talon Market", latitude: 45.53597, longitude: -73.61522, radius_m: 120,
+      challenge_prompt: "Take a photo by the market entrance and give a thumbs-up to your favourite seasonal produce.",
+      description: "A public market in Little Italy known for its produce stands and food vendors.",
+    },
+    {
+      id: "kondiaronk-belvedere", name: "Kondiaronk Belvedere", latitude: 45.50345, longitude: -73.58704, radius_m: 120,
+      challenge_prompt: "Frame the downtown skyline behind you from the Mount Royal lookout.",
+      description: "A public Mount Royal lookout next to the chalet, overlooking downtown Montréal.",
+    },
+    {
+      id: "montreal-museum-fine-arts", name: "Montréal Museum of Fine Arts", latitude: 45.4987, longitude: -73.5801, radius_m: 100,
+      challenge_prompt: "Recreate a sculpture pose on the public sidewalk with a museum façade behind you.",
+      description: "An art museum whose pavilions line Sherbrooke Street in downtown Montréal.",
+    },
+    {
+      id: "notre-dame-basilica", name: "Notre-Dame Basilica", latitude: 45.5046, longitude: -73.5561, radius_m: 100,
+      challenge_prompt: "From Place d’Armes, take a photo with the basilica’s twin towers in the frame.",
+      description: "A Gothic Revival basilica facing Place d’Armes in Old Montréal.",
+    },
+    {
+      id: "olympic-stadium", name: "Olympic Stadium", latitude: 45.558, longitude: -73.552, radius_m: 250,
+      challenge_prompt: "Strike a victory pose on the Olympic Park esplanade with the stadium behind you.",
+      description: "The landmark stadium built for Montréal’s 1976 Summer Olympics.",
     },
   ].map((landmark) => ({ ...landmark, unlock_count: 0, unlocked: false }));
 }
