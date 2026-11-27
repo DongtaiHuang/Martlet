@@ -101,7 +101,7 @@ export function HeroCarousel() {
         </a>
       </div>
 
-      <div className="relative z-20 px-5 pt-6 pb-4 md:w-[53%] md:px-8 md:pt-10 md:pb-6 lg:px-10 lg:pt-12">
+      <div className="relative z-20 px-5 pt-6 pb-4 md:w-[53%] md:px-8 md:pt-8 md:pb-4 lg:px-10 lg:pt-9">
         <div className="grid">
           {heroSlides.map((item, index) => (
             <div
@@ -114,8 +114,8 @@ export function HeroCarousel() {
               className={`col-start-1 row-start-1 flex flex-col items-start ${index === current ? "" : "invisible"}`}
             >
               <h2 className="text-4xl leading-tight font-extrabold tracking-tight lg:text-5xl">{item.title}</h2>
-              <p className="mt-2 max-w-[35ch] text-base leading-6 text-stone-100 lg:text-lg lg:leading-7">{item.description}</p>
-              <div className="mt-5 flex flex-wrap gap-2.5">
+              <p className="mt-2 max-w-[35ch] text-base leading-6 text-stone-100 lg:max-w-[44ch] lg:text-lg lg:leading-7">{item.description}</p>
+              <div className="mt-4 flex flex-wrap gap-2.5">
                 {item.actions.map(({ label, href }, actionIndex) => (
                   <Link key={href} href={href} prefetch={index === current ? undefined : false} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${actionIndex === 0 ? "bg-brand hover:bg-brand-hover" : "border border-white/50 bg-stone-950/60 hover:bg-stone-950"}`}>
                     {label} <ArrowUpRight aria-hidden="true" size={16} />
@@ -126,7 +126,7 @@ export function HeroCarousel() {
           ))}
         </div>
 
-        <div role="group" aria-label="Carousel controls" className="mt-3 flex w-fit flex-wrap items-center gap-0.5">
+        <div role="group" aria-label="Carousel controls" className="mt-2 flex w-fit flex-wrap items-center gap-0.5">
           <button type="button" aria-label="Previous slide" className={controlClass} onClick={() => navigate(current - 1)}>
             <ChevronLeft aria-hidden="true" size={20} />
           </button>

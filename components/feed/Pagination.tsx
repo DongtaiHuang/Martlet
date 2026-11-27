@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /** Cards per page in the Meetups tab (meetups and landmarks views). */
-export const PAGE_SIZE = 6;
+export const PAGE_SIZE = 8; // four rows of two on laptops, level with the widgets
 
 /**
  * Client-side paging over an already-loaded list. `listTop` goes on the element above the
