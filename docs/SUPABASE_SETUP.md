@@ -59,6 +59,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 35 | `031_creator_photos.sql` | Creator profile photos: `has_photo`, photo Storage rules in `creator-works`, `set_creator_photo`, purge fix (ADR 0045) | After `029`. Apply before deploying the app with photos. Safe to re-run |
 | 36 | `032_more_landmarks.sql` | Twelve McGill and Montréal landmarks, `landmarks.hidden` (no new unlocks on hidden ones) and hides the duplicate Montréal Biosphère (ADR 0049) | After `006`, `012` and `015`. Safe to re-run |
 | 37 | `033_dashboard_landmarks.sql` | Copies the seven landmarks first added in the dashboard (Atwater, Jean-Talon, Kondiaronk, Museum of Fine Arts, Notre-Dame, Olympic Stadium, hidden Montréal Biosphère) so a fresh database matches production | After `032`. No-op on production. Safe to re-run |
+| 38 | `034_drift_ghosts.sql` | Martlet Drift ghost races: `drift_ghosts` (one replay per student), `submit_drift_run`, `get_drift_ghosts`, `get_my_drift_ghost` (ADR 0050) | After `022`. Apply before deploying the app with ghosts. Safe to re-run |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 

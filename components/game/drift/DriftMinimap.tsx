@@ -6,7 +6,9 @@ import type { NamedOutline } from "@/lib/drift-hud";
  * A north-up map of the loop for Martlet Drift's HUD (ADR 0047): the track, McGill's buildings in
  * red and your car as an arrow. World axes are x east and z south, so they map straight to SVG.
  */
-export function DriftMinimap({ track, buildings, car }: { track: Track; buildings: readonly NamedOutline[]; car: { x: number; z: number; heading: number } }) {
+type Pose = { x: number; z: number; heading: number };
+
+export function DriftMinimap({ track, buildings, car, ghost = null }: { track: Track; buildings: readonly NamedOutline[]; car: Pose; ghost?: Pose | null }) {
   const view = useMemo(() => {
     const xs = track.points.map((p) => p.x), zs = track.points.map((p) => p.z);
     const pad = 40;
@@ -26,6 +28,11 @@ export function DriftMinimap({ track, buildings, car }: { track: Track; building
       <path d={view.road} fill="none" stroke="#2a2a30" strokeWidth={u * 6} strokeLinejoin="round" />
       <path d={view.road} fill="none" stroke="#d9d4cc" strokeWidth={u * 3.5} strokeLinejoin="round" />
       <rect x={start.x - u * 2.5} y={start.z - u * 2.5} width={u * 5} height={u * 5} fill="#ffffff" stroke="#111" strokeWidth={u} />
+      {ghost && (
+        <g transform={`translate(${ghost.x.toFixed(1)} ${ghost.z.toFixed(1)}) rotate(${(180 - (ghost.heading * 180) / Math.PI).toFixed(1)})`} opacity="0.75">
+          <path d={`M0 ${-u * 6}L${u * 4} ${u * 4}L0 ${u * 1.5}L${-u * 4} ${u * 4}Z`} fill="#c8c8d0" stroke="#111" strokeWidth={u * 1.2} strokeLinejoin="round" />
+        </g>
+      )}
       {/* The car: an arrow pointing where it's heading (heading 0 faces +z, i.e. down). */}
       <g transform={`translate(${car.x.toFixed(1)} ${car.z.toFixed(1)}) rotate(${(180 - (car.heading * 180) / Math.PI).toFixed(1)})`}>
         <path d={`M0 ${-u * 6}L${u * 4} ${u * 4}L0 ${u * 1.5}L${-u * 4} ${u * 4}Z`} fill="#f5c84c" stroke="#111" strokeWidth={u * 1.2} strokeLinejoin="round" />
