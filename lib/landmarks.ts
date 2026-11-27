@@ -100,7 +100,8 @@ export async function listLandmarks(): Promise<LandmarkSummary[]> {
   const userId = await currentUserId(supabase);
 
   const [landmarks, counts, mine] = await Promise.all([
-    supabase.from("landmarks").select(LANDMARK_COLUMNS).order("name").returns<LandmarkRow[]>(),
+    // Hidden landmarks (ADR 0049) leave maps and lists; their existing unlocks stay.
+    supabase.from("landmarks").select(LANDMARK_COLUMNS).eq("hidden", false).order("name").returns<LandmarkRow[]>(),
     unlockCounts(supabase),
     userId
       ? supabase.from("landmark_unlocks").select("landmark_id").eq("user_id", userId)
@@ -233,13 +234,14 @@ export async function saveUnlock(
   const supabase = await createClient();
 
   const [landmark, existing] = await Promise.all([
-    supabase.from("landmarks").select("id").eq("id", landmarkId).maybeSingle(),
+    supabase.from("landmarks").select("id, hidden").eq("id", landmarkId).maybeSingle(),
     supabase.from("landmark_unlocks").select("user_id")
       .eq("landmark_id", landmarkId).eq("user_id", user.id).maybeSingle(),
   ]);
   if (landmark.error) throw new Error(`Failed to load landmark: ${landmark.error.message}`);
   if (existing.error) throw new Error(`Failed to load your unlock: ${existing.error.message}`);
-  if (!landmark.data) throw new LandmarkNotFoundError();
+  // A hidden landmark takes no new unlocks (the database enforces this too); existing ones can still be edited.
+  if (!landmark.data || (landmark.data.hidden && !existing.data)) throw new LandmarkNotFoundError();
 
   // The unlock row comes first: Storage only accepts photos for landmarks you've unlocked.
   if (!existing.data) {

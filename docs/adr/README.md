@@ -52,6 +52,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0046 | [Martlet Skies](0046-martlet-skies.md) | Accepted |
 | 0047 | [Martlet Drift on the real campus](0047-drift-on-the-real-campus.md) | Accepted |
 | 0048 | [McGill buildings highlighted in red on the campus maps](0048-mcgill-buildings-in-red.md) | Accepted |
+| 0049 | [More McGill and Montréal landmarks, and hiding landmarks](0049-more-landmarks.md) | Accepted |
 
 ## Adding a new ADR
 
