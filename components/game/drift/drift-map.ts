@@ -8,6 +8,7 @@ import { showMcgillBuildings } from "@/components/map/mcgill-buildings";
 import { PIXEL_SIZE } from "@/components/pixel/pixel3d";
 import { worldToLngLat } from "@/lib/drift-map";
 import { ORIGIN } from "@/lib/drift-streets";
+import { collapseCredit } from "@/components/map/map-credit";
 
 /** Must match the three.js camera's vertical field of view. */
 export const DRIFT_FOV = 60;
@@ -25,7 +26,7 @@ export function createDriftMap(container: HTMLElement): MapLibre {
   map.on("style.load", () => {
     for (const layer of map.getStyle().layers) if (layer.type === "symbol") map.setLayoutProperty(layer.id, "visibility", "none");
   });
-  map.once("load", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"));
+  collapseCredit(map);
   return map;
 }
 
