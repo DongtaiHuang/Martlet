@@ -4,6 +4,7 @@ import { LngLat, Map as MapLibre } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@/components/map/map-config"; // sets MapLibre's worker URL
 import { initialMapStyle, trackMapStyle } from "@/components/map/map-mode";
+import { showMcgillBuildings } from "@/components/map/mcgill-buildings";
 import { PIXEL_SIZE } from "@/components/pixel/pixel3d";
 import { worldToLngLat } from "@/lib/drift-map";
 import { ORIGIN } from "@/lib/drift-streets";
@@ -18,6 +19,7 @@ export function createDriftMap(container: HTMLElement): MapLibre {
     pixelRatio: 1 / PIXEL_SIZE, interactive: false, fadeDuration: 0, attributionControl: { compact: true },
   });
   trackMapStyle(map, style);
+  showMcgillBuildings(map); // McGill's buildings in red along the loop
   map.setVerticalFieldOfView(DRIFT_FOV);
   // Labels turn to mush when pixelated; keep the credit as its ⓘ button.
   map.on("style.load", () => {
