@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { SkiesLoader } from "@/components/game/skies/SkiesLoader";
 import type { SkiesLandmark, SkiesMeetup } from "@/components/game/skies/MartletSkies";
+import { BOUNDS } from "@/components/game/skies/skies-math";
 import { listLandmarks } from "@/lib/landmarks";
 import { listMeetups } from "@/lib/meetups";
 
@@ -26,7 +27,10 @@ export default async function SkiesPage() {
     listLandmarks().catch(() => []),
     listMeetups().catch(() => []),
   ]);
-  const towers: SkiesLandmark[] = landmarks.map(({ id, name, latitude, longitude, radius_m, unlock_count, unlocked }) =>
+  // Only landmarks inside the play area can be reached (and counted for "Bird's-eye view").
+  const inside = (l: { latitude: number; longitude: number }) =>
+    l.longitude >= BOUNDS.west && l.longitude <= BOUNDS.east && l.latitude >= BOUNDS.south && l.latitude <= BOUNDS.north;
+  const towers: SkiesLandmark[] = landmarks.filter(inside).map(({ id, name, latitude, longitude, radius_m, unlock_count, unlocked }) =>
     ({ id, name, latitude, longitude, radius_m, unlock_count, unlocked }));
   const spots = upcomingSpots(meetups);
 
