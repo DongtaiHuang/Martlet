@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { showMcgillBuildings } from "./mcgill-buildings";
 import { LngLatBounds, Map, Marker, NavigationControl } from "maplibre-gl";
 import { Box, Map as MapIcon } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -63,6 +64,7 @@ function MapLibreLocationMap({ category, color, locationName, latitude, longitud
       });
       mapRef.current = map;
       trackMapStyle(map, style);
+      showMcgillBuildings(map);
       map.addControl(new NavigationControl({ showCompass: false }), "top-right");
       map.touchZoomRotate.disableRotation();
       // Keep the 3D beacon after a light/dark style swap (style.load fires after setStyle).

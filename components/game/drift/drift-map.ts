@@ -19,7 +19,7 @@ export function createDriftMap(container: HTMLElement): MapLibre {
     pixelRatio: 1 / PIXEL_SIZE, interactive: false, fadeDuration: 0, attributionControl: { compact: true },
   });
   trackMapStyle(map, style);
-  showMcgillBuildings(map); // McGill's buildings in red along the loop
+  showMcgillBuildings(map, "solid"); // McGill's buildings in red along the loop
   map.setVerticalFieldOfView(DRIFT_FOV);
   // Labels turn to mush when pixelated; keep the credit as its ⓘ button.
   map.on("style.load", () => {

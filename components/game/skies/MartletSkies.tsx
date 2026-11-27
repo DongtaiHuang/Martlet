@@ -84,7 +84,7 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
       pixelRatio: 1 / PIXEL_SIZE, interactive: false, fadeDuration: 0, maxPitch: 70, attributionControl: { compact: true },
     });
     trackMapStyle(map, style);
-    showMcgillBuildings(map);
+    showMcgillBuildings(map, "solid");
     // Street and place labels turn to mush when pixelated, and we label what matters ourselves.
     map.on("style.load", () => {
       for (const layer of map.getStyle().layers) if (layer.type === "symbol") map.setLayoutProperty(layer.id, "visibility", "none");

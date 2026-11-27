@@ -51,7 +51,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0045 | [Creator profile photos](0045-creator-profile-photos.md) | Accepted |
 | 0046 | [Martlet Skies](0046-martlet-skies.md) | Accepted |
 | 0047 | [Martlet Drift on the real campus](0047-drift-on-the-real-campus.md) | Accepted |
-| 0048 | [McGill buildings in red on the game maps](0048-mcgill-buildings-in-red.md) | Accepted |
+| 0048 | [McGill buildings highlighted in red on the campus maps](0048-mcgill-buildings-in-red.md) | Accepted |
 
 ## Adding a new ADR
 
