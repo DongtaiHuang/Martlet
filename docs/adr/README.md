@@ -54,6 +54,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0048 | [McGill buildings highlighted in red on the campus maps](0048-mcgill-buildings-in-red.md) | Accepted |
 | 0049 | [More McGill and Montréal landmarks, and hiding landmarks](0049-more-landmarks.md) | Accepted |
 | 0050 | [Martlet Drift ghost races](0050-drift-ghost-races.md) | Accepted |
+| 0052 | [Drift tracks](0052-drift-tracks.md) | Accepted |
 
 ## Adding a new ADR
 

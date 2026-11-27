@@ -2,11 +2,12 @@
 
 import { getDriftGhosts, getDriftLeaderboard, startDriftRun, submitDriftRun, submitDriftScore, type Leaderboard, type SubmitResult } from "@/lib/drift-scores";
 import type { Ghost } from "@/lib/drift-ghost";
+import { isTrackId } from "@/lib/drift-tracks";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function startDriftRunAction(): Promise<string | null> {
-  return startDriftRun().catch(() => null);
+export async function startDriftRunAction(track: unknown = "streets"): Promise<string | null> {
+  return startDriftRun(isTrackId(track) ? track : "streets").catch(() => null);
 }
 
 export async function submitDriftScoreAction(runId: unknown, score: unknown): Promise<SubmitResult> {
@@ -14,8 +15,8 @@ export async function submitDriftScoreAction(runId: unknown, score: unknown): Pr
   return submitDriftScore(runId, score as number).catch(() => "error" as const);
 }
 
-export async function driftLeaderboardAction(limit = 10): Promise<Leaderboard | null> {
-  return getDriftLeaderboard(Math.min(Math.max(Math.trunc(limit) || 10, 1), 50)).catch(() => null);
+export async function driftLeaderboardAction(limit = 10, track: unknown = "streets"): Promise<Leaderboard | null> {
+  return getDriftLeaderboard(Math.min(Math.max(Math.trunc(limit) || 10, 1), 50), isTrackId(track) ? track : "streets").catch(() => null);
 }
 
 const SMALLINT = (v: unknown) => Number.isInteger(v) && Math.abs(v as number) <= 32767;
@@ -28,6 +29,6 @@ export async function submitDriftRunAction(runId: unknown, score: unknown, paint
   return submitDriftRun(runId, score as number, paint as number, replay).catch(() => "error" as const);
 }
 
-export async function driftGhostsAction(): Promise<Ghost[]> {
-  return getDriftGhosts().catch(() => []);
+export async function driftGhostsAction(track: unknown = "streets"): Promise<Ghost[]> {
+  return getDriftGhosts(5, isTrackId(track) ? track : "streets").catch(() => []);
 }

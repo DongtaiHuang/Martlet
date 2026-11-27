@@ -6,10 +6,11 @@ import { useMapColorMode } from "@/components/map/map-mode";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { passing, streetAt, type NamedOutline } from "@/lib/drift-hud";
+import { passing, type NamedOutline } from "@/lib/drift-hud";
+import { TRACK_IDS, TRACKS, signAt, type TrackId } from "@/lib/drift-tracks";
 import { lngLatToWorld } from "@/lib/drift-map";
 import { DriftMinimap } from "./DriftMinimap";
-import { buildTrack, nearest, TRACK_WIDTH, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
+import { buildTrack, nearest, TRACK_WIDTH, type Track, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
 import { driftGhostsAction, startDriftRunAction, submitDriftRunAction } from "@/app/play/drift/actions";
 import { GHOST_HZ, encodeSample, ghostAt, type Ghost } from "@/lib/drift-ghost";
 import type { SubmitResult } from "@/lib/drift-scores";
@@ -18,12 +19,11 @@ import { DriftEngine, SmokePool, type TouchKey } from "./engine";
 import { DRIFT_SCORE_EVENT } from "./events";
 import { TrackScene } from "./TrackScene";
 import { PIXEL_CANVAS } from "@/components/pixel/pixel3d";
-import { STREET_LOOP } from "@/lib/drift-streets";
 import type { Map as MapLibre } from "maplibre-gl";
 import { DRIFT_FOV, createDriftMap, syncDriftMap } from "./drift-map";
 
-// The real-street loop around campus (ADR 0047).
-const TRACK = buildTrack(STREET_LOOP);
+// The tracks (ADR 0047, 0052), built once each.
+const BUILT = Object.fromEntries(TRACK_IDS.map((id) => [id, buildTrack(TRACKS[id].loop)])) as Record<TrackId, Track>;
 type Phase = "ready" | "countdown" | "running" | "paused" | "done";
 interface Hud {
   score: number; current: number; multiplier: number; angle: number; speed: number; time: number; event: Score["lastEvent"]; offTrack: boolean;
@@ -32,10 +32,10 @@ interface Hud {
   /** The ghost you're racing (ADR 0050): its name, your lead in points, and where it is. */
   ghost: { name: string; lead: number; x: number; z: number; heading: number } | null;
 }
-const EMPTY_HUD: Hud = {
+const emptyHud = (id: TrackId): Hud => ({
   score: 0, current: 0, multiplier: 1, angle: 0, speed: 0, time: RUN_SECONDS, event: "", offTrack: false,
-  street: streetAt(0, TRACK.points.length).sign, passing: null, x: TRACK.points[0].x, z: TRACK.points[0].z, heading: 0, ghost: null,
-};
+  street: signAt(id, 0, BUILT[id].points.length), passing: null, x: BUILT[id].points[0].x, z: BUILT[id].points[0].z, heading: 0, ghost: null,
+});
 const SMOKE = 48, SKIDS = 1400;
 
 /** Moves the car, wheels, camera, smoke and skid marks each frame, and advances the engine while running. */
@@ -52,11 +52,12 @@ function GhostCoupe({ paint }: { paint: Paint }) {
   return <group ref={group}><Coupe paint={paint} /></group>;
 }
 
-function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef, recordRef, ghost }: {
-  engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void;
+function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildingsRef, recordRef, ghost }: {
+  engine: DriftEngine; trackId: TrackId; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void;
   mapRef: React.RefObject<MapLibre | null>; buildingsRef: React.RefObject<NamedOutline[]>; recordRef: React.RefObject<number[]>; ghost: Ghost | null;
 }) {
   const ghostCar = useRef<THREE.Group>(null);
+  const TRACK = BUILT[trackId];
   const car = useRef<THREE.Group>(null);
   const wheels = useRef<THREE.Object3D[]>([]);
   const { camera } = useThree();
@@ -166,7 +167,7 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef, re
         score: engine.score.total, current: Math.round(engine.score.current), multiplier: engine.score.multiplier, angle: Math.round(angle),
         speed: Math.round(speed * 3.6), time: Math.max(0, RUN_SECONDS - engine.time),
         event: engine.time - engine.eventAt < 1.6 ? engine.score.lastEvent : "", offTrack: phase === "running" && !isOnTrack(TRACK, c.x, c.z),
-        street: streetAt(nearest(TRACK, c.x, c.z).index, TRACK.points.length).sign,
+        street: signAt(trackId, nearest(TRACK, c.x, c.z).index, TRACK.points.length),
         passing: passing(c.x, c.z, buildingsRef.current ?? []), x: c.x, z: c.z, heading: c.heading,
         ghost: ghost && ghostState ? {
           name: ghost.me ? "Your best" : ghost.name, lead: engine.score.total + Math.round(engine.score.current) - ghostState.score,
@@ -178,7 +179,7 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef, re
 
   return (
     <>
-      <TrackScene track={TRACK} scenery={false} />
+      <TrackScene key={trackId} track={TRACK} scenery={false} />
       <instancedMesh ref={skids} args={[undefined, undefined, SKIDS]} frustumCulled={false}>
         <planeGeometry args={[0.28, 0.5]} />
         <meshBasicMaterial color="#1b1b1b" transparent opacity={0.55} depthWrite={false} polygonOffset polygonOffsetFactor={-2} />
@@ -205,7 +206,8 @@ const fmt = (n: number) => n.toLocaleString("en-CA");
 
 /** Martlet Drift (issue #149, ADR 0037): a 90-second drift run on the campus loop. */
 export default function DriftGame({ signedIn }: { signedIn: boolean }) {
-  const engine = useMemo(() => new DriftEngine(TRACK), []);
+  const [trackId, setTrackId] = useState<TrackId>("streets");
+  const engine = useMemo(() => new DriftEngine(BUILT[trackId]), [trackId]);
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibre | null>(null);
   useMapColorMode(mapRef);
@@ -220,7 +222,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   const [phase, setPhase] = useState<Phase>("ready");
   const phaseRef = useRef<Phase>("ready");
   const [paint, setPaint] = useState<Paint>(PAINTS[0]);
-  const [hud, setHud] = useState<Hud>(EMPTY_HUD);
+  const [hud, setHud] = useState<Hud>(() => emptyHud("streets"));
   // McGill's building outlines (the same file the map highlights) for the minimap and "Passing".
   const [buildings, setBuildings] = useState<NamedOutline[]>([]);
   const buildingsRef = useRef<NamedOutline[]>([]);
@@ -241,9 +243,9 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   useEffect(() => {
     if (!signedIn) return;
     let cancelled = false;
-    void driftGhostsAction().then((list) => { if (!cancelled) setGhosts(list); });
+    void driftGhostsAction(trackId).then((list) => { if (!cancelled) setGhosts(list); });
     return () => { cancelled = true; };
-  }, [signedIn]);
+  }, [signedIn, trackId]);
   const ghost = ghostIndex === null ? null : ghosts[ghostIndex] ?? null;
   const [count, setCount] = useState(3);
   const [result, setResult] = useState<{ score: number; saved: SubmitResult | null } | null>(null);
@@ -279,9 +281,9 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   async function start() {
     engine.reset();
     setResult(null);
-    setHud(EMPTY_HUD);
+    setHud(emptyHud(trackId));
     recordRef.current = [];
-    runId.current = signedIn ? await startDriftRunAction() : null;
+    runId.current = signedIn ? await startDriftRunAction(trackId) : null;
     go("countdown");
     box.current?.focus();
     for (const n of [3, 2, 1]) { setCount(n); await new Promise((r) => setTimeout(r, 700)); }
@@ -301,7 +303,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
       runId.current = null;
       setResult({ score, saved });
       window.dispatchEvent(new Event(DRIFT_SCORE_EVENT));
-      if (saved === "new-best") void driftGhostsAction().then(setGhosts);
+      if (saved === "new-best") void driftGhostsAction(trackId).then(setGhosts);
     }
   }
 
@@ -320,7 +322,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
         style={{ ...PIXEL_CANVAS.style, position: "absolute", inset: 0 }} aria-hidden="true">
         <hemisphereLight args={["#ffffff", "#4b6b3a", 1.1]} />
         <directionalLight position={[80, 120, 40]} intensity={1.6} />
-        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} recordRef={recordRef} ghost={ghost} />
+        <World engine={engine} trackId={trackId} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} recordRef={recordRef} ghost={ghost} />
       </Canvas>
 
       {/* HUD */}
@@ -361,7 +363,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
             <p className="rounded-sm border-2 border-white bg-[#1f4e9a] px-3 py-0.5 font-mono text-sm font-black tracking-wide whitespace-nowrap shadow-[0_2px_0_rgb(0_0_0/0.35)]">{hud.street}</p>
           </div>
           <div className="absolute top-32 right-3 size-24 overflow-hidden rounded-lg border-2 border-black/50 sm:top-36 sm:right-4 sm:size-32">
-            <DriftMinimap track={TRACK} buildings={buildings} car={hud} ghost={hud.ghost} />
+            <DriftMinimap track={BUILT[trackId]} buildings={buildings} car={hud} ghost={hud.ghost} />
           </div>
         </div>
       )}
@@ -399,6 +401,23 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
                 <h2 className="text-xl font-extrabold">Drift run · {RUN_SECONDS} s</h2>
                 <p className="mt-1 text-sm text-ink-2">Slide round Sherbrooke, University, Pine and McTavish. Longer, wider, faster drifts score more, and chaining them builds a combo up to ×5. Leave the track or spin out and the combo’s gone.</p>
               </>
+            )}
+            {phase !== "paused" && (
+              <fieldset className="mt-4">
+                <legend className="text-sm font-bold">Track</legend>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {TRACK_IDS.map((id) => (
+                    <label key={id} className="cursor-pointer">
+                      <input type="radio" name="track" className="peer sr-only" checked={trackId === id}
+                        onChange={() => { setTrackId(id); setGhostIndex(null); setHud(emptyHud(id)); }} />
+                      <span className="block rounded-xl border border-line-strong p-3 text-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-focus">
+                        <span className="block font-bold text-ink">{TRACKS[id].name}</span>
+                        <span className="block text-xs text-ink-muted">{TRACKS[id].blurb}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
             )}
             {phase !== "paused" && (
               <fieldset className="mt-4">
