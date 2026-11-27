@@ -3,6 +3,7 @@
 import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import type { Leaderboard, SubmitResult } from "@/lib/flight-scores";
+import { ghostChoices, type Ghost } from "@/lib/drift-ghost";
 
 export type { Leaderboard, SubmitResult } from "@/lib/flight-scores";
 
@@ -36,4 +37,25 @@ export async function getDriftLeaderboard(limit = 10): Promise<Leaderboard | nul
   const { data, error } = await supabase.rpc("get_drift_leaderboard", { p_limit: limit });
   if (error) { console.warn("get_drift_leaderboard failed", error.message); return null; }
   return data as Leaderboard;
+}
+
+/** Submits a run with its replay (migration 034): a new best also becomes your ghost. */
+export async function submitDriftRun(runId: string, score: number, paint: number, path: number[]): Promise<SubmitResult> {
+  const supabase = await signedInClient();
+  if (!supabase) return "guest";
+  const { data, error } = await supabase.rpc("submit_drift_run", { p_run: runId, p_score: score, p_paint: paint, p_path: path });
+  if (error) { console.warn("submit_drift_run failed", error.message); return "error"; }
+  return data === "new-best" || data === "saved" ? data : "rejected";
+}
+
+/** The best ghosts plus your own, best first. Empty for guests. */
+export async function getDriftGhosts(limit = 5): Promise<Ghost[]> {
+  const supabase = await signedInClient();
+  if (!supabase) return [];
+  const [top, mine] = await Promise.all([
+    supabase.rpc("get_drift_ghosts", { p_limit: limit }),
+    supabase.rpc("get_my_drift_ghost"),
+  ]);
+  if (top.error) { console.warn("get_drift_ghosts failed", top.error.message); return []; }
+  return ghostChoices((top.data ?? []) as Ghost[], (mine.data ?? null) as Ghost | null);
 }

@@ -10,7 +10,8 @@ import { passing, streetAt, type NamedOutline } from "@/lib/drift-hud";
 import { lngLatToWorld } from "@/lib/drift-map";
 import { DriftMinimap } from "./DriftMinimap";
 import { buildTrack, nearest, TRACK_WIDTH, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
-import { startDriftRunAction, submitDriftScoreAction } from "@/app/play/drift/actions";
+import { driftGhostsAction, startDriftRunAction, submitDriftRunAction } from "@/app/play/drift/actions";
+import { GHOST_HZ, encodeSample, ghostAt, type Ghost } from "@/lib/drift-ghost";
 import type { SubmitResult } from "@/lib/drift-scores";
 import { Coupe, PAINTS, type Paint } from "./Coupe";
 import { DriftEngine, SmokePool, type TouchKey } from "./engine";
@@ -28,15 +29,34 @@ interface Hud {
   score: number; current: number; multiplier: number; angle: number; speed: number; time: number; event: Score["lastEvent"]; offTrack: boolean;
   /** Where you are (ADR 0047): the street sign, the McGill building you're passing, and the car for the minimap. */
   street: string; passing: string | null; x: number; z: number; heading: number;
+  /** The ghost you're racing (ADR 0050): its name, your lead in points, and where it is. */
+  ghost: { name: string; lead: number; x: number; z: number; heading: number } | null;
 }
 const EMPTY_HUD: Hud = {
   score: 0, current: 0, multiplier: 1, angle: 0, speed: 0, time: RUN_SECONDS, event: "", offTrack: false,
-  street: streetAt(0, TRACK.points.length).sign, passing: null, x: TRACK.points[0].x, z: TRACK.points[0].z, heading: 0,
+  street: streetAt(0, TRACK.points.length).sign, passing: null, x: TRACK.points[0].x, z: TRACK.points[0].z, heading: 0, ghost: null,
 };
 const SMOKE = 48, SKIDS = 1400;
 
 /** Moves the car, wheels, camera, smoke and skid marks each frame, and advances the engine while running. */
-function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef }: { engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void; mapRef: React.RefObject<MapLibre | null>; buildingsRef: React.RefObject<NamedOutline[]> }) {
+/** A see-through coupe for the ghost: its own materials, made transparent once mounted. */
+function GhostCoupe({ paint }: { paint: Paint }) {
+  const group = useRef<THREE.Group>(null);
+  useEffect(() => {
+    group.current?.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      const mats = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
+      for (const m of mats) { m.transparent = true; m.opacity = 0.38; m.depthWrite = false; }
+    });
+  }, [paint]);
+  return <group ref={group}><Coupe paint={paint} /></group>;
+}
+
+function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef, recordRef, ghost }: {
+  engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void;
+  mapRef: React.RefObject<MapLibre | null>; buildingsRef: React.RefObject<NamedOutline[]>; recordRef: React.RefObject<number[]>; ghost: Ghost | null;
+}) {
+  const ghostCar = useRef<THREE.Group>(null);
   const car = useRef<THREE.Group>(null);
   const wheels = useRef<THREE.Object3D[]>([]);
   const { camera } = useThree();
@@ -61,6 +81,17 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef }: 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
     if (phase === "running" && engine.advance(dt)) onFinish();
+    // Record the run for its ghost (ADR 0050): 10 samples a second, with the banked score so the
+    // replay's score never goes down.
+    if (phase === "running" && recordRef.current && engine.time * GHOST_HZ >= recordRef.current.length / 4) {
+      recordRef.current.push(...encodeSample(engine.car.x, engine.car.z, engine.car.heading, engine.score.total));
+    }
+    // The ghost you're racing, see-through, at the same moment of its run.
+    const ghostState = ghost && phase !== "ready" ? ghostAt(ghost.path, engine.time) : null;
+    if (ghostCar.current) {
+      ghostCar.current.visible = Boolean(ghostState);
+      if (ghostState) { ghostCar.current.position.set(ghostState.x, 0, ghostState.z); ghostCar.current.rotation.y = ghostState.heading; }
+    }
     // Achievements: a full lap driven on the road (progress along the track, wrapping at the
     // start line), and a x5 combo.
     if (phase === "ready" || phase === "countdown") lap.current = { last: -1, progress: 0 };
@@ -137,6 +168,10 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef }: 
         event: engine.time - engine.eventAt < 1.6 ? engine.score.lastEvent : "", offTrack: phase === "running" && !isOnTrack(TRACK, c.x, c.z),
         street: streetAt(nearest(TRACK, c.x, c.z).index, TRACK.points.length).sign,
         passing: passing(c.x, c.z, buildingsRef.current ?? []), x: c.x, z: c.z, heading: c.heading,
+        ghost: ghost && ghostState ? {
+          name: ghost.me ? "Your best" : ghost.name, lead: engine.score.total + Math.round(engine.score.current) - ghostState.score,
+          x: ghostState.x, z: ghostState.z, heading: ghostState.heading,
+        } : null,
       });
     }
   });
@@ -157,6 +192,11 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef }: 
       <group ref={car}>
         <Coupe paint={paint} />
       </group>
+      {ghost && (
+        <group ref={ghostCar} visible={false}>
+          <GhostCoupe paint={PAINTS[ghost.paint] ?? PAINTS[0]} />
+        </group>
+      )}
     </>
   );
 }
@@ -194,6 +234,17 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
     }).catch(() => { /* the HUD just has no building names */ });
     return () => { cancelled = true; };
   }, []);
+  // Ghost races (ADR 0050): the ghosts to pick from, the one you're racing, and this run's replay.
+  const [ghosts, setGhosts] = useState<Ghost[]>([]);
+  const [ghostIndex, setGhostIndex] = useState<number | null>(null);
+  const recordRef = useRef<number[]>([]);
+  useEffect(() => {
+    if (!signedIn) return;
+    let cancelled = false;
+    void driftGhostsAction().then((list) => { if (!cancelled) setGhosts(list); });
+    return () => { cancelled = true; };
+  }, [signedIn]);
+  const ghost = ghostIndex === null ? null : ghosts[ghostIndex] ?? null;
   const [count, setCount] = useState(3);
   const [result, setResult] = useState<{ score: number; saved: SubmitResult | null } | null>(null);
   const runId = useRef<string | null>(null);
@@ -229,6 +280,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
     engine.reset();
     setResult(null);
     setHud(EMPTY_HUD);
+    recordRef.current = [];
     runId.current = signedIn ? await startDriftRunAction() : null;
     go("countdown");
     box.current?.focus();
@@ -242,10 +294,14 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
     const score = engine.final();
     setResult({ score, saved: null });
     if (runId.current) {
-      const saved = await submitDriftScoreAction(runId.current, score);
+      // The replay ends on the final score.
+      const path = [...recordRef.current, ...encodeSample(engine.car.x, engine.car.z, engine.car.heading, score)];
+      const paintIndex = Math.max(0, PAINTS.findIndex((p) => p.name === paint.name));
+      const saved = await submitDriftRunAction(runId.current, score, paintIndex, path);
       runId.current = null;
       setResult({ score, saved });
       window.dispatchEvent(new Event(DRIFT_SCORE_EVENT));
+      if (saved === "new-best") void driftGhostsAction().then(setGhosts);
     }
   }
 
@@ -264,7 +320,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
         style={{ ...PIXEL_CANVAS.style, position: "absolute", inset: 0 }} aria-hidden="true">
         <hemisphereLight args={["#ffffff", "#4b6b3a", 1.1]} />
         <directionalLight position={[80, 120, 40]} intensity={1.6} />
-        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} />
+        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} recordRef={recordRef} ghost={ghost} />
       </Canvas>
 
       {/* HUD */}
@@ -288,6 +344,11 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
               <p className={`text-2xl font-extrabold tabular-nums ${hud.time < 10 ? "text-amber-300" : ""}`}>{hud.time.toFixed(1)}</p>
             </div>
           </div>
+          {hud.ghost && (
+            <p className={`mx-auto mt-2 w-fit rounded-lg px-3 py-1 text-xs font-bold tabular-nums ${hud.ghost.lead >= 0 ? "bg-emerald-600/80" : "bg-black/50"}`}>
+              vs {hud.ghost.name}: {hud.ghost.lead >= 0 ? "+" : "−"}{fmt(Math.abs(hud.ghost.lead))}
+            </p>
+          )}
           {(hud.event || hud.offTrack) && (
             <p key={hud.event + hud.offTrack} className="bj-land mx-auto mt-4 w-fit rounded-xl bg-black/55 px-4 py-2 text-lg font-extrabold">
               {hud.offTrack ? "Off track!" : hud.event === "banked" ? "Combo banked!" : hud.event === "lost" ? "Combo lost" : "Spun out!"}
@@ -300,7 +361,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
             <p className="rounded-sm border-2 border-white bg-[#1f4e9a] px-3 py-0.5 font-mono text-sm font-black tracking-wide whitespace-nowrap shadow-[0_2px_0_rgb(0_0_0/0.35)]">{hud.street}</p>
           </div>
           <div className="absolute top-32 right-3 size-24 overflow-hidden rounded-lg border-2 border-black/50 sm:top-36 sm:right-4 sm:size-32">
-            <DriftMinimap track={TRACK} buildings={buildings} car={hud} />
+            <DriftMinimap track={TRACK} buildings={buildings} car={hud} ghost={hud.ghost} />
           </div>
         </div>
       )}
@@ -350,6 +411,24 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
                       <span aria-hidden="true" className="block size-9 rounded-full border-2 border-line ring-offset-2 ring-offset-surface peer-checked:ring-2 peer-checked:ring-brand peer-focus-visible:outline-2 peer-focus-visible:outline-focus" style={{ background: p.color }} />
                     </label>
                   ))}
+                </div>
+              </fieldset>
+            )}
+            {phase !== "paused" && ghosts.length > 0 && (
+              <fieldset className="mt-4">
+                <legend className="text-sm font-bold">Race a ghost</legend>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[null, ...ghosts.map((_, i) => i)].map((i) => {
+                    const g = i === null ? null : ghosts[i];
+                    return (
+                      <label key={i ?? "none"} className="cursor-pointer">
+                        <input type="radio" name="ghost" className="peer sr-only" checked={ghostIndex === i} onChange={() => setGhostIndex(i)} />
+                        <span className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line-strong px-3 text-sm font-semibold text-ink-2 peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:text-brand-ink-strong peer-focus-visible:outline-2 peer-focus-visible:outline-focus">
+                          {g ? <>{g.me ? "Your best" : g.name} <span className="tabular-nums text-ink-muted">{fmt(g.score)}</span></> : "No ghost"}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </fieldset>
             )}
