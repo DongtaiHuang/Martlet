@@ -12,6 +12,7 @@ import { earn } from "@/components/achievements/earn";
 import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook } from "@/components/avatar/look";
 import { towerSvg, towerTier } from "@/components/map/landmark-tower";
 import { initialMapStyle, trackMapStyle, useMapColorMode } from "@/components/map/map-mode";
+import { showMcgillBuildings } from "@/components/map/mcgill-buildings";
 import "@/components/map/map-config"; // sets MapLibre's worker URL
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { PixelSprite } from "@/components/pixel/PixelSprite";
@@ -83,6 +84,7 @@ export default function MartletSkies({ landmarks, meetups }: { landmarks: SkiesL
       pixelRatio: 1 / PIXEL_SIZE, interactive: false, fadeDuration: 0, maxPitch: 70, attributionControl: { compact: true },
     });
     trackMapStyle(map, style);
+    showMcgillBuildings(map, "solid");
     // Street and place labels turn to mush when pixelated, and we label what matters ourselves.
     map.on("style.load", () => {
       for (const layer of map.getStyle().layers) if (layer.type === "symbol") map.setLayoutProperty(layer.id, "visibility", "none");

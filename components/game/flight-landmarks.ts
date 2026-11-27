@@ -3,7 +3,7 @@
 // font for their names. Drawn with simple shapes into letter grids, in day and night colours.
 // Relative .ts imports keep this importable by node --test.
 import { CAMPUS, MARTY } from "../../lib/pixel/palette.ts";
-import { blank, outlined, toSprite, type Grid, type Sprite } from "../../lib/pixel/sprite.ts";
+import { blank, outlined, overlay, grid, toSprite, type Grid, type Sprite } from "../../lib/pixel/sprite.ts";
 
 type Mode = "light" | "dark";
 
@@ -11,10 +11,12 @@ type Mode = "light" | "dark";
 // L lantern, B tree leaf, b leaf shade, T trunk, K outline.
 const COLORS: Record<Mode, Record<string, string>> = {
   light: {
+    H: "#c8102e", M: "#a6192e", P: "#ffffff",
     K: MARTY.outline, S: CAMPUS.stone, s: CAMPUS.stoneShade, C: "#fff6e3", W: CAMPUS.window, D: "#4a2a20",
     R: "#6e9c8c", r: "#4f7a6b", I: "#2a2a30", L: CAMPUS.gold, B: CAMPUS.leaf, b: CAMPUS.leafDark, T: CAMPUS.wood,
   },
   dark: {
+    H: "#e0303f", M: "#c42a2a", P: "#ffe9de",
     K: "#14101c", S: "#3a3550", s: "#2c2840", C: "#4a4562", W: "#ffd36b", D: "#1a1426",
     R: "#2f4a4a", r: "#223838", I: "#0f0f14", L: "#ffe39a", B: "#1e3a28", b: "#142a1d", T: "#2a1d14",
   },
@@ -121,8 +123,54 @@ export const LANDMARKS = [
 const cache = new Map<string, Sprite>();
 const cached = (key: string, make: () => Sprite) => { let s = cache.get(key); if (!s) { s = make(); cache.set(key, s); } return s; };
 
+/**
+ * Like outlined(), but only on the outside: empty cells reachable from the sprite's edge that touch
+ * a filled cell. Gaps inside a shape (between the gates' bars) stay empty.
+ */
+function outerHalo(g: Grid, halo: string): Grid {
+  const h = g.length, w = g[0].length;
+  const outside = g.map((row) => row.map(() => false));
+  const stack: [number, number][] = [];
+  for (let x = 0; x < w; x++) stack.push([x, 0], [x, h - 1]);
+  for (let y = 0; y < h; y++) stack.push([0, y], [w - 1, y]);
+  while (stack.length) {
+    const [x, y] = stack.pop()!;
+    if (x < 0 || y < 0 || x >= w || y >= h || outside[y][x] || g[y][x] !== ".") continue;
+    outside[y][x] = true;
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+  // Only the gates' archway is open to the sky between bars, so treat cells boxed in on both
+  // sides by filled cells in the same row as inside too.
+  return g.map((row, y) => row.map((c, x) => {
+    if (c !== "." || !outside[y][x]) return c;
+    const touches = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => { const n = g[y + dy]?.[x + dx]; return n !== undefined && n !== "."; });
+    const between = row.slice(0, x).some((v) => v !== ".") && row.slice(x + 1).some((v) => v !== ".");
+    return touches && !between ? halo : c;
+  }));
+}
+
+// A McGill pennant on a pole (7 x 10): I pole, M red, P white stripe.
+const PENNANT = grid([
+  "I......", "IMMMM..", "IMPPMMM", "IMMMM..", "I......", "I......", "I......", "I......", "I......", "I......",
+]);
+
+/**
+ * A landmark with a McGill pennant on its highest point and a red halo (H) around the outline,
+ * so McGill's buildings stand out in the skyline.
+ */
 export const landmarkSprite = (index: number, mode: Mode) =>
-  cached(`lm-${index}-${mode}`, () => toSprite(LANDMARKS[index].draw(), COLORS[mode]));
+  cached(`lm-${index}-${mode}`, () => {
+    const body = LANDMARKS[index].draw();
+    const w = body[0].length;
+    // Room above for the pennant, and a 1-pixel border for the halo.
+    let g: Grid = [...blank(w, PENNANT.length), ...body].map((row) => [".", ...row, "."]);
+    g = [Array(w + 2).fill("."), ...g, Array(w + 2).fill(".")];
+    // The pennant stands on the first filled cell from the top, in the middle third.
+    let top = { x: Math.floor(w / 2), y: body.length };
+    for (let y = 0; y < body.length && top.y === body.length; y++) for (let x = Math.floor(w / 3); x < (2 * w) / 3; x++) if (body[y][x] !== ".") { top = { x, y }; break; }
+    g = overlay(g, PENNANT, top.x + 1, top.y + 1);
+    return toSprite(outerHalo(g, "H"), COLORS[mode]);
+  });
 export const treeSprite = (mode: Mode) => cached(`tree-${mode}`, () => toSprite(tree(), COLORS[mode]));
 
 // 3 x 5 capitals for landmark names.

@@ -16,7 +16,7 @@ import { LANDMARKS } from "./flight-landmarks";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 
 // Logical playfield (scaled to fit the container).
-const W = 360, H = 600, GROUND = 70;
+const W = 360, H = 600, GROUND = 46; // a thin ground strip: fly low among the landmarks
 const GRAVITY = 1500, FLAP = -470, MAX_FALL = 620;
 const BIRD_X = 96, BIRD_R = 14;
 const COL_W = 62, GAP_START = 168, GAP_MIN = 132, SPACING = 214;

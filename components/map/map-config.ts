@@ -1,6 +1,7 @@
 import { GeolocateControl, Map, NavigationControl, getVersion, setWorkerUrl } from "maplibre-gl";
 import type { MeetupCategory } from "@/types/meetup";
 import { initialMapStyle, trackMapStyle } from "./map-mode";
+import { showMcgillBuildings } from "./mcgill-buildings";
 
 // Shared by CampusMap (Explore), LandmarkMap (Landmarks) and MeetupLocationMap (meetup detail).
 
@@ -23,6 +24,7 @@ export function createCampusMap(container: HTMLElement): Map {
   const style = initialMapStyle(); // light or dark basemap (ADR 0014)
   const map = new Map({ container, style, center: CAMPUS_CENTER, zoom: CAMPUS_ZOOM });
   trackMapStyle(map, style);
+  showMcgillBuildings(map); // McGill's buildings outlined in red (ADR 0048)
   map.addControl(new NavigationControl(), "top-right");
   // ADR 0008: opt-in, one-shot "show my location". The position stays in the
   // browser (MapLibre draws a dot); it is never sent to our server or stored.
