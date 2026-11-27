@@ -5,6 +5,7 @@ import { getMockCreators } from "@/lib/mock-creators";
 import { requireUser } from "@/lib/supabase/auth";
 import { getDataMode } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { blockedIds, inList } from "@/lib/blocks";
 
 const BUCKET = "creator-works";
 const URL_SECONDS = 3600;
@@ -83,6 +84,8 @@ export async function listCreators(filter: CreatorFilter = {}): Promise<Creator[
   let query = s.supabase.from("creator_profiles").select(PROFILE_SELECT).eq("status", "visible").order("updated_at", { ascending: false }).limit(PAGE);
   if (filter.discipline) query = query.contains("disciplines", [filter.discipline]);
   if (filter.open) query = query.eq("open_for_requests", true);
+  const blocked = await blockedIds(s.supabase); // creators you've blocked (ADR 0051)
+  if (blocked.length) query = query.not("user_id", "in", inList(blocked));
   const q = filter.q?.trim().replace(/[%_,()]/g, " ").slice(0, 60);
   if (q) query = query.or(`headline.ilike.%${q}%,bio.ilike.%${q}%,rates.ilike.%${q}%`);
   const { data, error } = await query.returns<ProfileRow[]>();
@@ -163,6 +166,7 @@ function rpcError(error: { message: string; hint?: string; code?: string }): nev
   if (error.hint === "removed") throw new CreatorError("A moderator removed your creator profile, so it can’t be edited.");
   if (error.code === "23514" || error.code === "23503" || error.code === "22P02") throw new CreatorError("Check the form: something is missing or not allowed.");
   if (error.code === "P0002") throw new CreatorError("That creator or request isn’t available any more.");
+  if (error.hint === "blocked") throw new CreatorError("You can’t message this person.");
   if (error.code === "42501") throw new CreatorError("You can’t do that.");
   throw new Error(error.message);
 }

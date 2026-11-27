@@ -7,6 +7,7 @@ import {
   removeMyBoardContent, REPORT_TARGETS, reportContent, setBoardVote, type BoardKind, type PostableKind, type ReportReason, type ReportTarget,
 } from "@/lib/board";
 import { AuthRequiredError } from "@/lib/supabase/auth";
+import { blockAuthor, unblockUser } from "@/lib/blocks";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_IMAGE = 3_000_000;
@@ -91,6 +92,29 @@ export async function reportAction(type: ReportTarget, id: string, reason: strin
   } catch (error) {
     return friendly(error);
   }
+}
+
+/** Blocks the author of an item (ADR 0051): they can't message you, and you stop seeing their posts. */
+export async function blockAction(type: ReportTarget, id: string): Promise<string> {
+  if (!UUID.test(id) || !REPORT_TARGETS.includes(type)) return "Couldn't block this person.";
+  try {
+    const r = await blockAuthor(type, id);
+    revalidatePath("/", "layout");
+    if (r === "self") return "That's you!";
+    if (r === "missing") return "Couldn't find who wrote this.";
+    return r === "already"
+      ? "You've already blocked this person."
+      : "Blocked. They can't message you, and you won't see their posts, comments, listings or chat. Unblock them from your profile.";
+  } catch (error) {
+    return friendly(error);
+  }
+}
+
+/** Unblock someone from your blocked list on the profile page. */
+export async function unblockAction(userId: string): Promise<void> {
+  if (!UUID.test(userId)) return;
+  await unblockUser(userId).catch((error) => console.error("Unblock failed", error));
+  revalidatePath("/", "layout");
 }
 
 export async function moderateAction(type: ReportTarget, id: string, action: "restore" | "remove" | "dismiss"): Promise<void> {
