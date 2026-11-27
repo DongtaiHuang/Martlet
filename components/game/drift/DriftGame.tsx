@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { earn } from "@/components/achievements/earn";
 import { useMapColorMode } from "@/components/map/map-mode";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
@@ -11,7 +11,13 @@ import { TRACK_IDS, TRACKS, signAt, type TrackId } from "@/lib/drift-tracks";
 import { lngLatToWorld } from "@/lib/drift-map";
 import { DriftMinimap } from "./DriftMinimap";
 import { buildTrack, nearest, TRACK_WIDTH, type Track, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
-import { driftGhostsAction, startDriftRunAction, submitDriftRunAction } from "@/app/play/drift/actions";
+import {
+  createRaceAction, driftGhostsAction, finishRaceAction, joinRaceAction, leaveRaceAction, raceRoomAction, rematchRaceAction,
+  startDriftRunAction, startRaceAction, submitDriftRunAction,
+} from "@/app/play/drift/actions";
+import type { RaceFinish, RaceRoom } from "@/lib/drift-race";
+import { openRaceChannel, type RaceChannel, type RivalPose } from "@/lib/drift-race-channel";
+import { DriftRacePanel } from "./DriftRacePanel";
 import { GHOST_HZ, encodeSample, ghostAt, type Ghost } from "@/lib/drift-ghost";
 import type { SubmitResult } from "@/lib/drift-scores";
 import { Coupe, PAINTS, type Paint } from "./Coupe";
@@ -31,10 +37,12 @@ interface Hud {
   street: string; passing: string | null; x: number; z: number; heading: number;
   /** The ghost you're racing (ADR 0050): its name, your lead in points, and where it is. */
   ghost: { name: string; lead: number; x: number; z: number; heading: number } | null;
+  /** Friends in a live race (ADR 0053): where they are and their points so far. */
+  rivals: { seat: number; score: number; x: number; z: number; heading: number; paint: number }[];
 }
 const emptyHud = (id: TrackId): Hud => ({
   score: 0, current: 0, multiplier: 1, angle: 0, speed: 0, time: RUN_SECONDS, event: "", offTrack: false,
-  street: signAt(id, 0, BUILT[id].points.length), passing: null, x: BUILT[id].points[0].x, z: BUILT[id].points[0].z, heading: 0, ghost: null,
+  street: signAt(id, 0, BUILT[id].points.length), passing: null, x: BUILT[id].points[0].x, z: BUILT[id].points[0].z, heading: 0, ghost: null, rivals: [],
 });
 const SMOKE = 48, SKIDS = 1400;
 
@@ -52,10 +60,16 @@ function GhostCoupe({ paint }: { paint: Paint }) {
   return <group ref={group}><Coupe paint={paint} /></group>;
 }
 
-function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildingsRef, recordRef, ghost }: {
+type Rival = RivalPose & { at: number };
+const RIVAL_STALE_MS = 3000;
+
+function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildingsRef, recordRef, ghost, rivalsRef, rivalPaints, onPose }: {
   engine: DriftEngine; trackId: TrackId; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void;
   mapRef: React.RefObject<MapLibre | null>; buildingsRef: React.RefObject<NamedOutline[]>; recordRef: React.RefObject<number[]>; ghost: Ghost | null;
+  rivalsRef: React.RefObject<Map<number, Rival>>; rivalPaints: { seat: number; paint: number }[];
+  onPose: (pose: { x: number; z: number; h: number; s: number; t: number }) => void;
 }) {
+  const rivalCars = useRef(new Map<number, THREE.Group>());
   const ghostCar = useRef<THREE.Group>(null);
   const TRACK = BUILT[trackId];
   const car = useRef<THREE.Group>(null);
@@ -93,6 +107,22 @@ function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildin
       ghostCar.current.visible = Boolean(ghostState);
       if (ghostState) { ghostCar.current.position.set(ghostState.x, 0, ghostState.z); ghostCar.current.rotation.y = ghostState.heading; }
     }
+    // Friends' cars (ADR 0053), eased toward their latest position so 10 updates a second look smooth.
+    const now = performance.now();
+    for (const [seat, group] of rivalCars.current) {
+      const r = rivalsRef.current?.get(seat);
+      const fresh = Boolean(r && now - r.at < RIVAL_STALE_MS && phase !== "ready");
+      group.visible = fresh;
+      if (!r || !fresh) continue;
+      const k = 1 - Math.exp(-dt * 12);
+      group.position.x += (r.x - group.position.x) * k;
+      group.position.z += (r.z - group.position.z) * k;
+      if (Math.hypot(r.x - group.position.x, r.z - group.position.z) > 30) group.position.set(r.x, 0, r.z); // first sight or a jump
+      let dh = r.h - group.rotation.y;
+      dh = Math.atan2(Math.sin(dh), Math.cos(dh));
+      group.rotation.y += dh * k;
+    }
+
     // Achievements: a full lap driven on the road (progress along the track, wrapping at the
     // start line), and a x5 combo.
     if (phase === "ready" || phase === "countdown") lap.current = { last: -1, progress: 0 };
@@ -163,6 +193,9 @@ function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildin
     // HUD at 10 Hz.
     if (engine.time - t.hud > 0.1 || phase !== "running") {
       t.hud = engine.time;
+      if (phase === "running") onPose({ x: c.x, z: c.z, h: c.heading, s: engine.score.total + Math.round(engine.score.current), t: engine.time });
+      const rivals = [...(rivalsRef.current?.values() ?? [])].filter((r) => now - r.at < RIVAL_STALE_MS || phase === "done")
+        .map((r) => ({ seat: r.seat, score: r.s, x: r.x, z: r.z, heading: r.h, paint: r.p }));
       onHud({
         score: engine.score.total, current: Math.round(engine.score.current), multiplier: engine.score.multiplier, angle: Math.round(angle),
         speed: Math.round(speed * 3.6), time: Math.max(0, RUN_SECONDS - engine.time),
@@ -173,6 +206,7 @@ function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildin
           name: ghost.me ? "Your best" : ghost.name, lead: engine.score.total + Math.round(engine.score.current) - ghostState.score,
           x: ghostState.x, z: ghostState.z, heading: ghostState.heading,
         } : null,
+        rivals,
       });
     }
   });
@@ -193,6 +227,11 @@ function World({ engine, trackId, phase, paint, onHud, onFinish, mapRef, buildin
       <group ref={car}>
         <Coupe paint={paint} />
       </group>
+      {rivalPaints.map(({ seat, paint: p }) => (
+        <group key={seat} visible={false} ref={(g) => { if (g) rivalCars.current.set(seat, g); else rivalCars.current.delete(seat); }}>
+          <Coupe paint={PAINTS[p] ?? PAINTS[0]} />
+        </group>
+      ))}
       {ghost && (
         <group ref={ghostCar} visible={false}>
           <GhostCoupe paint={PAINTS[ghost.paint] ?? PAINTS[0]} />
@@ -255,18 +294,87 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
 
   const go = (p: Phase) => { phaseRef.current = p; setPhase(p); };
 
+  // Live races with friends (ADR 0053). The room comes from the database; cars come over Realtime.
+  const [room, setRoom] = useState<RaceRoom | null>(null);
+  const [raceError, setRaceError] = useState<string | null>(null);
+  const [raceBusy, setRaceBusy] = useState(false);
+  const [raceFinish, setRaceFinish] = useState<RaceFinish | null>(null);
+  const [rivalPaints, setRivalPaints] = useState<{ seat: number; paint: number }[]>([]);
+  const rivalsRef = useRef(new Map<number, Rival>());
+  const channelRef = useRef<RaceChannel | null>(null);
+  const offsetRef = useRef(0); // server clock minus this browser's
+  const racing = useRef(false); // the current run is a race
+  const raceStartedFor = useRef<string | null>(null);
+  const mySeat = room?.players.find((p) => p.me)?.seat ?? 0;
+  const mySeatRef = useRef(0);
+  const paintIndex = Math.max(0, PAINTS.findIndex((p) => p.name === paint.name));
+  const paintRef = useRef(0);
+  useEffect(() => { mySeatRef.current = mySeat; paintRef.current = paintIndex; }, [mySeat, paintIndex]);
+  // Mirrors racing.current for rendering.
+  const [inRace, setInRace] = useState(false);
+  const setRacing = (on: boolean) => { racing.current = on; setInRace(on); };
+
+  const applyRoom = useCallback((reply: { room: RaceRoom | null; error?: string }) => {
+    if (reply.error) setRaceError(reply.error); else setRaceError(null);
+    if (reply.room) offsetRef.current = Date.parse(reply.room.server_now) - Date.now();
+    if (!reply.error || reply.room) setRoom(reply.room);
+  }, []);
+  const refreshRoom = useCallback(() => raceRoomAction().then((r) => { if (!r.error) applyRoom(r); }), [applyRoom]);
+  const raceCall = async (work: () => Promise<{ room: RaceRoom | null; error?: string }>) => {
+    setRaceBusy(true);
+    try { applyRoom(await work()); channelRef.current?.nudge(); } finally { setRaceBusy(false); }
+  };
+
+  // Rejoin your room after a reload, then keep it fresh: every 2 s, and at once when someone nudges.
+  const roomCode = room?.code ?? null;
+  useEffect(() => {
+    if (!signedIn) return;
+    void refreshRoom();
+  }, [signedIn, refreshRoom]);
+  useEffect(() => {
+    if (!roomCode) return;
+    const id = setInterval(() => { if (!(racing.current && phaseRef.current === "running")) void refreshRoom(); }, 2000);
+    return () => clearInterval(id);
+  }, [roomCode, refreshRoom]);
+  useEffect(() => {
+    if (!roomCode) return;
+    const known = new Map<number, number>();
+    const rivals = rivalsRef.current;
+    const channel = openRaceChannel(roomCode, (pose) => {
+      if (pose.seat === mySeatRef.current) return;
+      rivalsRef.current.set(pose.seat, { ...pose, at: performance.now() });
+      if (known.get(pose.seat) !== pose.p) {
+        known.set(pose.seat, pose.p);
+        setRivalPaints([...known].map(([seat, p]) => ({ seat, paint: p })));
+      }
+    }, () => void refreshRoom());
+    channelRef.current = channel;
+    return () => { channel.close(); channelRef.current = null; rivals.clear(); setRivalPaints([]); };
+  }, [roomCode, refreshRoom]);
+  const sendPose = useCallback((pose: { x: number; z: number; h: number; s: number; t: number }) => {
+    if (racing.current) channelRef.current?.pose({ ...pose, seat: mySeatRef.current, p: paintRef.current });
+  }, []);
+
+  // The room picks the track.
+  const roomTrack = room?.track ?? null;
+  useEffect(() => {
+    if (roomTrack && roomTrack !== trackId && phaseRef.current !== "running" && phaseRef.current !== "countdown") {
+      setTrackId(roomTrack); setGhostIndex(null); setHud(emptyHud(roomTrack));
+    }
+  }, [roomTrack, trackId]);
+
   // Keyboard: arrows/WASD, Space = handbrake, P/Escape = pause.
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if ((key === "p" || key === "escape") && (phaseRef.current === "running" || phaseRef.current === "paused")) {
+      if ((key === "p" || key === "escape") && !racing.current && (phaseRef.current === "running" || phaseRef.current === "paused")) {
         go(phaseRef.current === "running" ? "paused" : "running");
         return;
       }
       if (phaseRef.current === "running" && engine.key(key, true)) e.preventDefault();
     };
     const up = (e: KeyboardEvent) => { engine.key(e.key, false); };
-    const away = () => { engine.release(); if (phaseRef.current === "running") go("paused"); };
+    const away = () => { engine.release(); if (phaseRef.current === "running" && !racing.current) go("paused"); };
     const hidden = () => { if (document.hidden) away(); };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
@@ -279,6 +387,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   }, [engine]);
 
   async function start() {
+    setRacing(false);
     engine.reset();
     setResult(null);
     setHud(emptyHud(trackId));
@@ -295,6 +404,13 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
     go("done");
     const score = engine.final();
     setResult({ score, saved: null });
+    if (racing.current) {
+      const path = [...recordRef.current, ...encodeSample(engine.car.x, engine.car.z, engine.car.heading, score)];
+      setRaceFinish(await finishRaceAction(score, path));
+      channelRef.current?.nudge();
+      void refreshRoom();
+      return;
+    }
     if (runId.current) {
       // The replay ends on the final score.
       const path = [...recordRef.current, ...encodeSample(engine.car.x, engine.car.z, engine.car.heading, score)];
@@ -306,6 +422,37 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
       if (saved === "new-best") void driftGhostsAction(trackId).then(setGhosts);
     }
   }
+
+  // Everyone's run starts at the same server time.
+  async function raceStart(startsAt: string) {
+    raceStartedFor.current = startsAt;
+    setRacing(true);
+    const startsLocal = Date.parse(startsAt) - offsetRef.current;
+    engine.reset();
+    setResult(null); setRaceFinish(null);
+    setHud(emptyHud(trackId));
+    recordRef.current = [];
+    runId.current = null;
+    setGhostIndex(null);
+    go("countdown");
+    box.current?.focus();
+    while (Date.now() < startsLocal) {
+      setCount(Math.ceil((startsLocal - Date.now()) / 1000));
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    go("running");
+  }
+
+  useEffect(() => {
+    if (!room?.starts_at || (room.status !== "countdown" && room.status !== "racing")) return;
+    if (raceStartedFor.current === room.starts_at || engine.track !== BUILT[room.track]) return;
+    if (phaseRef.current === "running" || phaseRef.current === "countdown") return;
+    // Too late to join this one (e.g. after a reload mid-race): wait for the next.
+    if (Date.now() > Date.parse(room.starts_at) - offsetRef.current + 2000) return;
+    void raceStart(room.starts_at);
+    // raceStart only reads refs and the engine, which is in the deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, engine]);
 
   // The gamepad (phones): D-pad steers (up gas, down brake), A is gas, B is the handbrake.
   const PAD: Record<PadControl, TouchKey> = { left: "left", right: "right", up: "gas", down: "brake", a: "gas", b: "drift" };
@@ -322,7 +469,8 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
         style={{ ...PIXEL_CANVAS.style, position: "absolute", inset: 0 }} aria-hidden="true">
         <hemisphereLight args={["#ffffff", "#4b6b3a", 1.1]} />
         <directionalLight position={[80, 120, 40]} intensity={1.6} />
-        <World engine={engine} trackId={trackId} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} recordRef={recordRef} ghost={ghost} />
+        <World engine={engine} trackId={trackId} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} recordRef={recordRef} ghost={ghost}
+          rivalsRef={rivalsRef} rivalPaints={rivalPaints} onPose={sendPose} />
       </Canvas>
 
       {/* HUD */}
@@ -346,6 +494,18 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
               <p className={`text-2xl font-extrabold tabular-nums ${hud.time < 10 ? "text-amber-300" : ""}`}>{hud.time.toFixed(1)}</p>
             </div>
           </div>
+          {inRace && room && (
+            <ol className="mt-2 w-fit min-w-36 rounded-xl bg-black/45 px-3 py-1.5 text-xs font-bold backdrop-blur-sm">
+              {[{ seat: mySeat, score: hud.score + hud.current }, ...hud.rivals.map((r) => ({ seat: r.seat, score: r.score }))]
+                .sort((a, b) => b.score - a.score)
+                .map((r, i) => (
+                  <li key={r.seat} className={`flex justify-between gap-3 tabular-nums ${r.seat === mySeat ? "text-amber-300" : ""}`}>
+                    <span className="max-w-28 truncate">{i + 1}. {r.seat === mySeat ? "You" : room.players.find((p) => p.seat === r.seat)?.name ?? "Driver"}</span>
+                    <span>{fmt(r.score)}</span>
+                  </li>
+                ))}
+            </ol>
+          )}
           {hud.ghost && (
             <p className={`mx-auto mt-2 w-fit rounded-lg px-3 py-1 text-xs font-bold tabular-nums ${hud.ghost.lead >= 0 ? "bg-emerald-600/80" : "bg-black/50"}`}>
               vs {hud.ghost.name}: {hud.ghost.lead >= 0 ? "+" : "−"}{fmt(Math.abs(hud.ghost.lead))}
@@ -363,12 +523,13 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
             <p className="rounded-sm border-2 border-white bg-[#1f4e9a] px-3 py-0.5 font-mono text-sm font-black tracking-wide whitespace-nowrap shadow-[0_2px_0_rgb(0_0_0/0.35)]">{hud.street}</p>
           </div>
           <div className="absolute top-32 right-3 size-24 overflow-hidden rounded-lg border-2 border-black/50 sm:top-36 sm:right-4 sm:size-32">
-            <DriftMinimap track={BUILT[trackId]} buildings={buildings} car={hud} ghost={hud.ghost} />
+            <DriftMinimap track={BUILT[trackId]} buildings={buildings} car={hud} ghost={hud.ghost}
+              rivals={hud.rivals.map((r) => ({ x: r.x, z: r.z, heading: r.heading, color: (PAINTS[r.paint] ?? PAINTS[0]).color }))} />
           </div>
         </div>
       )}
 
-      {(phase === "running" || phase === "paused") && (
+      {(phase === "running" || phase === "paused") && !inRace && (
         <button type="button" onClick={() => go(phase === "running" ? "paused" : "running")}
           className="absolute top-20 right-3 rounded-lg bg-black/45 px-3 py-1.5 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-white sm:top-24 sm:right-4">
           {phase === "running" ? "Pause" : "Resume"}
@@ -377,12 +538,39 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
 
       {/* Overlays */}
       {phase === "countdown" && (
-        <p key={count} className="bj-land absolute inset-0 grid place-items-center text-8xl font-extrabold text-white drop-shadow-lg" aria-live="assertive">{count}</p>
+        <p key={count} className="bj-land absolute inset-0 grid place-items-center text-8xl font-extrabold text-white drop-shadow-lg" aria-live="assertive">
+          {count > 3 ? <span className="text-3xl">Get ready… {count}</span> : count}
+        </p>
       )}
       {(phase === "ready" || phase === "paused" || phase === "done") && (
         <div className="absolute inset-0 grid place-items-center bg-black/35 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-surface p-5 text-ink shadow-xl">
-            {phase === "done" && result ? (
+            {room && phase === "done" && result && inRace ? (
+              <div aria-live="polite">
+                <h2 className="text-xl font-extrabold">Race complete</h2>
+                <p className="mt-1 text-sm text-ink-muted">
+                  You scored <span className="font-bold text-ink tabular-nums">{fmt(result.score)}</span>.{" "}
+                  {raceFinish === null ? "Sending…" : raceFinish === "rejected" || raceFinish === "error" ? "Your run couldn’t be checked, so it doesn’t count." : raceFinish === "late" ? "Too late to count." : ""}
+                </p>
+                <ol className="mt-3 divide-y divide-line-soft text-sm">
+                  {[...room.players].sort((a, b) => (b.score ?? -1) - (a.score ?? -1)).map((p, i) => (
+                    <li key={p.seat} className={`flex items-center justify-between gap-3 py-1.5 ${p.me ? "font-bold text-brand-ink" : ""}`}>
+                      <span className="min-w-0 truncate">{room.status === "done" && p.score !== null ? ["🥇", "🥈", "🥉"][i] ?? `${i + 1}.` : "·"} {p.name}{p.me ? " (you)" : ""}</span>
+                      <span className="tabular-nums">{p.score !== null ? fmt(p.score) : p.finished ? "—" : "driving…"}</span>
+                    </li>
+                  ))}
+                </ol>
+                {room.status !== "done" && <p className="mt-2 text-xs text-ink-muted">Waiting for everyone to finish…</p>}
+              </div>
+            ) : room && phase !== "paused" ? (
+              <>
+                <h2 className="text-xl font-extrabold">Race · <span className="font-mono tracking-widest">{room.code}</span></h2>
+                <p className="mt-1 text-sm text-ink-2">
+                  {room.status === "lobby" ? `${room.players.length} of 4 drivers on the ${TRACKS[room.track].name.toLowerCase()}. ${room.host ? "Start when everyone’s in." : "Waiting for the host to start."}`
+                    : room.status === "done" ? "That race is over." : "A race is under way. You’ll be in the next one."}
+                </p>
+              </>
+            ) : phase === "done" && result ? (
               <div aria-live="polite">
                 <h2 className="text-xl font-extrabold">Run complete</h2>
                 <p className="mt-1 text-4xl font-extrabold tabular-nums">{fmt(result.score)}</p>
@@ -402,7 +590,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
                 <p className="mt-1 text-sm text-ink-2">Slide round Sherbrooke, University, Pine and McTavish. Longer, wider, faster drifts score more, and chaining them builds a combo up to ×5. Leave the track or spin out and the combo’s gone.</p>
               </>
             )}
-            {phase !== "paused" && (
+            {phase !== "paused" && !room && (
               <fieldset className="mt-4">
                 <legend className="text-sm font-bold">Track</legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -433,7 +621,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
                 </div>
               </fieldset>
             )}
-            {phase !== "paused" && ghosts.length > 0 && (
+            {phase !== "paused" && !room && ghosts.length > 0 && (
               <fieldset className="mt-4">
                 <legend className="text-sm font-bold">Race a ghost</legend>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -455,9 +643,19 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
               {phase === "paused" && (
                 <button type="button" onClick={() => go("running")} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Resume</button>
               )}
-              <button type="button" onClick={() => void start()} className={`inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${phase === "paused" ? "border border-line-strong text-ink-2 hover:border-brand" : "bg-brand text-on-brand hover:bg-brand-hover"}`}>
+              {room && room.host && (room.status === "lobby" || room.status === "done") && (
+                <button type="button" disabled={raceBusy || room.players.length < 2}
+                  onClick={() => void raceCall(async () => {
+                    if (room.status === "done") { const r = await rematchRaceAction(room.track); if (r.error) return r; }
+                    return startRaceAction();
+                  })}
+                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-brand px-4 text-sm font-bold text-on-brand hover:bg-brand-hover disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
+                  {room.players.length < 2 ? "Waiting for a friend…" : room.status === "done" ? "Race again" : "Start the race"}
+                </button>
+              )}
+              {!room && <button type="button" onClick={() => void start()} className={`inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${phase === "paused" ? "border border-line-strong text-ink-2 hover:border-brand" : "bg-brand text-on-brand hover:bg-brand-hover"}`}>
                 {phase === "ready" ? "Start" : phase === "paused" ? "Restart" : "Drive again"}
-              </button>
+              </button>}
             </div>
             <p className="mt-3 text-xs text-ink-muted">
               {touch ? "Hold A for gas, steer with the D-pad, tap B to drift into a corner." : "W/↑ gas · S/↓ brake · A D/← → steer · Space handbrake · P pause"}
@@ -467,6 +665,12 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
       )}
     </div>
     <Gamepad onChange={onPad} a="Gas" b="Drift" title="Martlet Drift" />
+    <DriftRacePanel signedIn={signedIn} room={room} error={raceError} busy={raceBusy} track={trackId}
+      onCreate={() => void raceCall(() => createRaceAction(trackId))}
+      onJoin={(code) => void raceCall(() => joinRaceAction(code))}
+      onLeave={() => void raceCall(async () => { const r = await leaveRaceAction(); setRacing(false); raceStartedFor.current = null; go("ready"); return r; })}
+      onStart={() => void raceCall(startRaceAction)}
+      onTrack={(t) => void raceCall(() => rematchRaceAction(t))} />
     </div>
   );
 }

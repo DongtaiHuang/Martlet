@@ -62,6 +62,7 @@ In **SQL Editor**, paste and run each file once, in this order. It's filename or
 | 38 | `034_drift_ghosts.sql` | Martlet Drift ghost races: `drift_ghosts` (one replay per student), `submit_drift_run`, `get_drift_ghosts`, `get_my_drift_ghost` (ADR 0050) | After `022`. Apply before deploying the app with ghosts. Safe to re-run |
 | 39 | `035_user_blocks.sql` | Blocking: `user_blocks`, `block_author`, `unblock_user`, `my_blocks`; marketplace and creator messaging refuse blocked pairs; table chat hides them (ADR 0051) | After `026`, `028`, `029` and `034`. Apply before deploying the app with blocking. Safe to re-run |
 | 40 | `036_drift_tracks.sql` | Drift tracks: `track` on scores, runs and ghosts; per-track leaderboard and ghosts; old signatures mean the street loop (ADR 0052) | After `034`. Apply before deploying the app with tracks. Safe to re-run |
+| 41 | `037_drift_races.sql` | Drift live races: `drift_rooms`, `drift_room_players`, room and result functions, and RLS on `realtime.messages` for the private `drift-room:<code>` channels (ADR 0053) | After `035` and `036`. Apply before deploying the app with races. Safe to re-run |
 
 **Production:** take a backup first, then have the database owner apply only the migrations that are missing. Check which ones are installed with the read-only queries in [DEPLOYMENT.md](DEPLOYMENT.md#supabase-readiness).
 
