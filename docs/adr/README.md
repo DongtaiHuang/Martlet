@@ -56,6 +56,7 @@ Short records of the significant decisions behind Martlet. Each ADR captures the
 | 0050 | [Martlet Drift ghost races](0050-drift-ghost-races.md) | Accepted |
 | 0051 | [Blocking](0051-blocking.md) | Accepted |
 | 0052 | [Drift tracks](0052-drift-tracks.md) | Accepted |
+| 0053 | [Martlet Drift live races](0053-drift-live-races.md) | Accepted |
 
 ## Adding a new ADR
 

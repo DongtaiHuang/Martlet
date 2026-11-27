@@ -8,7 +8,9 @@ import type { NamedOutline } from "@/lib/drift-hud";
  */
 type Pose = { x: number; z: number; heading: number };
 
-export function DriftMinimap({ track, buildings, car, ghost = null }: { track: Track; buildings: readonly NamedOutline[]; car: Pose; ghost?: Pose | null }) {
+export function DriftMinimap({ track, buildings, car, ghost = null, rivals = [] }: {
+  track: Track; buildings: readonly NamedOutline[]; car: Pose; ghost?: Pose | null; rivals?: (Pose & { color: string })[];
+}) {
   const view = useMemo(() => {
     const xs = track.points.map((p) => p.x), zs = track.points.map((p) => p.z);
     const pad = 40;
@@ -33,6 +35,11 @@ export function DriftMinimap({ track, buildings, car, ghost = null }: { track: T
           <path d={`M0 ${-u * 6}L${u * 4} ${u * 4}L0 ${u * 1.5}L${-u * 4} ${u * 4}Z`} fill="#c8c8d0" stroke="#111" strokeWidth={u * 1.2} strokeLinejoin="round" />
         </g>
       )}
+      {rivals.map((r, i) => (
+        <g key={i} transform={`translate(${r.x.toFixed(1)} ${r.z.toFixed(1)}) rotate(${(180 - (r.heading * 180) / Math.PI).toFixed(1)})`}>
+          <path d={`M0 ${-u * 6}L${u * 4} ${u * 4}L0 ${u * 1.5}L${-u * 4} ${u * 4}Z`} fill={r.color} stroke="#111" strokeWidth={u * 1.2} strokeLinejoin="round" />
+        </g>
+      ))}
       {/* The car: an arrow pointing where it's heading (heading 0 faces +z, i.e. down). */}
       <g transform={`translate(${car.x.toFixed(1)} ${car.z.toFixed(1)}) rotate(${(180 - (car.heading * 180) / Math.PI).toFixed(1)})`}>
         <path d={`M0 ${-u * 6}L${u * 4} ${u * 4}L0 ${u * 1.5}L${-u * 4} ${u * 4}Z`} fill="#f5c84c" stroke="#111" strokeWidth={u * 1.2} strokeLinejoin="round" />
