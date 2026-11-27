@@ -35,7 +35,7 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
   const btn = "inline-flex size-10 sm:size-9 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-focus";
   return (
     <div ref={wrap} className="relative inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-surface-muted p-0.5">
-      <div role="radiogroup" aria-label="Colour mode" className="hidden sm:inline-flex">
+      <div role="radiogroup" aria-label="Colour mode" className="hidden sm:inline-flex xl:hidden">
         {OPTIONS.map(({ value, label, icon: Icon }) => {
           const on = pref === value;
           return (
@@ -47,7 +47,7 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
           );
         })}
       </div>
-      <span aria-hidden="true" className="hidden h-5 w-px bg-line sm:block" />
+      <span aria-hidden="true" className="hidden h-5 w-px bg-line sm:block xl:hidden" />
       <button type="button" aria-haspopup="true" aria-expanded={open} title="Theme" onClick={() => setOpen((v) => !v)}
         className={`${btn} ${open ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}>
         <Palette aria-hidden="true" size={16} />
@@ -55,7 +55,7 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
       </button>
       {open && (
         <div className="absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-1.5 shadow-xl">
-          <div role="radiogroup" aria-label="Colour mode" className="mb-1.5 grid grid-cols-3 gap-1 rounded-lg bg-surface-muted p-1 sm:hidden">
+          <div role="radiogroup" aria-label="Colour mode" className="mb-1.5 grid grid-cols-3 gap-1 rounded-lg bg-surface-muted p-1 sm:hidden xl:grid">
             {OPTIONS.map(({ value, label, icon: Icon }) => (
               <button key={value} type="button" role="radio" aria-checked={pref === value} onClick={() => setPref(value)}
                 className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md text-xs font-semibold focus-visible:outline-2 focus-visible:outline-focus ${pref === value ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted"}`}>
