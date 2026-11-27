@@ -52,7 +52,7 @@ export function AppearancePicker() {
   const pick = (key: keyof CustomColors, value: string) => setNotes(saveCustom({ ...colors, [key]: value }));
 
   return (
-    <section aria-labelledby="appearance-heading" className="mt-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
+    <section id="appearance" aria-labelledby="appearance-heading" className="mt-6 scroll-mt-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
       <h2 id="appearance-heading" className="text-lg font-bold">Appearance</h2>
       <p className="mt-1 text-sm text-ink-muted">Saved on this device. Every theme has a light and dark version.</p>
 

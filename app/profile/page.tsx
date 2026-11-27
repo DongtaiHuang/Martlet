@@ -3,6 +3,7 @@ import { ArrowRight, Bird, LogIn, MessagesSquare, ShieldCheck, Trophy, UserRound
 import { CourseCodesForm } from "@/components/courses/CourseCodesForm";
 import { AppearancePicker } from "@/components/settings/AppearancePicker";
 import { BlockedPeople } from "@/components/profile/BlockedPeople";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 import { MartletNav } from "@/components/layout/MartletNav";
 import { DisplayNameForm } from "@/components/profile/DisplayNameForm";
 import { ProfileActivity } from "@/components/profile/ProfileActivity";
@@ -125,6 +126,9 @@ export default async function ProfilePage() {
         {state.kind === "ready" && <ProfileActivity viewerId={state.user.id} />}
         {state.kind === "ready" && <BlockedPeople />}
         <AppearancePicker />
+        {state.kind === "ready" && (
+          <div className="mt-8 flex justify-center border-t border-line pt-6"><SignOutButton /></div>
+        )}
       </main>
     </div>
   );

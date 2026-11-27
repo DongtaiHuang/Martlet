@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import { useColorMode, useCustomTheme, useModePreference, useThemePreference } from "@/lib/useColorMode";
 import { CUSTOM_THEME, THEMES, THEME_INFO, type ModePreference, type ThemeId } from "@/lib/theme";
@@ -11,9 +11,8 @@ const OPTIONS: { value: ModePreference; label: string; icon: typeof Sun }[] = [
   { value: "system", label: "System", icon: Monitor },
 ];
 
-/** Nav control: Light / Dark / System, plus a palette menu to switch theme from any page (ADR 0014). */
-/** `account`: sign in/out controls, shown inside the menu on phones where the header has no room. */
-export function ThemeSwitch({ account }: { account?: ReactNode }) {
+/** Nav control for signed-out visitors: a palette menu with Light / Dark / System and the themes (ADR 0014). Signed-in students have these in the account menu. */
+export function ThemeSwitch() {
   const [pref, setPref] = useModePreference();
   const [theme, setTheme] = useThemePreference();
   const [customColors] = useCustomTheme();
@@ -35,19 +34,6 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
   const btn = "inline-flex size-10 sm:size-9 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-focus";
   return (
     <div ref={wrap} className="relative inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-surface-muted p-0.5">
-      <div role="radiogroup" aria-label="Colour mode" className="hidden sm:inline-flex xl:hidden">
-        {OPTIONS.map(({ value, label, icon: Icon }) => {
-          const on = pref === value;
-          return (
-            <button key={value} type="button" role="radio" aria-checked={on} title={label} onClick={() => setPref(value)}
-              className={`${btn} ${on ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}>
-              <Icon aria-hidden="true" size={16} />
-              <span className="sr-only">{label}</span>
-            </button>
-          );
-        })}
-      </div>
-      <span aria-hidden="true" className="hidden h-5 w-px bg-line sm:block xl:hidden" />
       <button type="button" aria-haspopup="true" aria-expanded={open} title="Theme" onClick={() => setOpen((v) => !v)}
         className={`${btn} ${open ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted hover:text-ink"}`}>
         <Palette aria-hidden="true" size={16} />
@@ -55,7 +41,7 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
       </button>
       {open && (
         <div className="absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-1.5 shadow-xl">
-          <div role="radiogroup" aria-label="Colour mode" className="mb-1.5 grid grid-cols-3 gap-1 rounded-lg bg-surface-muted p-1 sm:hidden xl:grid">
+          <div role="radiogroup" aria-label="Colour mode" className="mb-1.5 grid grid-cols-3 gap-1 rounded-lg bg-surface-muted p-1">
             {OPTIONS.map(({ value, label, icon: Icon }) => (
               <button key={value} type="button" role="radio" aria-checked={pref === value} onClick={() => setPref(value)}
                 className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md text-xs font-semibold focus-visible:outline-2 focus-visible:outline-focus ${pref === value ? "bg-surface text-brand-ink shadow-sm" : "text-ink-muted"}`}>
@@ -82,7 +68,6 @@ export function ThemeSwitch({ account }: { account?: ReactNode }) {
             );
           })}
           </div>
-          {account && <div className="mt-1.5 flex justify-end border-t border-line pt-2 sm:hidden">{account}</div>}
         </div>
       )}
     </div>
