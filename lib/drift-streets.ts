@@ -19,3 +19,12 @@ export const STREET_LOOP: [number, number][] = [
   [-69.2, 128.9], [-45.5, 146.2], [-21.0, 163.4], [3.4, 180.6], [27.9, 197.8], [52.6, 214.6],
   [77.2, 231.5], [101.6, 248.8], [125.9, 266.2], [150.2, 283.6], [167.1, 259.0], [184.2, 234.4],
 ];
+
+/** The street each STREET_LOOP point is on (from the same OpenStreetMap ways). */
+export const STREETS = [
+  { short: "Sherbrooke", sign: "Rue Sherbrooke O." },
+  { short: "University", sign: "Rue University" },
+  { short: "Pine", sign: "Av. des Pins O." },
+  { short: "McTavish", sign: "Rue McTavish" },
+] as const;
+export const STREET_OF_POINT: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0];

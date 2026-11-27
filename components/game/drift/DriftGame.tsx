@@ -6,6 +6,9 @@ import { useMapColorMode } from "@/components/map/map-mode";
 import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { passing, streetAt, type NamedOutline } from "@/lib/drift-hud";
+import { lngLatToWorld } from "@/lib/drift-map";
+import { DriftMinimap } from "./DriftMinimap";
 import { buildTrack, nearest, TRACK_WIDTH, driftAngle, forwardOf, onTrack as isOnTrack, RUN_SECONDS, speedOf, type Score } from "@/lib/drift";
 import { startDriftRunAction, submitDriftScoreAction } from "@/app/play/drift/actions";
 import type { SubmitResult } from "@/lib/drift-scores";
@@ -21,12 +24,19 @@ import { DRIFT_FOV, createDriftMap, syncDriftMap } from "./drift-map";
 // The real-street loop around campus (ADR 0047).
 const TRACK = buildTrack(STREET_LOOP);
 type Phase = "ready" | "countdown" | "running" | "paused" | "done";
-interface Hud { score: number; current: number; multiplier: number; angle: number; speed: number; time: number; event: Score["lastEvent"]; offTrack: boolean }
-const EMPTY_HUD: Hud = { score: 0, current: 0, multiplier: 1, angle: 0, speed: 0, time: RUN_SECONDS, event: "", offTrack: false };
+interface Hud {
+  score: number; current: number; multiplier: number; angle: number; speed: number; time: number; event: Score["lastEvent"]; offTrack: boolean;
+  /** Where you are (ADR 0047): the street sign, the McGill building you're passing, and the car for the minimap. */
+  street: string; passing: string | null; x: number; z: number; heading: number;
+}
+const EMPTY_HUD: Hud = {
+  score: 0, current: 0, multiplier: 1, angle: 0, speed: 0, time: RUN_SECONDS, event: "", offTrack: false,
+  street: streetAt(0, TRACK.points.length).sign, passing: null, x: TRACK.points[0].x, z: TRACK.points[0].z, heading: 0,
+};
 const SMOKE = 48, SKIDS = 1400;
 
 /** Moves the car, wheels, camera, smoke and skid marks each frame, and advances the engine while running. */
-function World({ engine, phase, paint, onHud, onFinish, mapRef }: { engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void; mapRef: React.RefObject<MapLibre | null> }) {
+function World({ engine, phase, paint, onHud, onFinish, mapRef, buildingsRef }: { engine: DriftEngine; phase: Phase; paint: Paint; onHud: (h: Hud) => void; onFinish: () => void; mapRef: React.RefObject<MapLibre | null>; buildingsRef: React.RefObject<NamedOutline[]> }) {
   const car = useRef<THREE.Group>(null);
   const wheels = useRef<THREE.Object3D[]>([]);
   const { camera } = useThree();
@@ -125,6 +135,8 @@ function World({ engine, phase, paint, onHud, onFinish, mapRef }: { engine: Drif
         score: engine.score.total, current: Math.round(engine.score.current), multiplier: engine.score.multiplier, angle: Math.round(angle),
         speed: Math.round(speed * 3.6), time: Math.max(0, RUN_SECONDS - engine.time),
         event: engine.time - engine.eventAt < 1.6 ? engine.score.lastEvent : "", offTrack: phase === "running" && !isOnTrack(TRACK, c.x, c.z),
+        street: streetAt(nearest(TRACK, c.x, c.z).index, TRACK.points.length).sign,
+        passing: passing(c.x, c.z, buildingsRef.current ?? []), x: c.x, z: c.z, heading: c.heading,
       });
     }
   });
@@ -169,6 +181,19 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   const phaseRef = useRef<Phase>("ready");
   const [paint, setPaint] = useState<Paint>(PAINTS[0]);
   const [hud, setHud] = useState<Hud>(EMPTY_HUD);
+  // McGill's building outlines (the same file the map highlights) for the minimap and "Passing".
+  const [buildings, setBuildings] = useState<NamedOutline[]>([]);
+  const buildingsRef = useRef<NamedOutline[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/mcgill-buildings.json").then((r) => r.json()).then((fc: { features: { properties: { name: string }; geometry: { coordinates: number[][][] } }[] }) => {
+      if (cancelled) return;
+      const outlines = fc.features.map((f) => ({ name: f.properties.name, points: f.geometry.coordinates[0].map(([lng, lat]) => lngLatToWorld(lng, lat)) }));
+      buildingsRef.current = outlines.filter((o) => o.name);
+      setBuildings(outlines);
+    }).catch(() => { /* the HUD just has no building names */ });
+    return () => { cancelled = true; };
+  }, []);
   const [count, setCount] = useState(3);
   const [result, setResult] = useState<{ score: number; saved: SubmitResult | null } | null>(null);
   const runId = useRef<string | null>(null);
@@ -239,7 +264,7 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
         style={{ ...PIXEL_CANVAS.style, position: "absolute", inset: 0 }} aria-hidden="true">
         <hemisphereLight args={["#ffffff", "#4b6b3a", 1.1]} />
         <directionalLight position={[80, 120, 40]} intensity={1.6} />
-        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} />
+        <World engine={engine} phase={phase} paint={paint} onHud={setHud} onFinish={() => void finish()} mapRef={mapRef} buildingsRef={buildingsRef} />
       </Canvas>
 
       {/* HUD */}
@@ -269,6 +294,14 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
             </p>
           )}
           <p className="absolute bottom-3 left-3 rounded-lg bg-black/45 px-2.5 py-1 text-sm font-bold tabular-nums sm:bottom-4 sm:left-4">{hud.speed} km/h</p>
+          {/* Where you are: a Montréal-style street sign, and the McGill building you're passing. */}
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 sm:bottom-4">
+            {hud.passing && <p key={hud.passing} className="bj-land rounded-md bg-[#a6192e] px-2.5 py-0.5 text-xs font-bold whitespace-nowrap shadow">Passing {hud.passing}</p>}
+            <p className="rounded-sm border-2 border-white bg-[#1f4e9a] px-3 py-0.5 font-mono text-sm font-black tracking-wide whitespace-nowrap shadow-[0_2px_0_rgb(0_0_0/0.35)]">{hud.street}</p>
+          </div>
+          <div className="absolute top-32 right-3 size-24 overflow-hidden rounded-lg border-2 border-black/50 sm:top-36 sm:right-4 sm:size-32">
+            <DriftMinimap track={TRACK} buildings={buildings} car={hud} />
+          </div>
         </div>
       )}
 
