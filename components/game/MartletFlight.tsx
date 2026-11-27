@@ -13,7 +13,7 @@ import { useColorMode } from "@/lib/useColorMode";
 import { DEFAULT_LOOK, LOOK_KEY, plumageOf, readLook, type AvatarLook } from "@/components/avatar/look";
 import { ART, LANDMARK_SPACING, SKYLINE_PARALLAX, drawScene } from "./flight-scene";
 import { LANDMARKS } from "./flight-landmarks";
-import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
+import { Gamepad, HANDHELD_SCREEN, HANDHELD_SHELL, HandheldExit, useHandheld, type PadControl } from "@/components/pixel/Gamepad";
 
 // Logical playfield (scaled to fit the container).
 const W = 360, H = 600, GROUND = 46; // a thin ground strip: fly low among the landmarks
@@ -169,6 +169,9 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
 
   const btn = "inline-flex min-h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
   const resume = () => { stateRef.current = "playing"; setState("playing"); };
+  // Phones: full screen with the gamepad underneath once you start, until you exit.
+  const handheld = useHandheld(state !== "ready");
+  const exitHandheld = () => { stateRef.current = "ready"; setState("ready"); };
   // The gamepad (phones): A or up flaps, B pauses and resumes. Tapping the game still flaps too.
   const onPad = useCallback((c: PadControl, on: boolean) => {
     if (!on) return;
@@ -180,8 +183,10 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
 
   return (
     // On a phone the game and its gamepad fit on one screen: the width follows the screen height.
-    <div className="mx-auto w-full max-w-[min(420px,calc((100dvh-22rem)*0.6))]">
-      <div ref={boxRef} tabIndex={-1} className="relative overflow-hidden rounded-3xl shadow-lg ring-1 ring-line outline-none" style={{ aspectRatio: `${W} / ${H}` }}>
+    <div className={handheld ? HANDHELD_SHELL : "mx-auto w-full max-w-[min(420px,calc((100dvh-22rem)*0.6))]"}>
+      <div className={handheld ? `${HANDHELD_SCREEN} relative grid place-items-center` : undefined}>
+      {handheld && state !== "playing" && <HandheldExit onExit={exitHandheld} />}
+      <div ref={boxRef} tabIndex={-1} className={`relative overflow-hidden rounded-3xl shadow-lg ring-1 ring-line outline-none ${handheld ? "h-full max-w-full" : ""}`} style={{ aspectRatio: `${W} / ${H}` }}>
         <canvas
           ref={canvasRef}
           className="block h-full w-full touch-none select-none"
@@ -210,8 +215,9 @@ export default function MartletFlight({ embedded = false }: { embedded?: boolean
           </div>
         )}
       </div>
-      <Gamepad onChange={onPad} a="Flap" b="Pause" title="Martlet Flight" />
-      <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
+      </div>
+      <Gamepad onChange={onPad} a="Flap" b="Pause" title="Martlet Flight" handheld={handheld} />
+      <div className={`mt-3 flex items-center justify-between text-sm text-ink-muted ${handheld ? "hidden" : ""}`}>
         <p role="status" aria-live="polite">{state === "over" ? `Game over. Score ${score}, best ${best}.` : <>Score <span className="font-bold text-ink tabular-nums">{score}</span></>}</p>
         <div className="flex items-center gap-3">
           <span>Best <span className="font-bold text-ink tabular-nums">{best}</span></span>

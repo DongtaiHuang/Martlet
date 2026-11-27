@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { earn } from "@/components/achievements/earn";
 import { useMapColorMode } from "@/components/map/map-mode";
-import { Gamepad, type PadControl } from "@/components/pixel/Gamepad";
+import { Gamepad, HANDHELD_SCREEN, HANDHELD_SHELL, HandheldExit, useHandheld, type PadControl } from "@/components/pixel/Gamepad";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { passing, type NamedOutline } from "@/lib/drift-hud";
@@ -293,6 +293,8 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   const box = useRef<HTMLDivElement>(null);
 
   const go = (p: Phase) => { phaseRef.current = p; setPhase(p); };
+  // Phones: full screen with the gamepad underneath from the countdown until you exit.
+  const handheld = useHandheld(phase !== "ready");
 
   // Live races with friends (ADR 0053). The room comes from the database; cars come over Realtime.
   const [room, setRoom] = useState<RaceRoom | null>(null);
@@ -458,9 +460,11 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
   const PAD: Record<PadControl, TouchKey> = { left: "left", right: "right", up: "gas", down: "brake", a: "gas", b: "drift" };
   const onPad = (c: PadControl, on: boolean) => engine.setTouch(PAD[c], on);
 
+  const exitHandheld = () => { engine.release(); setRacing(false); go("ready"); };
+
   return (
-    <div>
-    <div ref={box} tabIndex={-1} className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#86b0d8] outline-none sm:aspect-[16/10]">
+    <div className={handheld ? HANDHELD_SHELL : undefined}>
+    <div ref={box} tabIndex={-1} className={`relative w-full overflow-hidden rounded-3xl bg-[#86b0d8] outline-none ${handheld ? HANDHELD_SCREEN : "aspect-square sm:aspect-[16/10]"}`}>
       {/* The real campus (MapLibre) under a transparent three.js layer for the car and the road. */}
       <div className="absolute inset-0" style={{ imageRendering: "pixelated" }} aria-hidden="true">
         <div ref={mapEl} className="size-full" />
@@ -543,8 +547,10 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
         </p>
       )}
       {(phase === "ready" || phase === "paused" || phase === "done") && (
-        <div className="absolute inset-0 grid place-items-center bg-black/35 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-surface p-5 text-ink shadow-xl">
+        <div className="absolute inset-0 z-20 overflow-y-auto overscroll-contain bg-black/35 p-3 sm:p-4">
+          {handheld && <HandheldExit onExit={exitHandheld} />}
+          <div className="grid min-h-full place-items-center">
+          <div className="w-full max-w-sm rounded-2xl bg-surface p-4 text-ink shadow-xl sm:p-5">
             {room && phase === "done" && result && inRace ? (
               <div aria-live="polite">
                 <h2 className="text-xl font-extrabold">Race complete</h2>
@@ -587,20 +593,20 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
             ) : (
               <>
                 <h2 className="text-xl font-extrabold">Drift run · {RUN_SECONDS} s</h2>
-                <p className="mt-1 text-sm text-ink-2">Slide round Sherbrooke, University, Pine and McTavish. Longer, wider, faster drifts score more, and chaining them builds a combo up to ×5. Leave the track or spin out and the combo’s gone.</p>
+                <p className="mt-1 text-sm text-ink-2 max-sm:hidden">Slide round Sherbrooke, University, Pine and McTavish. Longer, wider, faster drifts score more, and chaining them builds a combo up to ×5. Leave the track or spin out and the combo’s gone.</p>
               </>
             )}
             {phase !== "paused" && !room && (
               <fieldset className="mt-4">
                 <legend className="text-sm font-bold">Track</legend>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                <div className="mt-2 grid grid-cols-2 gap-2">
                   {TRACK_IDS.map((id) => (
                     <label key={id} className="cursor-pointer">
                       <input type="radio" name="track" className="peer sr-only" checked={trackId === id}
                         onChange={() => { setTrackId(id); setGhostIndex(null); setHud(emptyHud(id)); }} />
                       <span className="block rounded-xl border border-line-strong p-3 text-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-focus">
                         <span className="block font-bold text-ink">{TRACKS[id].name}</span>
-                        <span className="block text-xs text-ink-muted">{TRACKS[id].blurb}</span>
+                        <span className="block text-xs text-ink-muted max-sm:hidden">{TRACKS[id].blurb}</span>
                       </span>
                     </label>
                   ))}
@@ -661,16 +667,17 @@ export default function DriftGame({ signedIn }: { signedIn: boolean }) {
               {touch ? "Hold A for gas, steer with the D-pad, tap B to drift into a corner." : "W/↑ gas · S/↓ brake · A D/← → steer · Space handbrake · P pause"}
             </p>
           </div>
+          </div>
         </div>
       )}
     </div>
-    <Gamepad onChange={onPad} a="Gas" b="Drift" title="Martlet Drift" />
-    <DriftRacePanel signedIn={signedIn} room={room} error={raceError} busy={raceBusy} track={trackId}
+    <Gamepad onChange={onPad} a="Gas" b="Drift" title="Martlet Drift" handheld={handheld} />
+    {!handheld && <DriftRacePanel signedIn={signedIn} room={room} error={raceError} busy={raceBusy} track={trackId}
       onCreate={() => void raceCall(() => createRaceAction(trackId))}
       onJoin={(code) => void raceCall(() => joinRaceAction(code))}
       onLeave={() => void raceCall(async () => { const r = await leaveRaceAction(); setRacing(false); raceStartedFor.current = null; go("ready"); return r; })}
       onStart={() => void raceCall(startRaceAction)}
-      onTrack={(t) => void raceCall(() => rematchRaceAction(t))} />
+      onTrack={(t) => void raceCall(() => rematchRaceAction(t))} />}
     </div>
   );
 }
